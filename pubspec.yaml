@@ -47,10 +47,18 @@ dependencies:
   connectivity_plus: ^6.1.0
   # Encrypted storage for the auth session token.
   flutter_secure_storage: ^9.2.2
+  # Offline-first local database (M03): typed SQLite on top of drift.
+  drift: ^2.21.0
+  drift_flutter: ^0.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.13
+  # Needed directly in tests to point the FFI loader at the sqlite3 lib
+  # actually installed on this dev machine (see test/support/sqlite3_test_setup.dart).
+  sqlite3: ^2.9.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

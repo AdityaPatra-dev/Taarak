@@ -1,5 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/config/app_config.dart';
+import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
+import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
+import 'package:taarak/core/database/repositories/local_incident_repository.dart';
+import 'package:taarak/core/database/repositories/local_route_repository.dart';
+import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
+import 'package:taarak/core/database/repositories/local_user_repository.dart';
+import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/network/api_client.dart';
 import 'package:taarak/core/network/network_info.dart';
 import 'package:taarak/core/storage/secure_key_value_store.dart';
@@ -19,4 +27,39 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 final secureKeyValueStoreProvider = Provider<SecureKeyValueStore>(
   (ref) => const FlutterSecureKeyValueStore(),
+);
+
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
+  return db;
+});
+
+final localUserRepositoryProvider = Provider<LocalUserRepository>(
+  (ref) => LocalUserRepository(ref.watch(appDatabaseProvider)),
+);
+
+final localHazardZoneRepositoryProvider = Provider<LocalHazardZoneRepository>(
+  (ref) => LocalHazardZoneRepository(ref.watch(appDatabaseProvider)),
+);
+
+final localIncidentRepositoryProvider = Provider<LocalIncidentRepository>(
+  (ref) => LocalIncidentRepository(ref.watch(appDatabaseProvider)),
+);
+
+final localIncidentReportRepositoryProvider =
+    Provider<LocalIncidentReportRepository>(
+      (ref) => LocalIncidentReportRepository(ref.watch(appDatabaseProvider)),
+    );
+
+final localShelterRepositoryProvider = Provider<LocalShelterRepository>(
+  (ref) => LocalShelterRepository(ref.watch(appDatabaseProvider)),
+);
+
+final localRouteRepositoryProvider = Provider<LocalRouteRepository>(
+  (ref) => LocalRouteRepository(ref.watch(appDatabaseProvider)),
+);
+
+final syncQueueDaoProvider = Provider<SyncQueueDao>(
+  (ref) => SyncQueueDao(ref.watch(appDatabaseProvider)),
 );
