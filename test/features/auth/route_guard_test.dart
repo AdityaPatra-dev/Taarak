@@ -54,5 +54,15 @@ void main() {
       );
       expect(result, '/unauthorized');
     });
+
+    test('the real /map route (M05) admits citizens', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(computeRedirect(session: session, location: '/map'), isNull);
+    });
+
+    test('the real /map route (M05) turns away a role without viewRiskMap', () {
+      final session = _sessionFor(UserRole.systemAdmin);
+      expect(computeRedirect(session: session, location: '/map'), '/unauthorized');
+    });
   });
 }

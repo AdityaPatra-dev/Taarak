@@ -5,10 +5,13 @@ import 'package:taarak/features/auth/domain/user_role.dart';
 const _authRoutes = {'/login', '/register'};
 
 /// Registered by each feature as its screens land, e.g. once M18's command
-/// dashboard exists: `'/dashboard': Permission.monitorZones`. Empty for now
-/// — M02 only ships the shared home screen, which every authenticated role
-/// may see (it just renders a different permitted-module list per role).
-const Map<String, Permission> defaultRoutePermissions = {};
+/// dashboard exists: `'/dashboard': Permission.monitorZones`. `/map` is the
+/// citizen Risk Map (blueprint section 4); the official Incident Map /
+/// Risk & Red-Zone Map variants will get their own gated routes reusing
+/// the same map engine once those modules land.
+const Map<String, Permission> defaultRoutePermissions = {
+  '/map': Permission.viewRiskMap,
+};
 
 /// Pure redirect decision for the app router: unauthenticated users are sent
 /// to login, authenticated users are kept off the auth screens, and anyone

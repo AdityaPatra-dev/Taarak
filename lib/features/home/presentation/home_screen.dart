@@ -28,6 +28,12 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('TAARAK'),
         actions: [
+          if (user.role.can(Permission.viewRiskMap))
+            IconButton(
+              icon: const Icon(Icons.map_outlined),
+              tooltip: 'Risk Map',
+              onPressed: () => context.go('/map'),
+            ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',

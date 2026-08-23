@@ -27,4 +27,9 @@ class AppConfig {
   );
 
   bool get isProduction => environment == Environment.production;
+
+  /// Gates dev-only convenience affordances (e.g. the map screen's "load
+  /// demo data" button, useful before M06/M12 produce real hazard/incident
+  /// data) that should never be reachable in a real build.
+  bool get isDevMode => environment == Environment.development;
 }
