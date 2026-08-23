@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TAARAK uses your location to geotag reports and show hazards near you.</string>
 </dict>
 </plist>

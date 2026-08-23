@@ -50,6 +50,8 @@ dependencies:
   # Offline-first local database (M03): typed SQLite on top of drift.
   drift: ^2.21.0
   drift_flutter: ^0.2.4
+  # GPS + location permissions (M04).
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:

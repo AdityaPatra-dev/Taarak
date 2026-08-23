@@ -39,6 +39,10 @@ class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure([super.message = 'Not authorized']);
 }
 
+class LocationFailure extends Failure {
+  const LocationFailure([super.message = 'Unable to determine location']);
+}
+
 class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'Unexpected error']);
 }

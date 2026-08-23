@@ -8,6 +8,10 @@ import 'package:taarak/core/database/repositories/local_route_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
 import 'package:taarak/core/database/repositories/local_user_repository.dart';
 import 'package:taarak/core/database/sync_queue_dao.dart';
+import 'package:taarak/core/location/administrative_context.dart';
+import 'package:taarak/core/location/geo_tag_service.dart';
+import 'package:taarak/core/location/geolocator_location_service.dart';
+import 'package:taarak/core/location/location_service.dart';
 import 'package:taarak/core/network/api_client.dart';
 import 'package:taarak/core/network/network_info.dart';
 import 'package:taarak/core/storage/secure_key_value_store.dart';
@@ -62,4 +66,20 @@ final localRouteRepositoryProvider = Provider<LocalRouteRepository>(
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(
   (ref) => SyncQueueDao(ref.watch(appDatabaseProvider)),
+);
+
+final locationServiceProvider = Provider<LocationService>(
+  (ref) => GeolocatorLocationService(),
+);
+
+final administrativeContextResolverProvider =
+    Provider<AdministrativeContextResolver>(
+      (ref) => const UnresolvedAdministrativeContextResolver(),
+    );
+
+final geoTagServiceProvider = Provider<GeoTagService>(
+  (ref) => GeoTagService(
+    locationService: ref.watch(locationServiceProvider),
+    contextResolver: ref.watch(administrativeContextResolverProvider),
+  ),
 );

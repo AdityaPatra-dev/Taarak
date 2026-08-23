@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
@@ -27,6 +28,11 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('TAARAK'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profile',
+            onPressed: () => context.go('/profile'),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Log out',

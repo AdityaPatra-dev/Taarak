@@ -7,6 +7,7 @@ import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
 import 'package:taarak/features/home/presentation/unauthorized_screen.dart';
+import 'package:taarak/features/profile/presentation/profile_screen.dart';
 
 /// Bridges Riverpod's `authControllerProvider` changes into GoRouter's
 /// `refreshListenable`, so a login/logout re-evaluates the redirect without
@@ -39,6 +40,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
