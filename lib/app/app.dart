@@ -2,12 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/router.dart';
 import 'package:taarak/app/theme.dart';
+import 'package:taarak/features/auth/application/auth_controller.dart';
 
 class TaarakApp extends ConsumerWidget {
   const TaarakApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Router redirects assume the session restore is already resolved, so
+    // hold on a splash screen until then rather than teaching the router
+    // about a loading state.
+    final isRestoringSession = ref.watch(
+      authControllerProvider.select((state) => state.isLoading),
+    );
+
+    if (isRestoringSession) {
+      return MaterialApp(
+        title: 'TAARAK',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        home: const _SplashScreen(),
+      );
+    }
+
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
@@ -16,6 +34,26 @@ class TaarakApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       routerConfig: router,
+    );
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('TAARAK', style: TextStyle(fontSize: 28)),
+            SizedBox(height: 16),
+            CircularProgressIndicator(),
+          ],
+        ),
+      ),
     );
   }
 }

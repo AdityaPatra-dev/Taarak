@@ -1,0 +1,73 @@
+import 'package:taarak/features/auth/domain/permission.dart';
+
+/// The six roles from blueprint section 3.
+enum UserRole {
+  citizen,
+  fieldResponder,
+  localOfficial,
+  districtCommand,
+  stateAdmin,
+  systemAdmin,
+}
+
+/// Role → permission mapping, transcribed 1:1 from the "Main capabilities"
+/// column of blueprint section 3. No inherited/hierarchical access is
+/// assumed — a District/Command account does not implicitly get Local
+/// Official capabilities, since the blueprint's restrictions column scopes
+/// each role independently.
+const Map<UserRole, Set<Permission>> rolePermissions = {
+  UserRole.citizen: {
+    Permission.viewRiskMap,
+    Permission.viewAlerts,
+    Permission.submitIncidentReport,
+    Permission.sendSos,
+    Permission.updateSafeStatus,
+    Permission.viewSheltersRoutes,
+  },
+  UserRole.fieldResponder: {
+    Permission.viewAssignedIncidents,
+    Permission.navigateToIncident,
+    Permission.submitDamageReport,
+    Permission.updateFieldStatus,
+    Permission.verifyFieldObservation,
+  },
+  UserRole.localOfficial: {
+    Permission.verifyReports,
+    Permission.manageLocalIncidents,
+    Permission.manageSheltersResources,
+    Permission.sendBroadcast,
+  },
+  UserRole.districtCommand: {
+    Permission.monitorZones,
+    Permission.viewCapacityGaps,
+    Permission.manageResources,
+    Permission.manageResponders,
+    Permission.manageRelocation,
+  },
+  UserRole.stateAdmin: {
+    Permission.crossDistrictOversight,
+    Permission.viewReports,
+    Permission.managePolicyConfiguration,
+  },
+  UserRole.systemAdmin: {
+    Permission.manageAccounts,
+    Permission.managePermissions,
+    Permission.manageTechnicalConfiguration,
+    Permission.reviewAudit,
+  },
+};
+
+extension UserRoleX on UserRole {
+  String get label => switch (this) {
+    UserRole.citizen => 'Citizen',
+    UserRole.fieldResponder => 'Field Responder',
+    UserRole.localOfficial => 'Local Official',
+    UserRole.districtCommand => 'District/Command',
+    UserRole.stateAdmin => 'State/Admin',
+    UserRole.systemAdmin => 'System Admin',
+  };
+
+  Set<Permission> get permissions => rolePermissions[this] ?? const {};
+
+  bool can(Permission permission) => permissions.contains(permission);
+}

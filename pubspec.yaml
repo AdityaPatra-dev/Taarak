@@ -45,6 +45,8 @@ dependencies:
   logger: ^2.5.0
   # Connectivity checks for offline-first behavior.
   connectivity_plus: ^6.1.0
+  # Encrypted storage for the auth session token.
+  flutter_secure_storage: ^9.2.2
 
 dev_dependencies:
   flutter_test:

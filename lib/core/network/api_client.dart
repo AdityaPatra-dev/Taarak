@@ -12,6 +12,7 @@ import 'package:taarak/core/repository/result.dart';
 class ApiClient {
   final Dio dio;
   final NetworkInfo networkInfo;
+  Future<String?> Function()? _tokenProvider;
 
   ApiClient({required AppConfig config, required this.networkInfo})
     : dio = Dio(
@@ -22,12 +23,29 @@ class ApiClient {
         ),
       ) {
     dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await _tokenProvider?.call();
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          handler.next(options);
+        },
+      ),
+    );
+    dio.interceptors.add(
       LogInterceptor(
         requestBody: false,
         responseBody: false,
         logPrint: (message) => AppLogger.debug(message.toString()),
       ),
     );
+  }
+
+  /// Lets the auth feature supply the current session token without core/
+  /// depending on features/auth. Wired once during provider setup.
+  void attachTokenProvider(Future<String?> Function() provider) {
+    _tokenProvider = provider;
   }
 
   Future<Result<T>> get<T>(
