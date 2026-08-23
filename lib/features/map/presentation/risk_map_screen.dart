@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/hazards/application/hazard_providers.dart';
 import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/application/map_search.dart';
@@ -27,7 +28,10 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
 
   Future<void> _seedDemoData() async {
     setState(() => _isSeeding = true);
-    await DemoMapDataSeeder(ref.read(appDatabaseProvider)).seedIfEmpty();
+    await DemoMapDataSeeder(
+      ref.read(appDatabaseProvider),
+      ref.read(hazardIngestionServiceProvider),
+    ).seedIfEmpty();
     ref.invalidate(hazardZonesProvider);
     ref.invalidate(sheltersProvider);
     ref.invalidate(incidentsProvider);

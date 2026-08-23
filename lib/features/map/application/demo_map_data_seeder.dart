@@ -1,20 +1,23 @@
 import 'package:drift/drift.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:taarak/core/database/app_database.dart';
-import 'package:taarak/core/gis/geometry_codec.dart';
+import 'package:taarak/features/hazards/application/hazard_ingestion_service.dart';
+import 'package:taarak/features/hazards/domain/raw_hazard_observation.dart';
 import 'package:taarak/features/map/domain/road_blockage.dart';
 
-/// Dev-only convenience: before M06 (hazard engine) and M12 (citizen
-/// reporting) exist to populate the local cache for real, this seeds a
-/// handful of sample hazard zones, shelters and incidents so the map
-/// screen has something to render. Gated behind [AppConfig.isDevMode] at
-/// the call site — never runs in a real build.
+/// Dev-only convenience: before M12 (citizen reporting) exists to populate
+/// the local cache for real, this seeds a handful of sample shelters and
+/// incidents, and pushes a couple of sample hazard observations through
+/// M06's real ingestion pipeline, so the map screen has something to
+/// render. Gated behind [AppConfig.isDevMode] at the call site — never
+/// runs in a real build.
 class DemoMapDataSeeder {
   static const LatLng demoCenter = LatLng(12.9716, 77.5946);
 
   final AppDatabase _db;
+  final HazardIngestionService _hazardIngestionService;
 
-  DemoMapDataSeeder(this._db);
+  DemoMapDataSeeder(this._db, this._hazardIngestionService);
 
   Future<void> seedIfEmpty() async {
     final existing = await (_db.select(
@@ -25,38 +28,42 @@ class DemoMapDataSeeder {
     final now = DateTime.now();
     const c = demoCenter;
 
-    await _db.batch((batch) {
-      batch.insertAll(_db.localHazardZones, [
-        LocalHazardZonesCompanion.insert(
-          id: 'demo-hazard-landslide',
-          hazardType: 'landslide',
-          severity: 'high',
-          geometryJson: encodePolygonPoints([
-            LatLng(c.latitude + 0.010, c.longitude - 0.010),
-            LatLng(c.latitude + 0.016, c.longitude + 0.004),
-            LatLng(c.latitude + 0.004, c.longitude + 0.014),
-            LatLng(c.latitude - 0.002, c.longitude + 0.002),
-          ]),
-          source: 'demo-seed',
-          observedAt: now,
-          updatedAt: now,
-        ),
-        LocalHazardZonesCompanion.insert(
-          id: 'demo-hazard-flood',
-          hazardType: 'flood',
-          severity: 'medium',
-          geometryJson: encodePolygonPoints([
-            LatLng(c.latitude - 0.008, c.longitude - 0.018),
-            LatLng(c.latitude - 0.002, c.longitude - 0.010),
-            LatLng(c.latitude - 0.010, c.longitude - 0.004),
-            LatLng(c.latitude - 0.016, c.longitude - 0.014),
-          ]),
-          source: 'demo-seed',
-          observedAt: now,
-          updatedAt: now,
-        ),
-      ]);
+    await _hazardIngestionService.ingest(
+      id: 'demo-hazard-landslide',
+      observation: RawHazardObservation(
+        hazardType: 'landslide',
+        severityScore: 0.75, // buckets to "high"
+        boundaryPoints: [
+          LatLng(c.latitude + 0.010, c.longitude - 0.010),
+          LatLng(c.latitude + 0.016, c.longitude + 0.004),
+          LatLng(c.latitude + 0.004, c.longitude + 0.014),
+          LatLng(c.latitude - 0.002, c.longitude + 0.002),
+        ],
+        source: 'demo-seed',
+        observedAt: now,
+        sourceConfidence: 0.9,
+      ),
+      now: now,
+    );
+    await _hazardIngestionService.ingest(
+      id: 'demo-hazard-flood',
+      observation: RawHazardObservation(
+        hazardType: 'flood',
+        severityScore: 0.5, // buckets to "medium"
+        boundaryPoints: [
+          LatLng(c.latitude - 0.008, c.longitude - 0.018),
+          LatLng(c.latitude - 0.002, c.longitude - 0.010),
+          LatLng(c.latitude - 0.010, c.longitude - 0.004),
+          LatLng(c.latitude - 0.016, c.longitude - 0.014),
+        ],
+        source: 'demo-seed',
+        observedAt: now,
+        sourceConfidence: 0.8,
+      ),
+      now: now,
+    );
 
+    await _db.batch((batch) {
       batch.insertAll(_db.localShelters, [
         LocalSheltersCompanion.insert(
           id: 'demo-shelter-1',

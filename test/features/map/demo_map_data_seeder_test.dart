@@ -1,6 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
+import 'package:taarak/features/hazards/application/hazard_ingestion_service.dart';
+import 'package:taarak/features/hazards/application/hazard_normalizer.dart';
 import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
 import 'package:taarak/features/map/domain/road_blockage.dart';
 
@@ -14,7 +17,11 @@ void main() {
 
   setUp(() {
     db = AppDatabase(NativeDatabase.memory());
-    seeder = DemoMapDataSeeder(db);
+    final hazardIngestionService = HazardIngestionService(
+      normalizer: HazardNormalizer(),
+      repository: LocalHazardZoneRepository(db),
+    );
+    seeder = DemoMapDataSeeder(db, hazardIngestionService);
   });
 
   tearDown(() => db.close());
@@ -33,6 +40,14 @@ void main() {
       incidents.where((i) => i.type == roadBlockageIncidentType),
       isNotEmpty,
     );
+
+    // Confirms hazard zones actually went through normalization, not a
+    // direct insert: bucketed severity and a computed (not raw) confidence.
+    final landslideZone = hazardZones.firstWhere(
+      (z) => z.id == 'demo-hazard-landslide',
+    );
+    expect(landslideZone.severity, 'high');
+    expect(landslideZone.confidence, closeTo(0.9, 0.001));
   });
 
   test('seeding twice does not duplicate data', () async {
