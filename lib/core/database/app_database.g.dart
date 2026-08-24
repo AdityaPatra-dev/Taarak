@@ -6610,6 +6610,559 @@ class LocalRelocationPlansCompanion
   }
 }
 
+class $LocalAuditEventsTable extends LocalAuditEvents
+    with TableInfo<$LocalAuditEventsTable, LocalAuditEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAuditEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _actorIdMeta = const VerificationMeta(
+    'actorId',
+  );
+  @override
+  late final GeneratedColumn<String> actorId = GeneratedColumn<String>(
+    'actor_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  @override
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+    'action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _objectTypeMeta = const VerificationMeta(
+    'objectType',
+  );
+  @override
+  late final GeneratedColumn<String> objectType = GeneratedColumn<String>(
+    'object_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _objectIdMeta = const VerificationMeta(
+    'objectId',
+  );
+  @override
+  late final GeneratedColumn<String> objectId = GeneratedColumn<String>(
+    'object_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _oldValueMeta = const VerificationMeta(
+    'oldValue',
+  );
+  @override
+  late final GeneratedColumn<String> oldValue = GeneratedColumn<String>(
+    'old_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _newValueMeta = const VerificationMeta(
+    'newValue',
+  );
+  @override
+  late final GeneratedColumn<String> newValue = GeneratedColumn<String>(
+    'new_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    actorId,
+    action,
+    objectType,
+    objectId,
+    oldValue,
+    newValue,
+    reason,
+    occurredAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_audit_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAuditEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('actor_id')) {
+      context.handle(
+        _actorIdMeta,
+        actorId.isAcceptableOrUnknown(data['actor_id']!, _actorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorIdMeta);
+    }
+    if (data.containsKey('action')) {
+      context.handle(
+        _actionMeta,
+        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actionMeta);
+    }
+    if (data.containsKey('object_type')) {
+      context.handle(
+        _objectTypeMeta,
+        objectType.isAcceptableOrUnknown(data['object_type']!, _objectTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_objectTypeMeta);
+    }
+    if (data.containsKey('object_id')) {
+      context.handle(
+        _objectIdMeta,
+        objectId.isAcceptableOrUnknown(data['object_id']!, _objectIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_objectIdMeta);
+    }
+    if (data.containsKey('old_value')) {
+      context.handle(
+        _oldValueMeta,
+        oldValue.isAcceptableOrUnknown(data['old_value']!, _oldValueMeta),
+      );
+    }
+    if (data.containsKey('new_value')) {
+      context.handle(
+        _newValueMeta,
+        newValue.isAcceptableOrUnknown(data['new_value']!, _newValueMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAuditEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAuditEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      actorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor_id'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
+      objectType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}object_type'],
+      )!,
+      objectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}object_id'],
+      )!,
+      oldValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}old_value'],
+      ),
+      newValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}new_value'],
+      ),
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAuditEventsTable createAlias(String alias) {
+    return $LocalAuditEventsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAuditEvent extends DataClass implements Insertable<LocalAuditEvent> {
+  final int id;
+  final String actorId;
+  final String action;
+  final String objectType;
+  final String objectId;
+  final String? oldValue;
+  final String? newValue;
+  final String? reason;
+  final DateTime occurredAt;
+  const LocalAuditEvent({
+    required this.id,
+    required this.actorId,
+    required this.action,
+    required this.objectType,
+    required this.objectId,
+    this.oldValue,
+    this.newValue,
+    this.reason,
+    required this.occurredAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['actor_id'] = Variable<String>(actorId);
+    map['action'] = Variable<String>(action);
+    map['object_type'] = Variable<String>(objectType);
+    map['object_id'] = Variable<String>(objectId);
+    if (!nullToAbsent || oldValue != null) {
+      map['old_value'] = Variable<String>(oldValue);
+    }
+    if (!nullToAbsent || newValue != null) {
+      map['new_value'] = Variable<String>(newValue);
+    }
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    return map;
+  }
+
+  LocalAuditEventsCompanion toCompanion(bool nullToAbsent) {
+    return LocalAuditEventsCompanion(
+      id: Value(id),
+      actorId: Value(actorId),
+      action: Value(action),
+      objectType: Value(objectType),
+      objectId: Value(objectId),
+      oldValue: oldValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(oldValue),
+      newValue: newValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(newValue),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      occurredAt: Value(occurredAt),
+    );
+  }
+
+  factory LocalAuditEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAuditEvent(
+      id: serializer.fromJson<int>(json['id']),
+      actorId: serializer.fromJson<String>(json['actorId']),
+      action: serializer.fromJson<String>(json['action']),
+      objectType: serializer.fromJson<String>(json['objectType']),
+      objectId: serializer.fromJson<String>(json['objectId']),
+      oldValue: serializer.fromJson<String?>(json['oldValue']),
+      newValue: serializer.fromJson<String?>(json['newValue']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'actorId': serializer.toJson<String>(actorId),
+      'action': serializer.toJson<String>(action),
+      'objectType': serializer.toJson<String>(objectType),
+      'objectId': serializer.toJson<String>(objectId),
+      'oldValue': serializer.toJson<String?>(oldValue),
+      'newValue': serializer.toJson<String?>(newValue),
+      'reason': serializer.toJson<String?>(reason),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+    };
+  }
+
+  LocalAuditEvent copyWith({
+    int? id,
+    String? actorId,
+    String? action,
+    String? objectType,
+    String? objectId,
+    Value<String?> oldValue = const Value.absent(),
+    Value<String?> newValue = const Value.absent(),
+    Value<String?> reason = const Value.absent(),
+    DateTime? occurredAt,
+  }) => LocalAuditEvent(
+    id: id ?? this.id,
+    actorId: actorId ?? this.actorId,
+    action: action ?? this.action,
+    objectType: objectType ?? this.objectType,
+    objectId: objectId ?? this.objectId,
+    oldValue: oldValue.present ? oldValue.value : this.oldValue,
+    newValue: newValue.present ? newValue.value : this.newValue,
+    reason: reason.present ? reason.value : this.reason,
+    occurredAt: occurredAt ?? this.occurredAt,
+  );
+  LocalAuditEvent copyWithCompanion(LocalAuditEventsCompanion data) {
+    return LocalAuditEvent(
+      id: data.id.present ? data.id.value : this.id,
+      actorId: data.actorId.present ? data.actorId.value : this.actorId,
+      action: data.action.present ? data.action.value : this.action,
+      objectType: data.objectType.present
+          ? data.objectType.value
+          : this.objectType,
+      objectId: data.objectId.present ? data.objectId.value : this.objectId,
+      oldValue: data.oldValue.present ? data.oldValue.value : this.oldValue,
+      newValue: data.newValue.present ? data.newValue.value : this.newValue,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAuditEvent(')
+          ..write('id: $id, ')
+          ..write('actorId: $actorId, ')
+          ..write('action: $action, ')
+          ..write('objectType: $objectType, ')
+          ..write('objectId: $objectId, ')
+          ..write('oldValue: $oldValue, ')
+          ..write('newValue: $newValue, ')
+          ..write('reason: $reason, ')
+          ..write('occurredAt: $occurredAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    actorId,
+    action,
+    objectType,
+    objectId,
+    oldValue,
+    newValue,
+    reason,
+    occurredAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAuditEvent &&
+          other.id == this.id &&
+          other.actorId == this.actorId &&
+          other.action == this.action &&
+          other.objectType == this.objectType &&
+          other.objectId == this.objectId &&
+          other.oldValue == this.oldValue &&
+          other.newValue == this.newValue &&
+          other.reason == this.reason &&
+          other.occurredAt == this.occurredAt);
+}
+
+class LocalAuditEventsCompanion extends UpdateCompanion<LocalAuditEvent> {
+  final Value<int> id;
+  final Value<String> actorId;
+  final Value<String> action;
+  final Value<String> objectType;
+  final Value<String> objectId;
+  final Value<String?> oldValue;
+  final Value<String?> newValue;
+  final Value<String?> reason;
+  final Value<DateTime> occurredAt;
+  const LocalAuditEventsCompanion({
+    this.id = const Value.absent(),
+    this.actorId = const Value.absent(),
+    this.action = const Value.absent(),
+    this.objectType = const Value.absent(),
+    this.objectId = const Value.absent(),
+    this.oldValue = const Value.absent(),
+    this.newValue = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+  });
+  LocalAuditEventsCompanion.insert({
+    this.id = const Value.absent(),
+    required String actorId,
+    required String action,
+    required String objectType,
+    required String objectId,
+    this.oldValue = const Value.absent(),
+    this.newValue = const Value.absent(),
+    this.reason = const Value.absent(),
+    required DateTime occurredAt,
+  }) : actorId = Value(actorId),
+       action = Value(action),
+       objectType = Value(objectType),
+       objectId = Value(objectId),
+       occurredAt = Value(occurredAt);
+  static Insertable<LocalAuditEvent> custom({
+    Expression<int>? id,
+    Expression<String>? actorId,
+    Expression<String>? action,
+    Expression<String>? objectType,
+    Expression<String>? objectId,
+    Expression<String>? oldValue,
+    Expression<String>? newValue,
+    Expression<String>? reason,
+    Expression<DateTime>? occurredAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (actorId != null) 'actor_id': actorId,
+      if (action != null) 'action': action,
+      if (objectType != null) 'object_type': objectType,
+      if (objectId != null) 'object_id': objectId,
+      if (oldValue != null) 'old_value': oldValue,
+      if (newValue != null) 'new_value': newValue,
+      if (reason != null) 'reason': reason,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+    });
+  }
+
+  LocalAuditEventsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? actorId,
+    Value<String>? action,
+    Value<String>? objectType,
+    Value<String>? objectId,
+    Value<String?>? oldValue,
+    Value<String?>? newValue,
+    Value<String?>? reason,
+    Value<DateTime>? occurredAt,
+  }) {
+    return LocalAuditEventsCompanion(
+      id: id ?? this.id,
+      actorId: actorId ?? this.actorId,
+      action: action ?? this.action,
+      objectType: objectType ?? this.objectType,
+      objectId: objectId ?? this.objectId,
+      oldValue: oldValue ?? this.oldValue,
+      newValue: newValue ?? this.newValue,
+      reason: reason ?? this.reason,
+      occurredAt: occurredAt ?? this.occurredAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (actorId.present) {
+      map['actor_id'] = Variable<String>(actorId.value);
+    }
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (objectType.present) {
+      map['object_type'] = Variable<String>(objectType.value);
+    }
+    if (objectId.present) {
+      map['object_id'] = Variable<String>(objectId.value);
+    }
+    if (oldValue.present) {
+      map['old_value'] = Variable<String>(oldValue.value);
+    }
+    if (newValue.present) {
+      map['new_value'] = Variable<String>(newValue.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAuditEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('actorId: $actorId, ')
+          ..write('action: $action, ')
+          ..write('objectType: $objectType, ')
+          ..write('objectId: $objectId, ')
+          ..write('oldValue: $oldValue, ')
+          ..write('newValue: $newValue, ')
+          ..write('reason: $reason, ')
+          ..write('occurredAt: $occurredAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -7201,6 +7754,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalCapacityAssessmentsTable(this);
   late final $LocalRelocationPlansTable localRelocationPlans =
       $LocalRelocationPlansTable(this);
+  late final $LocalAuditEventsTable localAuditEvents = $LocalAuditEventsTable(
+    this,
+  );
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -7220,6 +7776,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localVulnerabilityAssessments,
     localCapacityAssessments,
     localRelocationPlans,
+    localAuditEvents,
     syncQueueEntries,
   ];
 }
@@ -10506,6 +11063,286 @@ typedef $$LocalRelocationPlansTableProcessedTableManager =
       LocalRelocationPlan,
       PrefetchHooks Function()
     >;
+typedef $$LocalAuditEventsTableCreateCompanionBuilder =
+    LocalAuditEventsCompanion Function({
+      Value<int> id,
+      required String actorId,
+      required String action,
+      required String objectType,
+      required String objectId,
+      Value<String?> oldValue,
+      Value<String?> newValue,
+      Value<String?> reason,
+      required DateTime occurredAt,
+    });
+typedef $$LocalAuditEventsTableUpdateCompanionBuilder =
+    LocalAuditEventsCompanion Function({
+      Value<int> id,
+      Value<String> actorId,
+      Value<String> action,
+      Value<String> objectType,
+      Value<String> objectId,
+      Value<String?> oldValue,
+      Value<String?> newValue,
+      Value<String?> reason,
+      Value<DateTime> occurredAt,
+    });
+
+class $$LocalAuditEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAuditEventsTable> {
+  $$LocalAuditEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get objectType => $composableBuilder(
+    column: $table.objectType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get objectId => $composableBuilder(
+    column: $table.objectId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get oldValue => $composableBuilder(
+    column: $table.oldValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get newValue => $composableBuilder(
+    column: $table.newValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAuditEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAuditEventsTable> {
+  $$LocalAuditEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actorId => $composableBuilder(
+    column: $table.actorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get objectType => $composableBuilder(
+    column: $table.objectType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get objectId => $composableBuilder(
+    column: $table.objectId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get oldValue => $composableBuilder(
+    column: $table.oldValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get newValue => $composableBuilder(
+    column: $table.newValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAuditEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAuditEventsTable> {
+  $$LocalAuditEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get actorId =>
+      $composableBuilder(column: $table.actorId, builder: (column) => column);
+
+  GeneratedColumn<String> get action =>
+      $composableBuilder(column: $table.action, builder: (column) => column);
+
+  GeneratedColumn<String> get objectType => $composableBuilder(
+    column: $table.objectType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get objectId =>
+      $composableBuilder(column: $table.objectId, builder: (column) => column);
+
+  GeneratedColumn<String> get oldValue =>
+      $composableBuilder(column: $table.oldValue, builder: (column) => column);
+
+  GeneratedColumn<String> get newValue =>
+      $composableBuilder(column: $table.newValue, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+}
+
+class $$LocalAuditEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAuditEventsTable,
+          LocalAuditEvent,
+          $$LocalAuditEventsTableFilterComposer,
+          $$LocalAuditEventsTableOrderingComposer,
+          $$LocalAuditEventsTableAnnotationComposer,
+          $$LocalAuditEventsTableCreateCompanionBuilder,
+          $$LocalAuditEventsTableUpdateCompanionBuilder,
+          (
+            LocalAuditEvent,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalAuditEventsTable,
+              LocalAuditEvent
+            >,
+          ),
+          LocalAuditEvent,
+          PrefetchHooks Function()
+        > {
+  $$LocalAuditEventsTableTableManager(
+    _$AppDatabase db,
+    $LocalAuditEventsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAuditEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAuditEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAuditEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> actorId = const Value.absent(),
+                Value<String> action = const Value.absent(),
+                Value<String> objectType = const Value.absent(),
+                Value<String> objectId = const Value.absent(),
+                Value<String?> oldValue = const Value.absent(),
+                Value<String?> newValue = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+              }) => LocalAuditEventsCompanion(
+                id: id,
+                actorId: actorId,
+                action: action,
+                objectType: objectType,
+                objectId: objectId,
+                oldValue: oldValue,
+                newValue: newValue,
+                reason: reason,
+                occurredAt: occurredAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String actorId,
+                required String action,
+                required String objectType,
+                required String objectId,
+                Value<String?> oldValue = const Value.absent(),
+                Value<String?> newValue = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                required DateTime occurredAt,
+              }) => LocalAuditEventsCompanion.insert(
+                id: id,
+                actorId: actorId,
+                action: action,
+                objectType: objectType,
+                objectId: objectId,
+                oldValue: oldValue,
+                newValue: newValue,
+                reason: reason,
+                occurredAt: occurredAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAuditEventsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAuditEventsTable,
+      LocalAuditEvent,
+      $$LocalAuditEventsTableFilterComposer,
+      $$LocalAuditEventsTableOrderingComposer,
+      $$LocalAuditEventsTableAnnotationComposer,
+      $$LocalAuditEventsTableCreateCompanionBuilder,
+      $$LocalAuditEventsTableUpdateCompanionBuilder,
+      (
+        LocalAuditEvent,
+        BaseReferences<_$AppDatabase, $LocalAuditEventsTable, LocalAuditEvent>,
+      ),
+      LocalAuditEvent,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -10823,6 +11660,8 @@ class $AppDatabaseManager {
       );
   $$LocalRelocationPlansTableTableManager get localRelocationPlans =>
       $$LocalRelocationPlansTableTableManager(_db, _db.localRelocationPlans);
+  $$LocalAuditEventsTableTableManager get localAuditEvents =>
+      $$LocalAuditEventsTableTableManager(_db, _db.localAuditEvents);
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }

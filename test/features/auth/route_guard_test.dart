@@ -81,5 +81,18 @@ void main() {
         '/unauthorized',
       );
     });
+
+    test('the real /verification route (M13) admits a local official', () {
+      final session = _sessionFor(UserRole.localOfficial);
+      expect(computeRedirect(session: session, location: '/verification'), isNull);
+    });
+
+    test('the real /verification route (M13) turns away a citizen', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(
+        computeRedirect(session: session, location: '/verification'),
+        '/unauthorized',
+      );
+    });
   });
 }

@@ -55,7 +55,8 @@ class HomeScreen extends ConsumerWidget {
           Text(user.role.label, style: Theme.of(context).textTheme.bodyMedium),
           if (user.role.can(Permission.submitIncidentReport) ||
               user.role.can(Permission.sendSos) ||
-              user.role.can(Permission.updateSafeStatus)) ...[
+              user.role.can(Permission.updateSafeStatus) ||
+              user.role.can(Permission.verifyReports)) ...[
             const SizedBox(height: 24),
             Text(
               'Quick actions',
@@ -86,6 +87,12 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/safe-status'),
                     icon: const Icon(Icons.health_and_safety_outlined),
                     label: const Text('I Am Safe'),
+                  ),
+                if (user.role.can(Permission.verifyReports))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/verification'),
+                    icon: const Icon(Icons.fact_check_outlined),
+                    label: const Text('Verify Reports'),
                   ),
               ],
             ),

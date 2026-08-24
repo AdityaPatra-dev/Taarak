@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/config/app_config.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_capacity_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
@@ -96,6 +97,10 @@ final localRelocationPlanRepositoryProvider =
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(
   (ref) => SyncQueueDao(ref.watch(appDatabaseProvider)),
+);
+
+final auditLogDaoProvider = Provider<AuditLogDao>(
+  (ref) => AuditLogDao(ref.watch(appDatabaseProvider)),
 );
 
 final locationServiceProvider = Provider<LocationService>(
