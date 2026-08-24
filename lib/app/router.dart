@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taarak/app/route_guard.dart';
+import 'package:taarak/features/alerts/presentation/alerts_screen.dart';
+import 'package:taarak/features/alerts/presentation/broadcast_alert_screen.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
@@ -70,6 +72,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/shelters/manage',
         builder: (context, state) => const ShelterManagementScreen(),
+      ),
+      GoRoute(path: '/alerts', builder: (context, state) => const AlertsScreen()),
+      GoRoute(
+        path: '/alerts/broadcast',
+        builder: (context, state) => const BroadcastAlertScreen(),
       ),
       GoRoute(
         path: '/login',

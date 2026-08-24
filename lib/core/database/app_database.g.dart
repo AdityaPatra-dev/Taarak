@@ -7273,6 +7273,1052 @@ class LocalAuditEventsCompanion extends UpdateCompanion<LocalAuditEvent> {
   }
 }
 
+class $LocalAlertsTable extends LocalAlerts
+    with TableInfo<$LocalAlertsTable, LocalAlert> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAlertsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _messageMeta = const VerificationMeta(
+    'message',
+  );
+  @override
+  late final GeneratedColumn<String> message = GeneratedColumn<String>(
+    'message',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _severityMeta = const VerificationMeta(
+    'severity',
+  );
+  @override
+  late final GeneratedColumn<String> severity = GeneratedColumn<String>(
+    'severity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _zoneIdMeta = const VerificationMeta('zoneId');
+  @override
+  late final GeneratedColumn<String> zoneId = GeneratedColumn<String>(
+    'zone_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _zoneLabelMeta = const VerificationMeta(
+    'zoneLabel',
+  );
+  @override
+  late final GeneratedColumn<String> zoneLabel = GeneratedColumn<String>(
+    'zone_label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _geometryJsonMeta = const VerificationMeta(
+    'geometryJson',
+  );
+  @override
+  late final GeneratedColumn<String> geometryJson = GeneratedColumn<String>(
+    'geometry_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _issuedByMeta = const VerificationMeta(
+    'issuedBy',
+  );
+  @override
+  late final GeneratedColumn<String> issuedBy = GeneratedColumn<String>(
+    'issued_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _issuedAtMeta = const VerificationMeta(
+    'issuedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> issuedAt = GeneratedColumn<DateTime>(
+    'issued_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validUntilMeta = const VerificationMeta(
+    'validUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validUntil = GeneratedColumn<DateTime>(
+    'valid_until',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cancelledAtMeta = const VerificationMeta(
+    'cancelledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> cancelledAt = GeneratedColumn<DateTime>(
+    'cancelled_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    message,
+    severity,
+    zoneId,
+    zoneLabel,
+    geometryJson,
+    issuedBy,
+    issuedAt,
+    validUntil,
+    cancelledAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_alerts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAlert> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('message')) {
+      context.handle(
+        _messageMeta,
+        message.isAcceptableOrUnknown(data['message']!, _messageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_messageMeta);
+    }
+    if (data.containsKey('severity')) {
+      context.handle(
+        _severityMeta,
+        severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_severityMeta);
+    }
+    if (data.containsKey('zone_id')) {
+      context.handle(
+        _zoneIdMeta,
+        zoneId.isAcceptableOrUnknown(data['zone_id']!, _zoneIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_zoneIdMeta);
+    }
+    if (data.containsKey('zone_label')) {
+      context.handle(
+        _zoneLabelMeta,
+        zoneLabel.isAcceptableOrUnknown(data['zone_label']!, _zoneLabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_zoneLabelMeta);
+    }
+    if (data.containsKey('geometry_json')) {
+      context.handle(
+        _geometryJsonMeta,
+        geometryJson.isAcceptableOrUnknown(
+          data['geometry_json']!,
+          _geometryJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_geometryJsonMeta);
+    }
+    if (data.containsKey('issued_by')) {
+      context.handle(
+        _issuedByMeta,
+        issuedBy.isAcceptableOrUnknown(data['issued_by']!, _issuedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuedByMeta);
+    }
+    if (data.containsKey('issued_at')) {
+      context.handle(
+        _issuedAtMeta,
+        issuedAt.isAcceptableOrUnknown(data['issued_at']!, _issuedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_issuedAtMeta);
+    }
+    if (data.containsKey('valid_until')) {
+      context.handle(
+        _validUntilMeta,
+        validUntil.isAcceptableOrUnknown(data['valid_until']!, _validUntilMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_validUntilMeta);
+    }
+    if (data.containsKey('cancelled_at')) {
+      context.handle(
+        _cancelledAtMeta,
+        cancelledAt.isAcceptableOrUnknown(
+          data['cancelled_at']!,
+          _cancelledAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAlert map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAlert(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      message: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message'],
+      )!,
+      severity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}severity'],
+      )!,
+      zoneId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}zone_id'],
+      )!,
+      zoneLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}zone_label'],
+      )!,
+      geometryJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}geometry_json'],
+      )!,
+      issuedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}issued_by'],
+      )!,
+      issuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}issued_at'],
+      )!,
+      validUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_until'],
+      )!,
+      cancelledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}cancelled_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAlertsTable createAlias(String alias) {
+    return $LocalAlertsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAlert extends DataClass implements Insertable<LocalAlert> {
+  final String id;
+  final String title;
+  final String message;
+
+  /// low/medium/high/critical — same vocabulary as
+  /// [LocalHazardZones.severity] and [LocalIncidents.severity], so
+  /// [severityColor] applies unchanged.
+  final String severity;
+  final String zoneId;
+  final String zoneLabel;
+  final String geometryJson;
+  final String issuedBy;
+  final DateTime issuedAt;
+
+  /// The end of the alert's validity window (spec: "severity, validity,
+  /// acknowledgement and history"). An alert with `validUntil` in the past
+  /// is no longer active but is never deleted — it stays in the table as
+  /// part of the broadcast history.
+  final DateTime validUntil;
+
+  /// Set when an official ends an alert early, distinct from simply
+  /// expiring — both make [AlertEngine.isActive] false, but only
+  /// cancellation is a deliberate act worth its own audit action.
+  final DateTime? cancelledAt;
+  final int version;
+  const LocalAlert({
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.severity,
+    required this.zoneId,
+    required this.zoneLabel,
+    required this.geometryJson,
+    required this.issuedBy,
+    required this.issuedAt,
+    required this.validUntil,
+    this.cancelledAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
+    map['message'] = Variable<String>(message);
+    map['severity'] = Variable<String>(severity);
+    map['zone_id'] = Variable<String>(zoneId);
+    map['zone_label'] = Variable<String>(zoneLabel);
+    map['geometry_json'] = Variable<String>(geometryJson);
+    map['issued_by'] = Variable<String>(issuedBy);
+    map['issued_at'] = Variable<DateTime>(issuedAt);
+    map['valid_until'] = Variable<DateTime>(validUntil);
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt);
+    }
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalAlertsCompanion toCompanion(bool nullToAbsent) {
+    return LocalAlertsCompanion(
+      id: Value(id),
+      title: Value(title),
+      message: Value(message),
+      severity: Value(severity),
+      zoneId: Value(zoneId),
+      zoneLabel: Value(zoneLabel),
+      geometryJson: Value(geometryJson),
+      issuedBy: Value(issuedBy),
+      issuedAt: Value(issuedAt),
+      validUntil: Value(validUntil),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalAlert.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAlert(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      message: serializer.fromJson<String>(json['message']),
+      severity: serializer.fromJson<String>(json['severity']),
+      zoneId: serializer.fromJson<String>(json['zoneId']),
+      zoneLabel: serializer.fromJson<String>(json['zoneLabel']),
+      geometryJson: serializer.fromJson<String>(json['geometryJson']),
+      issuedBy: serializer.fromJson<String>(json['issuedBy']),
+      issuedAt: serializer.fromJson<DateTime>(json['issuedAt']),
+      validUntil: serializer.fromJson<DateTime>(json['validUntil']),
+      cancelledAt: serializer.fromJson<DateTime?>(json['cancelledAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'message': serializer.toJson<String>(message),
+      'severity': serializer.toJson<String>(severity),
+      'zoneId': serializer.toJson<String>(zoneId),
+      'zoneLabel': serializer.toJson<String>(zoneLabel),
+      'geometryJson': serializer.toJson<String>(geometryJson),
+      'issuedBy': serializer.toJson<String>(issuedBy),
+      'issuedAt': serializer.toJson<DateTime>(issuedAt),
+      'validUntil': serializer.toJson<DateTime>(validUntil),
+      'cancelledAt': serializer.toJson<DateTime?>(cancelledAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalAlert copyWith({
+    String? id,
+    String? title,
+    String? message,
+    String? severity,
+    String? zoneId,
+    String? zoneLabel,
+    String? geometryJson,
+    String? issuedBy,
+    DateTime? issuedAt,
+    DateTime? validUntil,
+    Value<DateTime?> cancelledAt = const Value.absent(),
+    int? version,
+  }) => LocalAlert(
+    id: id ?? this.id,
+    title: title ?? this.title,
+    message: message ?? this.message,
+    severity: severity ?? this.severity,
+    zoneId: zoneId ?? this.zoneId,
+    zoneLabel: zoneLabel ?? this.zoneLabel,
+    geometryJson: geometryJson ?? this.geometryJson,
+    issuedBy: issuedBy ?? this.issuedBy,
+    issuedAt: issuedAt ?? this.issuedAt,
+    validUntil: validUntil ?? this.validUntil,
+    cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
+    version: version ?? this.version,
+  );
+  LocalAlert copyWithCompanion(LocalAlertsCompanion data) {
+    return LocalAlert(
+      id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
+      message: data.message.present ? data.message.value : this.message,
+      severity: data.severity.present ? data.severity.value : this.severity,
+      zoneId: data.zoneId.present ? data.zoneId.value : this.zoneId,
+      zoneLabel: data.zoneLabel.present ? data.zoneLabel.value : this.zoneLabel,
+      geometryJson: data.geometryJson.present
+          ? data.geometryJson.value
+          : this.geometryJson,
+      issuedBy: data.issuedBy.present ? data.issuedBy.value : this.issuedBy,
+      issuedAt: data.issuedAt.present ? data.issuedAt.value : this.issuedAt,
+      validUntil: data.validUntil.present
+          ? data.validUntil.value
+          : this.validUntil,
+      cancelledAt: data.cancelledAt.present
+          ? data.cancelledAt.value
+          : this.cancelledAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAlert(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('message: $message, ')
+          ..write('severity: $severity, ')
+          ..write('zoneId: $zoneId, ')
+          ..write('zoneLabel: $zoneLabel, ')
+          ..write('geometryJson: $geometryJson, ')
+          ..write('issuedBy: $issuedBy, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    title,
+    message,
+    severity,
+    zoneId,
+    zoneLabel,
+    geometryJson,
+    issuedBy,
+    issuedAt,
+    validUntil,
+    cancelledAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAlert &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.message == this.message &&
+          other.severity == this.severity &&
+          other.zoneId == this.zoneId &&
+          other.zoneLabel == this.zoneLabel &&
+          other.geometryJson == this.geometryJson &&
+          other.issuedBy == this.issuedBy &&
+          other.issuedAt == this.issuedAt &&
+          other.validUntil == this.validUntil &&
+          other.cancelledAt == this.cancelledAt &&
+          other.version == this.version);
+}
+
+class LocalAlertsCompanion extends UpdateCompanion<LocalAlert> {
+  final Value<String> id;
+  final Value<String> title;
+  final Value<String> message;
+  final Value<String> severity;
+  final Value<String> zoneId;
+  final Value<String> zoneLabel;
+  final Value<String> geometryJson;
+  final Value<String> issuedBy;
+  final Value<DateTime> issuedAt;
+  final Value<DateTime> validUntil;
+  final Value<DateTime?> cancelledAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalAlertsCompanion({
+    this.id = const Value.absent(),
+    this.title = const Value.absent(),
+    this.message = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.zoneId = const Value.absent(),
+    this.zoneLabel = const Value.absent(),
+    this.geometryJson = const Value.absent(),
+    this.issuedBy = const Value.absent(),
+    this.issuedAt = const Value.absent(),
+    this.validUntil = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAlertsCompanion.insert({
+    required String id,
+    required String title,
+    required String message,
+    required String severity,
+    required String zoneId,
+    required String zoneLabel,
+    required String geometryJson,
+    required String issuedBy,
+    required DateTime issuedAt,
+    required DateTime validUntil,
+    this.cancelledAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       title = Value(title),
+       message = Value(message),
+       severity = Value(severity),
+       zoneId = Value(zoneId),
+       zoneLabel = Value(zoneLabel),
+       geometryJson = Value(geometryJson),
+       issuedBy = Value(issuedBy),
+       issuedAt = Value(issuedAt),
+       validUntil = Value(validUntil);
+  static Insertable<LocalAlert> custom({
+    Expression<String>? id,
+    Expression<String>? title,
+    Expression<String>? message,
+    Expression<String>? severity,
+    Expression<String>? zoneId,
+    Expression<String>? zoneLabel,
+    Expression<String>? geometryJson,
+    Expression<String>? issuedBy,
+    Expression<DateTime>? issuedAt,
+    Expression<DateTime>? validUntil,
+    Expression<DateTime>? cancelledAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (title != null) 'title': title,
+      if (message != null) 'message': message,
+      if (severity != null) 'severity': severity,
+      if (zoneId != null) 'zone_id': zoneId,
+      if (zoneLabel != null) 'zone_label': zoneLabel,
+      if (geometryJson != null) 'geometry_json': geometryJson,
+      if (issuedBy != null) 'issued_by': issuedBy,
+      if (issuedAt != null) 'issued_at': issuedAt,
+      if (validUntil != null) 'valid_until': validUntil,
+      if (cancelledAt != null) 'cancelled_at': cancelledAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAlertsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? title,
+    Value<String>? message,
+    Value<String>? severity,
+    Value<String>? zoneId,
+    Value<String>? zoneLabel,
+    Value<String>? geometryJson,
+    Value<String>? issuedBy,
+    Value<DateTime>? issuedAt,
+    Value<DateTime>? validUntil,
+    Value<DateTime?>? cancelledAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalAlertsCompanion(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      message: message ?? this.message,
+      severity: severity ?? this.severity,
+      zoneId: zoneId ?? this.zoneId,
+      zoneLabel: zoneLabel ?? this.zoneLabel,
+      geometryJson: geometryJson ?? this.geometryJson,
+      issuedBy: issuedBy ?? this.issuedBy,
+      issuedAt: issuedAt ?? this.issuedAt,
+      validUntil: validUntil ?? this.validUntil,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (message.present) {
+      map['message'] = Variable<String>(message.value);
+    }
+    if (severity.present) {
+      map['severity'] = Variable<String>(severity.value);
+    }
+    if (zoneId.present) {
+      map['zone_id'] = Variable<String>(zoneId.value);
+    }
+    if (zoneLabel.present) {
+      map['zone_label'] = Variable<String>(zoneLabel.value);
+    }
+    if (geometryJson.present) {
+      map['geometry_json'] = Variable<String>(geometryJson.value);
+    }
+    if (issuedBy.present) {
+      map['issued_by'] = Variable<String>(issuedBy.value);
+    }
+    if (issuedAt.present) {
+      map['issued_at'] = Variable<DateTime>(issuedAt.value);
+    }
+    if (validUntil.present) {
+      map['valid_until'] = Variable<DateTime>(validUntil.value);
+    }
+    if (cancelledAt.present) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAlertsCompanion(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('message: $message, ')
+          ..write('severity: $severity, ')
+          ..write('zoneId: $zoneId, ')
+          ..write('zoneLabel: $zoneLabel, ')
+          ..write('geometryJson: $geometryJson, ')
+          ..write('issuedBy: $issuedBy, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('validUntil: $validUntil, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalAlertAcknowledgementsTable extends LocalAlertAcknowledgements
+    with
+        TableInfo<$LocalAlertAcknowledgementsTable, LocalAlertAcknowledgement> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAlertAcknowledgementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _alertIdMeta = const VerificationMeta(
+    'alertId',
+  );
+  @override
+  late final GeneratedColumn<String> alertId = GeneratedColumn<String>(
+    'alert_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _acknowledgedAtMeta = const VerificationMeta(
+    'acknowledgedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> acknowledgedAt =
+      GeneratedColumn<DateTime>(
+        'acknowledged_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [id, alertId, userId, acknowledgedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_alert_acknowledgements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAlertAcknowledgement> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('alert_id')) {
+      context.handle(
+        _alertIdMeta,
+        alertId.isAcceptableOrUnknown(data['alert_id']!, _alertIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_alertIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('acknowledged_at')) {
+      context.handle(
+        _acknowledgedAtMeta,
+        acknowledgedAt.isAcceptableOrUnknown(
+          data['acknowledged_at']!,
+          _acknowledgedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_acknowledgedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAlertAcknowledgement map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAlertAcknowledgement(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      alertId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alert_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      acknowledgedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}acknowledged_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalAlertAcknowledgementsTable createAlias(String alias) {
+    return $LocalAlertAcknowledgementsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAlertAcknowledgement extends DataClass
+    implements Insertable<LocalAlertAcknowledgement> {
+  final String id;
+  final String alertId;
+  final String userId;
+  final DateTime acknowledgedAt;
+  const LocalAlertAcknowledgement({
+    required this.id,
+    required this.alertId,
+    required this.userId,
+    required this.acknowledgedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['alert_id'] = Variable<String>(alertId);
+    map['user_id'] = Variable<String>(userId);
+    map['acknowledged_at'] = Variable<DateTime>(acknowledgedAt);
+    return map;
+  }
+
+  LocalAlertAcknowledgementsCompanion toCompanion(bool nullToAbsent) {
+    return LocalAlertAcknowledgementsCompanion(
+      id: Value(id),
+      alertId: Value(alertId),
+      userId: Value(userId),
+      acknowledgedAt: Value(acknowledgedAt),
+    );
+  }
+
+  factory LocalAlertAcknowledgement.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAlertAcknowledgement(
+      id: serializer.fromJson<String>(json['id']),
+      alertId: serializer.fromJson<String>(json['alertId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      acknowledgedAt: serializer.fromJson<DateTime>(json['acknowledgedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'alertId': serializer.toJson<String>(alertId),
+      'userId': serializer.toJson<String>(userId),
+      'acknowledgedAt': serializer.toJson<DateTime>(acknowledgedAt),
+    };
+  }
+
+  LocalAlertAcknowledgement copyWith({
+    String? id,
+    String? alertId,
+    String? userId,
+    DateTime? acknowledgedAt,
+  }) => LocalAlertAcknowledgement(
+    id: id ?? this.id,
+    alertId: alertId ?? this.alertId,
+    userId: userId ?? this.userId,
+    acknowledgedAt: acknowledgedAt ?? this.acknowledgedAt,
+  );
+  LocalAlertAcknowledgement copyWithCompanion(
+    LocalAlertAcknowledgementsCompanion data,
+  ) {
+    return LocalAlertAcknowledgement(
+      id: data.id.present ? data.id.value : this.id,
+      alertId: data.alertId.present ? data.alertId.value : this.alertId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      acknowledgedAt: data.acknowledgedAt.present
+          ? data.acknowledgedAt.value
+          : this.acknowledgedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAlertAcknowledgement(')
+          ..write('id: $id, ')
+          ..write('alertId: $alertId, ')
+          ..write('userId: $userId, ')
+          ..write('acknowledgedAt: $acknowledgedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, alertId, userId, acknowledgedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAlertAcknowledgement &&
+          other.id == this.id &&
+          other.alertId == this.alertId &&
+          other.userId == this.userId &&
+          other.acknowledgedAt == this.acknowledgedAt);
+}
+
+class LocalAlertAcknowledgementsCompanion
+    extends UpdateCompanion<LocalAlertAcknowledgement> {
+  final Value<String> id;
+  final Value<String> alertId;
+  final Value<String> userId;
+  final Value<DateTime> acknowledgedAt;
+  final Value<int> rowid;
+  const LocalAlertAcknowledgementsCompanion({
+    this.id = const Value.absent(),
+    this.alertId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.acknowledgedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAlertAcknowledgementsCompanion.insert({
+    required String id,
+    required String alertId,
+    required String userId,
+    required DateTime acknowledgedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       alertId = Value(alertId),
+       userId = Value(userId),
+       acknowledgedAt = Value(acknowledgedAt);
+  static Insertable<LocalAlertAcknowledgement> custom({
+    Expression<String>? id,
+    Expression<String>? alertId,
+    Expression<String>? userId,
+    Expression<DateTime>? acknowledgedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (alertId != null) 'alert_id': alertId,
+      if (userId != null) 'user_id': userId,
+      if (acknowledgedAt != null) 'acknowledged_at': acknowledgedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAlertAcknowledgementsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? alertId,
+    Value<String>? userId,
+    Value<DateTime>? acknowledgedAt,
+    Value<int>? rowid,
+  }) {
+    return LocalAlertAcknowledgementsCompanion(
+      id: id ?? this.id,
+      alertId: alertId ?? this.alertId,
+      userId: userId ?? this.userId,
+      acknowledgedAt: acknowledgedAt ?? this.acknowledgedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (alertId.present) {
+      map['alert_id'] = Variable<String>(alertId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (acknowledgedAt.present) {
+      map['acknowledged_at'] = Variable<DateTime>(acknowledgedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAlertAcknowledgementsCompanion(')
+          ..write('id: $id, ')
+          ..write('alertId: $alertId, ')
+          ..write('userId: $userId, ')
+          ..write('acknowledgedAt: $acknowledgedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -7867,6 +8913,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalAuditEventsTable localAuditEvents = $LocalAuditEventsTable(
     this,
   );
+  late final $LocalAlertsTable localAlerts = $LocalAlertsTable(this);
+  late final $LocalAlertAcknowledgementsTable localAlertAcknowledgements =
+      $LocalAlertAcknowledgementsTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -7887,6 +8936,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localCapacityAssessments,
     localRelocationPlans,
     localAuditEvents,
+    localAlerts,
+    localAlertAcknowledgements,
     syncQueueEntries,
   ];
 }
@@ -11495,6 +12546,547 @@ typedef $$LocalAuditEventsTableProcessedTableManager =
       LocalAuditEvent,
       PrefetchHooks Function()
     >;
+typedef $$LocalAlertsTableCreateCompanionBuilder =
+    LocalAlertsCompanion Function({
+      required String id,
+      required String title,
+      required String message,
+      required String severity,
+      required String zoneId,
+      required String zoneLabel,
+      required String geometryJson,
+      required String issuedBy,
+      required DateTime issuedAt,
+      required DateTime validUntil,
+      Value<DateTime?> cancelledAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalAlertsTableUpdateCompanionBuilder =
+    LocalAlertsCompanion Function({
+      Value<String> id,
+      Value<String> title,
+      Value<String> message,
+      Value<String> severity,
+      Value<String> zoneId,
+      Value<String> zoneLabel,
+      Value<String> geometryJson,
+      Value<String> issuedBy,
+      Value<DateTime> issuedAt,
+      Value<DateTime> validUntil,
+      Value<DateTime?> cancelledAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalAlertsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAlertsTable> {
+  $$LocalAlertsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get zoneId => $composableBuilder(
+    column: $table.zoneId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get zoneLabel => $composableBuilder(
+    column: $table.zoneLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get geometryJson => $composableBuilder(
+    column: $table.geometryJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get issuedBy => $composableBuilder(
+    column: $table.issuedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAlertsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAlertsTable> {
+  $$LocalAlertsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get message => $composableBuilder(
+    column: $table.message,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get zoneId => $composableBuilder(
+    column: $table.zoneId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get zoneLabel => $composableBuilder(
+    column: $table.zoneLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get geometryJson => $composableBuilder(
+    column: $table.geometryJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get issuedBy => $composableBuilder(
+    column: $table.issuedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAlertsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAlertsTable> {
+  $$LocalAlertsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get message =>
+      $composableBuilder(column: $table.message, builder: (column) => column);
+
+  GeneratedColumn<String> get severity =>
+      $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<String> get zoneId =>
+      $composableBuilder(column: $table.zoneId, builder: (column) => column);
+
+  GeneratedColumn<String> get zoneLabel =>
+      $composableBuilder(column: $table.zoneLabel, builder: (column) => column);
+
+  GeneratedColumn<String> get geometryJson => $composableBuilder(
+    column: $table.geometryJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get issuedBy =>
+      $composableBuilder(column: $table.issuedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get issuedAt =>
+      $composableBuilder(column: $table.issuedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validUntil => $composableBuilder(
+    column: $table.validUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get cancelledAt => $composableBuilder(
+    column: $table.cancelledAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalAlertsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAlertsTable,
+          LocalAlert,
+          $$LocalAlertsTableFilterComposer,
+          $$LocalAlertsTableOrderingComposer,
+          $$LocalAlertsTableAnnotationComposer,
+          $$LocalAlertsTableCreateCompanionBuilder,
+          $$LocalAlertsTableUpdateCompanionBuilder,
+          (
+            LocalAlert,
+            BaseReferences<_$AppDatabase, $LocalAlertsTable, LocalAlert>,
+          ),
+          LocalAlert,
+          PrefetchHooks Function()
+        > {
+  $$LocalAlertsTableTableManager(_$AppDatabase db, $LocalAlertsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAlertsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalAlertsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalAlertsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> message = const Value.absent(),
+                Value<String> severity = const Value.absent(),
+                Value<String> zoneId = const Value.absent(),
+                Value<String> zoneLabel = const Value.absent(),
+                Value<String> geometryJson = const Value.absent(),
+                Value<String> issuedBy = const Value.absent(),
+                Value<DateTime> issuedAt = const Value.absent(),
+                Value<DateTime> validUntil = const Value.absent(),
+                Value<DateTime?> cancelledAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAlertsCompanion(
+                id: id,
+                title: title,
+                message: message,
+                severity: severity,
+                zoneId: zoneId,
+                zoneLabel: zoneLabel,
+                geometryJson: geometryJson,
+                issuedBy: issuedBy,
+                issuedAt: issuedAt,
+                validUntil: validUntil,
+                cancelledAt: cancelledAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String title,
+                required String message,
+                required String severity,
+                required String zoneId,
+                required String zoneLabel,
+                required String geometryJson,
+                required String issuedBy,
+                required DateTime issuedAt,
+                required DateTime validUntil,
+                Value<DateTime?> cancelledAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAlertsCompanion.insert(
+                id: id,
+                title: title,
+                message: message,
+                severity: severity,
+                zoneId: zoneId,
+                zoneLabel: zoneLabel,
+                geometryJson: geometryJson,
+                issuedBy: issuedBy,
+                issuedAt: issuedAt,
+                validUntil: validUntil,
+                cancelledAt: cancelledAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAlertsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAlertsTable,
+      LocalAlert,
+      $$LocalAlertsTableFilterComposer,
+      $$LocalAlertsTableOrderingComposer,
+      $$LocalAlertsTableAnnotationComposer,
+      $$LocalAlertsTableCreateCompanionBuilder,
+      $$LocalAlertsTableUpdateCompanionBuilder,
+      (
+        LocalAlert,
+        BaseReferences<_$AppDatabase, $LocalAlertsTable, LocalAlert>,
+      ),
+      LocalAlert,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalAlertAcknowledgementsTableCreateCompanionBuilder =
+    LocalAlertAcknowledgementsCompanion Function({
+      required String id,
+      required String alertId,
+      required String userId,
+      required DateTime acknowledgedAt,
+      Value<int> rowid,
+    });
+typedef $$LocalAlertAcknowledgementsTableUpdateCompanionBuilder =
+    LocalAlertAcknowledgementsCompanion Function({
+      Value<String> id,
+      Value<String> alertId,
+      Value<String> userId,
+      Value<DateTime> acknowledgedAt,
+      Value<int> rowid,
+    });
+
+class $$LocalAlertAcknowledgementsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalAlertAcknowledgementsTable> {
+  $$LocalAlertAcknowledgementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get alertId => $composableBuilder(
+    column: $table.alertId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAlertAcknowledgementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalAlertAcknowledgementsTable> {
+  $$LocalAlertAcknowledgementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get alertId => $composableBuilder(
+    column: $table.alertId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAlertAcknowledgementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalAlertAcknowledgementsTable> {
+  $$LocalAlertAcknowledgementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get alertId =>
+      $composableBuilder(column: $table.alertId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get acknowledgedAt => $composableBuilder(
+    column: $table.acknowledgedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$LocalAlertAcknowledgementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalAlertAcknowledgementsTable,
+          LocalAlertAcknowledgement,
+          $$LocalAlertAcknowledgementsTableFilterComposer,
+          $$LocalAlertAcknowledgementsTableOrderingComposer,
+          $$LocalAlertAcknowledgementsTableAnnotationComposer,
+          $$LocalAlertAcknowledgementsTableCreateCompanionBuilder,
+          $$LocalAlertAcknowledgementsTableUpdateCompanionBuilder,
+          (
+            LocalAlertAcknowledgement,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalAlertAcknowledgementsTable,
+              LocalAlertAcknowledgement
+            >,
+          ),
+          LocalAlertAcknowledgement,
+          PrefetchHooks Function()
+        > {
+  $$LocalAlertAcknowledgementsTableTableManager(
+    _$AppDatabase db,
+    $LocalAlertAcknowledgementsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalAlertAcknowledgementsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalAlertAcknowledgementsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalAlertAcknowledgementsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> alertId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<DateTime> acknowledgedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAlertAcknowledgementsCompanion(
+                id: id,
+                alertId: alertId,
+                userId: userId,
+                acknowledgedAt: acknowledgedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String alertId,
+                required String userId,
+                required DateTime acknowledgedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAlertAcknowledgementsCompanion.insert(
+                id: id,
+                alertId: alertId,
+                userId: userId,
+                acknowledgedAt: acknowledgedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAlertAcknowledgementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalAlertAcknowledgementsTable,
+      LocalAlertAcknowledgement,
+      $$LocalAlertAcknowledgementsTableFilterComposer,
+      $$LocalAlertAcknowledgementsTableOrderingComposer,
+      $$LocalAlertAcknowledgementsTableAnnotationComposer,
+      $$LocalAlertAcknowledgementsTableCreateCompanionBuilder,
+      $$LocalAlertAcknowledgementsTableUpdateCompanionBuilder,
+      (
+        LocalAlertAcknowledgement,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalAlertAcknowledgementsTable,
+          LocalAlertAcknowledgement
+        >,
+      ),
+      LocalAlertAcknowledgement,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -11814,6 +13406,14 @@ class $AppDatabaseManager {
       $$LocalRelocationPlansTableTableManager(_db, _db.localRelocationPlans);
   $$LocalAuditEventsTableTableManager get localAuditEvents =>
       $$LocalAuditEventsTableTableManager(_db, _db.localAuditEvents);
+  $$LocalAlertsTableTableManager get localAlerts =>
+      $$LocalAlertsTableTableManager(_db, _db.localAlerts);
+  $$LocalAlertAcknowledgementsTableTableManager
+  get localAlertAcknowledgements =>
+      $$LocalAlertAcknowledgementsTableTableManager(
+        _db,
+        _db.localAlertAcknowledgements,
+      );
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }

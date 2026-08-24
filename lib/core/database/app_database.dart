@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:taarak/core/database/tables/local_alert_acknowledgements_table.dart';
+import 'package:taarak/core/database/tables/local_alerts_table.dart';
 import 'package:taarak/core/database/tables/local_audit_events_table.dart';
 import 'package:taarak/core/database/tables/local_capacity_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_habitations_table.dart';
@@ -33,6 +35,8 @@ part 'app_database.g.dart';
     LocalCapacityAssessments,
     LocalRelocationPlans,
     LocalAuditEvents,
+    LocalAlerts,
+    LocalAlertAcknowledgements,
     SyncQueueEntries,
   ],
 )
@@ -41,7 +45,7 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'taarak_local'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

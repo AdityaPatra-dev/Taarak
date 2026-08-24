@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/config/app_config.dart';
+import 'package:taarak/core/database/alert_acknowledgement_dao.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
+import 'package:taarak/core/database/repositories/local_alert_repository.dart';
 import 'package:taarak/core/database/repositories/local_capacity_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
@@ -101,6 +103,14 @@ final syncQueueDaoProvider = Provider<SyncQueueDao>(
 
 final auditLogDaoProvider = Provider<AuditLogDao>(
   (ref) => AuditLogDao(ref.watch(appDatabaseProvider)),
+);
+
+final localAlertRepositoryProvider = Provider<LocalAlertRepository>(
+  (ref) => LocalAlertRepository(ref.watch(appDatabaseProvider)),
+);
+
+final alertAcknowledgementDaoProvider = Provider<AlertAcknowledgementDao>(
+  (ref) => AlertAcknowledgementDao(ref.watch(appDatabaseProvider)),
 );
 
 final locationServiceProvider = Provider<LocationService>(

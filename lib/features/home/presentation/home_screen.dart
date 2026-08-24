@@ -57,7 +57,9 @@ class HomeScreen extends ConsumerWidget {
               user.role.can(Permission.sendSos) ||
               user.role.can(Permission.updateSafeStatus) ||
               user.role.can(Permission.verifyReports) ||
-              user.role.can(Permission.manageSheltersResources)) ...[
+              user.role.can(Permission.manageSheltersResources) ||
+              user.role.can(Permission.viewAlerts) ||
+              user.role.can(Permission.sendBroadcast)) ...[
             const SizedBox(height: 24),
             Text(
               'Quick actions',
@@ -100,6 +102,18 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/shelters/manage'),
                     icon: const Icon(Icons.home_work_outlined),
                     label: const Text('Shelters & Resources'),
+                  ),
+                if (user.role.can(Permission.viewAlerts))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/alerts'),
+                    icon: const Icon(Icons.campaign_outlined),
+                    label: const Text('Alerts'),
+                  ),
+                if (user.role.can(Permission.sendBroadcast))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/alerts/broadcast'),
+                    icon: const Icon(Icons.campaign),
+                    label: const Text('Broadcast Alert'),
                   ),
               ],
             ),
