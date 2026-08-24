@@ -15,6 +15,21 @@ class LocalRiskAssessments extends Table {
   TextColumn get modelVersion => text()();
   TextColumn get contributingHazardZoneIdsJson =>
       text().withDefault(const Constant('[]'))();
+
+  /// M24: how much [[EnvironmentalRiskEngine]] nudged the score above the
+  /// hazard/vulnerability base — 0.0 when no fresh environmental data was
+  /// available for this habitation. Kept separate from `hazardExposure`
+  /// rather than folded into it, so the UI can show "here's what external
+  /// data added" as its own, visibly-attributed line.
+  RealColumn get environmentalAdjustment =>
+      real().withDefault(const Constant(0))();
+
+  /// JSON list of {parameter, value, source, observedAt} for the fresh
+  /// observations that actually contributed — the "visible provenance"
+  /// the acceptance criterion asks for.
+  TextColumn get environmentalProvenanceJson =>
+      text().withDefault(const Constant('[]'))();
+
   DateTimeColumn get assessedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();
 

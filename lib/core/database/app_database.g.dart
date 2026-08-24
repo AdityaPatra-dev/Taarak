@@ -4586,6 +4586,30 @@ class $LocalRiskAssessmentsTable extends LocalRiskAssessments
         requiredDuringInsert: false,
         defaultValue: const Constant('[]'),
       );
+  static const VerificationMeta _environmentalAdjustmentMeta =
+      const VerificationMeta('environmentalAdjustment');
+  @override
+  late final GeneratedColumn<double> environmentalAdjustment =
+      GeneratedColumn<double>(
+        'environmental_adjustment',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _environmentalProvenanceJsonMeta =
+      const VerificationMeta('environmentalProvenanceJson');
+  @override
+  late final GeneratedColumn<String> environmentalProvenanceJson =
+      GeneratedColumn<String>(
+        'environmental_provenance_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
   static const VerificationMeta _assessedAtMeta = const VerificationMeta(
     'assessedAt',
   );
@@ -4618,6 +4642,8 @@ class $LocalRiskAssessmentsTable extends LocalRiskAssessments
     riskClass,
     modelVersion,
     contributingHazardZoneIdsJson,
+    environmentalAdjustment,
+    environmentalProvenanceJson,
     assessedAt,
     version,
   ];
@@ -4702,6 +4728,24 @@ class $LocalRiskAssessmentsTable extends LocalRiskAssessments
         ),
       );
     }
+    if (data.containsKey('environmental_adjustment')) {
+      context.handle(
+        _environmentalAdjustmentMeta,
+        environmentalAdjustment.isAcceptableOrUnknown(
+          data['environmental_adjustment']!,
+          _environmentalAdjustmentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('environmental_provenance_json')) {
+      context.handle(
+        _environmentalProvenanceJsonMeta,
+        environmentalProvenanceJson.isAcceptableOrUnknown(
+          data['environmental_provenance_json']!,
+          _environmentalProvenanceJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('assessed_at')) {
       context.handle(
         _assessedAtMeta,
@@ -4753,6 +4797,14 @@ class $LocalRiskAssessmentsTable extends LocalRiskAssessments
         DriftSqlType.string,
         data['${effectivePrefix}contributing_hazard_zone_ids_json'],
       )!,
+      environmentalAdjustment: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}environmental_adjustment'],
+      )!,
+      environmentalProvenanceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}environmental_provenance_json'],
+      )!,
       assessedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}assessed_at'],
@@ -4780,6 +4832,18 @@ class LocalRiskAssessment extends DataClass
   final String riskClass;
   final String modelVersion;
   final String contributingHazardZoneIdsJson;
+
+  /// M24: how much [[EnvironmentalRiskEngine]] nudged the score above the
+  /// hazard/vulnerability base — 0.0 when no fresh environmental data was
+  /// available for this habitation. Kept separate from `hazardExposure`
+  /// rather than folded into it, so the UI can show "here's what external
+  /// data added" as its own, visibly-attributed line.
+  final double environmentalAdjustment;
+
+  /// JSON list of {parameter, value, source, observedAt} for the fresh
+  /// observations that actually contributed — the "visible provenance"
+  /// the acceptance criterion asks for.
+  final String environmentalProvenanceJson;
   final DateTime assessedAt;
   final int version;
   const LocalRiskAssessment({
@@ -4790,6 +4854,8 @@ class LocalRiskAssessment extends DataClass
     required this.riskClass,
     required this.modelVersion,
     required this.contributingHazardZoneIdsJson,
+    required this.environmentalAdjustment,
+    required this.environmentalProvenanceJson,
     required this.assessedAt,
     required this.version,
   });
@@ -4805,6 +4871,10 @@ class LocalRiskAssessment extends DataClass
     map['contributing_hazard_zone_ids_json'] = Variable<String>(
       contributingHazardZoneIdsJson,
     );
+    map['environmental_adjustment'] = Variable<double>(environmentalAdjustment);
+    map['environmental_provenance_json'] = Variable<String>(
+      environmentalProvenanceJson,
+    );
     map['assessed_at'] = Variable<DateTime>(assessedAt);
     map['version'] = Variable<int>(version);
     return map;
@@ -4819,6 +4889,8 @@ class LocalRiskAssessment extends DataClass
       riskClass: Value(riskClass),
       modelVersion: Value(modelVersion),
       contributingHazardZoneIdsJson: Value(contributingHazardZoneIdsJson),
+      environmentalAdjustment: Value(environmentalAdjustment),
+      environmentalProvenanceJson: Value(environmentalProvenanceJson),
       assessedAt: Value(assessedAt),
       version: Value(version),
     );
@@ -4841,6 +4913,12 @@ class LocalRiskAssessment extends DataClass
       contributingHazardZoneIdsJson: serializer.fromJson<String>(
         json['contributingHazardZoneIdsJson'],
       ),
+      environmentalAdjustment: serializer.fromJson<double>(
+        json['environmentalAdjustment'],
+      ),
+      environmentalProvenanceJson: serializer.fromJson<String>(
+        json['environmentalProvenanceJson'],
+      ),
       assessedAt: serializer.fromJson<DateTime>(json['assessedAt']),
       version: serializer.fromJson<int>(json['version']),
     );
@@ -4858,6 +4936,12 @@ class LocalRiskAssessment extends DataClass
       'contributingHazardZoneIdsJson': serializer.toJson<String>(
         contributingHazardZoneIdsJson,
       ),
+      'environmentalAdjustment': serializer.toJson<double>(
+        environmentalAdjustment,
+      ),
+      'environmentalProvenanceJson': serializer.toJson<String>(
+        environmentalProvenanceJson,
+      ),
       'assessedAt': serializer.toJson<DateTime>(assessedAt),
       'version': serializer.toJson<int>(version),
     };
@@ -4871,6 +4955,8 @@ class LocalRiskAssessment extends DataClass
     String? riskClass,
     String? modelVersion,
     String? contributingHazardZoneIdsJson,
+    double? environmentalAdjustment,
+    String? environmentalProvenanceJson,
     DateTime? assessedAt,
     int? version,
   }) => LocalRiskAssessment(
@@ -4882,6 +4968,10 @@ class LocalRiskAssessment extends DataClass
     modelVersion: modelVersion ?? this.modelVersion,
     contributingHazardZoneIdsJson:
         contributingHazardZoneIdsJson ?? this.contributingHazardZoneIdsJson,
+    environmentalAdjustment:
+        environmentalAdjustment ?? this.environmentalAdjustment,
+    environmentalProvenanceJson:
+        environmentalProvenanceJson ?? this.environmentalProvenanceJson,
     assessedAt: assessedAt ?? this.assessedAt,
     version: version ?? this.version,
   );
@@ -4904,6 +4994,12 @@ class LocalRiskAssessment extends DataClass
       contributingHazardZoneIdsJson: data.contributingHazardZoneIdsJson.present
           ? data.contributingHazardZoneIdsJson.value
           : this.contributingHazardZoneIdsJson,
+      environmentalAdjustment: data.environmentalAdjustment.present
+          ? data.environmentalAdjustment.value
+          : this.environmentalAdjustment,
+      environmentalProvenanceJson: data.environmentalProvenanceJson.present
+          ? data.environmentalProvenanceJson.value
+          : this.environmentalProvenanceJson,
       assessedAt: data.assessedAt.present
           ? data.assessedAt.value
           : this.assessedAt,
@@ -4923,6 +5019,8 @@ class LocalRiskAssessment extends DataClass
           ..write(
             'contributingHazardZoneIdsJson: $contributingHazardZoneIdsJson, ',
           )
+          ..write('environmentalAdjustment: $environmentalAdjustment, ')
+          ..write('environmentalProvenanceJson: $environmentalProvenanceJson, ')
           ..write('assessedAt: $assessedAt, ')
           ..write('version: $version')
           ..write(')'))
@@ -4938,6 +5036,8 @@ class LocalRiskAssessment extends DataClass
     riskClass,
     modelVersion,
     contributingHazardZoneIdsJson,
+    environmentalAdjustment,
+    environmentalProvenanceJson,
     assessedAt,
     version,
   );
@@ -4953,6 +5053,9 @@ class LocalRiskAssessment extends DataClass
           other.modelVersion == this.modelVersion &&
           other.contributingHazardZoneIdsJson ==
               this.contributingHazardZoneIdsJson &&
+          other.environmentalAdjustment == this.environmentalAdjustment &&
+          other.environmentalProvenanceJson ==
+              this.environmentalProvenanceJson &&
           other.assessedAt == this.assessedAt &&
           other.version == this.version);
 }
@@ -4966,6 +5069,8 @@ class LocalRiskAssessmentsCompanion
   final Value<String> riskClass;
   final Value<String> modelVersion;
   final Value<String> contributingHazardZoneIdsJson;
+  final Value<double> environmentalAdjustment;
+  final Value<String> environmentalProvenanceJson;
   final Value<DateTime> assessedAt;
   final Value<int> version;
   final Value<int> rowid;
@@ -4977,6 +5082,8 @@ class LocalRiskAssessmentsCompanion
     this.riskClass = const Value.absent(),
     this.modelVersion = const Value.absent(),
     this.contributingHazardZoneIdsJson = const Value.absent(),
+    this.environmentalAdjustment = const Value.absent(),
+    this.environmentalProvenanceJson = const Value.absent(),
     this.assessedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -4989,6 +5096,8 @@ class LocalRiskAssessmentsCompanion
     required String riskClass,
     required String modelVersion,
     this.contributingHazardZoneIdsJson = const Value.absent(),
+    this.environmentalAdjustment = const Value.absent(),
+    this.environmentalProvenanceJson = const Value.absent(),
     required DateTime assessedAt,
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -5007,6 +5116,8 @@ class LocalRiskAssessmentsCompanion
     Expression<String>? riskClass,
     Expression<String>? modelVersion,
     Expression<String>? contributingHazardZoneIdsJson,
+    Expression<double>? environmentalAdjustment,
+    Expression<String>? environmentalProvenanceJson,
     Expression<DateTime>? assessedAt,
     Expression<int>? version,
     Expression<int>? rowid,
@@ -5020,6 +5131,10 @@ class LocalRiskAssessmentsCompanion
       if (modelVersion != null) 'model_version': modelVersion,
       if (contributingHazardZoneIdsJson != null)
         'contributing_hazard_zone_ids_json': contributingHazardZoneIdsJson,
+      if (environmentalAdjustment != null)
+        'environmental_adjustment': environmentalAdjustment,
+      if (environmentalProvenanceJson != null)
+        'environmental_provenance_json': environmentalProvenanceJson,
       if (assessedAt != null) 'assessed_at': assessedAt,
       if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
@@ -5034,6 +5149,8 @@ class LocalRiskAssessmentsCompanion
     Value<String>? riskClass,
     Value<String>? modelVersion,
     Value<String>? contributingHazardZoneIdsJson,
+    Value<double>? environmentalAdjustment,
+    Value<String>? environmentalProvenanceJson,
     Value<DateTime>? assessedAt,
     Value<int>? version,
     Value<int>? rowid,
@@ -5047,6 +5164,10 @@ class LocalRiskAssessmentsCompanion
       modelVersion: modelVersion ?? this.modelVersion,
       contributingHazardZoneIdsJson:
           contributingHazardZoneIdsJson ?? this.contributingHazardZoneIdsJson,
+      environmentalAdjustment:
+          environmentalAdjustment ?? this.environmentalAdjustment,
+      environmentalProvenanceJson:
+          environmentalProvenanceJson ?? this.environmentalProvenanceJson,
       assessedAt: assessedAt ?? this.assessedAt,
       version: version ?? this.version,
       rowid: rowid ?? this.rowid,
@@ -5079,6 +5200,16 @@ class LocalRiskAssessmentsCompanion
         contributingHazardZoneIdsJson.value,
       );
     }
+    if (environmentalAdjustment.present) {
+      map['environmental_adjustment'] = Variable<double>(
+        environmentalAdjustment.value,
+      );
+    }
+    if (environmentalProvenanceJson.present) {
+      map['environmental_provenance_json'] = Variable<String>(
+        environmentalProvenanceJson.value,
+      );
+    }
     if (assessedAt.present) {
       map['assessed_at'] = Variable<DateTime>(assessedAt.value);
     }
@@ -5103,6 +5234,8 @@ class LocalRiskAssessmentsCompanion
           ..write(
             'contributingHazardZoneIdsJson: $contributingHazardZoneIdsJson, ',
           )
+          ..write('environmentalAdjustment: $environmentalAdjustment, ')
+          ..write('environmentalProvenanceJson: $environmentalProvenanceJson, ')
           ..write('assessedAt: $assessedAt, ')
           ..write('version: $version, ')
           ..write('rowid: $rowid')
@@ -8319,6 +8452,589 @@ class LocalAlertAcknowledgementsCompanion
   }
 }
 
+class $LocalEnvironmentalObservationsTable
+    extends LocalEnvironmentalObservations
+    with
+        TableInfo<
+          $LocalEnvironmentalObservationsTable,
+          LocalEnvironmentalObservation
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalEnvironmentalObservationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _parameterMeta = const VerificationMeta(
+    'parameter',
+  );
+  @override
+  late final GeneratedColumn<String> parameter = GeneratedColumn<String>(
+    'parameter',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<double> value = GeneratedColumn<double>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _observedAtMeta = const VerificationMeta(
+    'observedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> observedAt = GeneratedColumn<DateTime>(
+    'observed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.7),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    habitationId,
+    parameter,
+    value,
+    source,
+    observedAt,
+    fetchedAt,
+    confidence,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_environmental_observations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalEnvironmentalObservation> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('parameter')) {
+      context.handle(
+        _parameterMeta,
+        parameter.isAcceptableOrUnknown(data['parameter']!, _parameterMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_parameterMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('observed_at')) {
+      context.handle(
+        _observedAtMeta,
+        observedAt.isAcceptableOrUnknown(data['observed_at']!, _observedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_observedAtMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalEnvironmentalObservation map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalEnvironmentalObservation(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      parameter: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parameter'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}value'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      observedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}observed_at'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalEnvironmentalObservationsTable createAlias(String alias) {
+    return $LocalEnvironmentalObservationsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalEnvironmentalObservation extends DataClass
+    implements Insertable<LocalEnvironmentalObservation> {
+  final String id;
+  final String habitationId;
+
+  /// One of [EnvironmentalParameter]'s storage values.
+  final String parameter;
+  final double value;
+
+  /// Free-text attribution — "IMD", "CWC River Gauge", etc. — the
+  /// "visible provenance" the acceptance criterion asks for.
+  final String source;
+
+  /// When the source itself took this reading — distinct from when this
+  /// device fetched it, and what [[EnvironmentalRiskEngine]]'s freshness
+  /// check is measured against ("do not present stale environmental data
+  /// as current without freshness information").
+  final DateTime observedAt;
+  final DateTime fetchedAt;
+  final double confidence;
+  final int version;
+  const LocalEnvironmentalObservation({
+    required this.id,
+    required this.habitationId,
+    required this.parameter,
+    required this.value,
+    required this.source,
+    required this.observedAt,
+    required this.fetchedAt,
+    required this.confidence,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['parameter'] = Variable<String>(parameter);
+    map['value'] = Variable<double>(value);
+    map['source'] = Variable<String>(source);
+    map['observed_at'] = Variable<DateTime>(observedAt);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    map['confidence'] = Variable<double>(confidence);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalEnvironmentalObservationsCompanion toCompanion(bool nullToAbsent) {
+    return LocalEnvironmentalObservationsCompanion(
+      id: Value(id),
+      habitationId: Value(habitationId),
+      parameter: Value(parameter),
+      value: Value(value),
+      source: Value(source),
+      observedAt: Value(observedAt),
+      fetchedAt: Value(fetchedAt),
+      confidence: Value(confidence),
+      version: Value(version),
+    );
+  }
+
+  factory LocalEnvironmentalObservation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalEnvironmentalObservation(
+      id: serializer.fromJson<String>(json['id']),
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      parameter: serializer.fromJson<String>(json['parameter']),
+      value: serializer.fromJson<double>(json['value']),
+      source: serializer.fromJson<String>(json['source']),
+      observedAt: serializer.fromJson<DateTime>(json['observedAt']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+      confidence: serializer.fromJson<double>(json['confidence']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'habitationId': serializer.toJson<String>(habitationId),
+      'parameter': serializer.toJson<String>(parameter),
+      'value': serializer.toJson<double>(value),
+      'source': serializer.toJson<String>(source),
+      'observedAt': serializer.toJson<DateTime>(observedAt),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+      'confidence': serializer.toJson<double>(confidence),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalEnvironmentalObservation copyWith({
+    String? id,
+    String? habitationId,
+    String? parameter,
+    double? value,
+    String? source,
+    DateTime? observedAt,
+    DateTime? fetchedAt,
+    double? confidence,
+    int? version,
+  }) => LocalEnvironmentalObservation(
+    id: id ?? this.id,
+    habitationId: habitationId ?? this.habitationId,
+    parameter: parameter ?? this.parameter,
+    value: value ?? this.value,
+    source: source ?? this.source,
+    observedAt: observedAt ?? this.observedAt,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+    confidence: confidence ?? this.confidence,
+    version: version ?? this.version,
+  );
+  LocalEnvironmentalObservation copyWithCompanion(
+    LocalEnvironmentalObservationsCompanion data,
+  ) {
+    return LocalEnvironmentalObservation(
+      id: data.id.present ? data.id.value : this.id,
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      parameter: data.parameter.present ? data.parameter.value : this.parameter,
+      value: data.value.present ? data.value.value : this.value,
+      source: data.source.present ? data.source.value : this.source,
+      observedAt: data.observedAt.present
+          ? data.observedAt.value
+          : this.observedAt,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalEnvironmentalObservation(')
+          ..write('id: $id, ')
+          ..write('habitationId: $habitationId, ')
+          ..write('parameter: $parameter, ')
+          ..write('value: $value, ')
+          ..write('source: $source, ')
+          ..write('observedAt: $observedAt, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('confidence: $confidence, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    habitationId,
+    parameter,
+    value,
+    source,
+    observedAt,
+    fetchedAt,
+    confidence,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalEnvironmentalObservation &&
+          other.id == this.id &&
+          other.habitationId == this.habitationId &&
+          other.parameter == this.parameter &&
+          other.value == this.value &&
+          other.source == this.source &&
+          other.observedAt == this.observedAt &&
+          other.fetchedAt == this.fetchedAt &&
+          other.confidence == this.confidence &&
+          other.version == this.version);
+}
+
+class LocalEnvironmentalObservationsCompanion
+    extends UpdateCompanion<LocalEnvironmentalObservation> {
+  final Value<String> id;
+  final Value<String> habitationId;
+  final Value<String> parameter;
+  final Value<double> value;
+  final Value<String> source;
+  final Value<DateTime> observedAt;
+  final Value<DateTime> fetchedAt;
+  final Value<double> confidence;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalEnvironmentalObservationsCompanion({
+    this.id = const Value.absent(),
+    this.habitationId = const Value.absent(),
+    this.parameter = const Value.absent(),
+    this.value = const Value.absent(),
+    this.source = const Value.absent(),
+    this.observedAt = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalEnvironmentalObservationsCompanion.insert({
+    required String id,
+    required String habitationId,
+    required String parameter,
+    required double value,
+    required String source,
+    required DateTime observedAt,
+    required DateTime fetchedAt,
+    this.confidence = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       habitationId = Value(habitationId),
+       parameter = Value(parameter),
+       value = Value(value),
+       source = Value(source),
+       observedAt = Value(observedAt),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<LocalEnvironmentalObservation> custom({
+    Expression<String>? id,
+    Expression<String>? habitationId,
+    Expression<String>? parameter,
+    Expression<double>? value,
+    Expression<String>? source,
+    Expression<DateTime>? observedAt,
+    Expression<DateTime>? fetchedAt,
+    Expression<double>? confidence,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (parameter != null) 'parameter': parameter,
+      if (value != null) 'value': value,
+      if (source != null) 'source': source,
+      if (observedAt != null) 'observed_at': observedAt,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (confidence != null) 'confidence': confidence,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalEnvironmentalObservationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? habitationId,
+    Value<String>? parameter,
+    Value<double>? value,
+    Value<String>? source,
+    Value<DateTime>? observedAt,
+    Value<DateTime>? fetchedAt,
+    Value<double>? confidence,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalEnvironmentalObservationsCompanion(
+      id: id ?? this.id,
+      habitationId: habitationId ?? this.habitationId,
+      parameter: parameter ?? this.parameter,
+      value: value ?? this.value,
+      source: source ?? this.source,
+      observedAt: observedAt ?? this.observedAt,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      confidence: confidence ?? this.confidence,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (parameter.present) {
+      map['parameter'] = Variable<String>(parameter.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<double>(value.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (observedAt.present) {
+      map['observed_at'] = Variable<DateTime>(observedAt.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalEnvironmentalObservationsCompanion(')
+          ..write('id: $id, ')
+          ..write('habitationId: $habitationId, ')
+          ..write('parameter: $parameter, ')
+          ..write('value: $value, ')
+          ..write('source: $source, ')
+          ..write('observedAt: $observedAt, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('confidence: $confidence, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -8916,6 +9632,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalAlertsTable localAlerts = $LocalAlertsTable(this);
   late final $LocalAlertAcknowledgementsTable localAlertAcknowledgements =
       $LocalAlertAcknowledgementsTable(this);
+  late final $LocalEnvironmentalObservationsTable
+  localEnvironmentalObservations = $LocalEnvironmentalObservationsTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -8938,6 +9656,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localAuditEvents,
     localAlerts,
     localAlertAcknowledgements,
+    localEnvironmentalObservations,
     syncQueueEntries,
   ];
 }
@@ -11144,6 +11863,8 @@ typedef $$LocalRiskAssessmentsTableCreateCompanionBuilder =
       required String riskClass,
       required String modelVersion,
       Value<String> contributingHazardZoneIdsJson,
+      Value<double> environmentalAdjustment,
+      Value<String> environmentalProvenanceJson,
       required DateTime assessedAt,
       Value<int> version,
       Value<int> rowid,
@@ -11157,6 +11878,8 @@ typedef $$LocalRiskAssessmentsTableUpdateCompanionBuilder =
       Value<String> riskClass,
       Value<String> modelVersion,
       Value<String> contributingHazardZoneIdsJson,
+      Value<double> environmentalAdjustment,
+      Value<String> environmentalProvenanceJson,
       Value<DateTime> assessedAt,
       Value<int> version,
       Value<int> rowid,
@@ -11203,6 +11926,16 @@ class $$LocalRiskAssessmentsTableFilterComposer
 
   ColumnFilters<String> get contributingHazardZoneIdsJson => $composableBuilder(
     column: $table.contributingHazardZoneIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get environmentalAdjustment => $composableBuilder(
+    column: $table.environmentalAdjustment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get environmentalProvenanceJson => $composableBuilder(
+    column: $table.environmentalProvenanceJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11262,6 +11995,16 @@ class $$LocalRiskAssessmentsTableOrderingComposer
         builder: (column) => ColumnOrderings(column),
       );
 
+  ColumnOrderings<double> get environmentalAdjustment => $composableBuilder(
+    column: $table.environmentalAdjustment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get environmentalProvenanceJson => $composableBuilder(
+    column: $table.environmentalProvenanceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get assessedAt => $composableBuilder(
     column: $table.assessedAt,
     builder: (column) => ColumnOrderings(column),
@@ -11313,6 +12056,16 @@ class $$LocalRiskAssessmentsTableAnnotationComposer
         column: $table.contributingHazardZoneIdsJson,
         builder: (column) => column,
       );
+
+  GeneratedColumn<double> get environmentalAdjustment => $composableBuilder(
+    column: $table.environmentalAdjustment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get environmentalProvenanceJson => $composableBuilder(
+    column: $table.environmentalProvenanceJson,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get assessedAt => $composableBuilder(
     column: $table.assessedAt,
@@ -11374,6 +12127,9 @@ class $$LocalRiskAssessmentsTableTableManager
                 Value<String> modelVersion = const Value.absent(),
                 Value<String> contributingHazardZoneIdsJson =
                     const Value.absent(),
+                Value<double> environmentalAdjustment = const Value.absent(),
+                Value<String> environmentalProvenanceJson =
+                    const Value.absent(),
                 Value<DateTime> assessedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -11385,6 +12141,8 @@ class $$LocalRiskAssessmentsTableTableManager
                 riskClass: riskClass,
                 modelVersion: modelVersion,
                 contributingHazardZoneIdsJson: contributingHazardZoneIdsJson,
+                environmentalAdjustment: environmentalAdjustment,
+                environmentalProvenanceJson: environmentalProvenanceJson,
                 assessedAt: assessedAt,
                 version: version,
                 rowid: rowid,
@@ -11399,6 +12157,9 @@ class $$LocalRiskAssessmentsTableTableManager
                 required String modelVersion,
                 Value<String> contributingHazardZoneIdsJson =
                     const Value.absent(),
+                Value<double> environmentalAdjustment = const Value.absent(),
+                Value<String> environmentalProvenanceJson =
+                    const Value.absent(),
                 required DateTime assessedAt,
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -11410,6 +12171,8 @@ class $$LocalRiskAssessmentsTableTableManager
                 riskClass: riskClass,
                 modelVersion: modelVersion,
                 contributingHazardZoneIdsJson: contributingHazardZoneIdsJson,
+                environmentalAdjustment: environmentalAdjustment,
+                environmentalProvenanceJson: environmentalProvenanceJson,
                 assessedAt: assessedAt,
                 version: version,
                 rowid: rowid,
@@ -13087,6 +13850,307 @@ typedef $$LocalAlertAcknowledgementsTableProcessedTableManager =
       LocalAlertAcknowledgement,
       PrefetchHooks Function()
     >;
+typedef $$LocalEnvironmentalObservationsTableCreateCompanionBuilder =
+    LocalEnvironmentalObservationsCompanion Function({
+      required String id,
+      required String habitationId,
+      required String parameter,
+      required double value,
+      required String source,
+      required DateTime observedAt,
+      required DateTime fetchedAt,
+      Value<double> confidence,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalEnvironmentalObservationsTableUpdateCompanionBuilder =
+    LocalEnvironmentalObservationsCompanion Function({
+      Value<String> id,
+      Value<String> habitationId,
+      Value<String> parameter,
+      Value<double> value,
+      Value<String> source,
+      Value<DateTime> observedAt,
+      Value<DateTime> fetchedAt,
+      Value<double> confidence,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalEnvironmentalObservationsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalEnvironmentalObservationsTable> {
+  $$LocalEnvironmentalObservationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parameter => $composableBuilder(
+    column: $table.parameter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get observedAt => $composableBuilder(
+    column: $table.observedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalEnvironmentalObservationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalEnvironmentalObservationsTable> {
+  $$LocalEnvironmentalObservationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parameter => $composableBuilder(
+    column: $table.parameter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get observedAt => $composableBuilder(
+    column: $table.observedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalEnvironmentalObservationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalEnvironmentalObservationsTable> {
+  $$LocalEnvironmentalObservationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get parameter =>
+      $composableBuilder(column: $table.parameter, builder: (column) => column);
+
+  GeneratedColumn<double> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get observedAt => $composableBuilder(
+    column: $table.observedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalEnvironmentalObservationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalEnvironmentalObservationsTable,
+          LocalEnvironmentalObservation,
+          $$LocalEnvironmentalObservationsTableFilterComposer,
+          $$LocalEnvironmentalObservationsTableOrderingComposer,
+          $$LocalEnvironmentalObservationsTableAnnotationComposer,
+          $$LocalEnvironmentalObservationsTableCreateCompanionBuilder,
+          $$LocalEnvironmentalObservationsTableUpdateCompanionBuilder,
+          (
+            LocalEnvironmentalObservation,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalEnvironmentalObservationsTable,
+              LocalEnvironmentalObservation
+            >,
+          ),
+          LocalEnvironmentalObservation,
+          PrefetchHooks Function()
+        > {
+  $$LocalEnvironmentalObservationsTableTableManager(
+    _$AppDatabase db,
+    $LocalEnvironmentalObservationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalEnvironmentalObservationsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalEnvironmentalObservationsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalEnvironmentalObservationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> habitationId = const Value.absent(),
+                Value<String> parameter = const Value.absent(),
+                Value<double> value = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<DateTime> observedAt = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalEnvironmentalObservationsCompanion(
+                id: id,
+                habitationId: habitationId,
+                parameter: parameter,
+                value: value,
+                source: source,
+                observedAt: observedAt,
+                fetchedAt: fetchedAt,
+                confidence: confidence,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String habitationId,
+                required String parameter,
+                required double value,
+                required String source,
+                required DateTime observedAt,
+                required DateTime fetchedAt,
+                Value<double> confidence = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalEnvironmentalObservationsCompanion.insert(
+                id: id,
+                habitationId: habitationId,
+                parameter: parameter,
+                value: value,
+                source: source,
+                observedAt: observedAt,
+                fetchedAt: fetchedAt,
+                confidence: confidence,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalEnvironmentalObservationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalEnvironmentalObservationsTable,
+      LocalEnvironmentalObservation,
+      $$LocalEnvironmentalObservationsTableFilterComposer,
+      $$LocalEnvironmentalObservationsTableOrderingComposer,
+      $$LocalEnvironmentalObservationsTableAnnotationComposer,
+      $$LocalEnvironmentalObservationsTableCreateCompanionBuilder,
+      $$LocalEnvironmentalObservationsTableUpdateCompanionBuilder,
+      (
+        LocalEnvironmentalObservation,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalEnvironmentalObservationsTable,
+          LocalEnvironmentalObservation
+        >,
+      ),
+      LocalEnvironmentalObservation,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -13413,6 +14477,12 @@ class $AppDatabaseManager {
       $$LocalAlertAcknowledgementsTableTableManager(
         _db,
         _db.localAlertAcknowledgements,
+      );
+  $$LocalEnvironmentalObservationsTableTableManager
+  get localEnvironmentalObservations =>
+      $$LocalEnvironmentalObservationsTableTableManager(
+        _db,
+        _db.localEnvironmentalObservations,
       );
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);

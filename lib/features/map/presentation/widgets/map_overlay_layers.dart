@@ -101,6 +101,19 @@ String _habitationTooltip(HabitationOverview item) {
       'hazard ${risk.hazardExposure.toStringAsFixed(2)}, '
       'vulnerability ${risk.vulnerabilityIndex.toStringAsFixed(2)}',
     );
+    // M24: only shown when environmental data actually moved the score —
+    // "visible provenance", not a silent adjustment.
+    if (risk.environmentalAdjustment > 0) {
+      final provenance = jsonDecode(risk.environmentalProvenanceJson) as List;
+      final sources = provenance
+          .map((entry) => (entry as Map<String, dynamic>)['source'])
+          .toSet()
+          .join(', ');
+      buffer.write(
+        '\n+${risk.environmentalAdjustment.toStringAsFixed(2)} from environmental data '
+        '($sources)',
+      );
+    }
   }
 
   if (capacity != null && capacity.exposedPopulation > 0) {

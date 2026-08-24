@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
 import 'package:taarak/features/capacity/application/capacity_providers.dart';
+import 'package:taarak/features/environmental/application/environmental_providers.dart';
 import 'package:taarak/features/hazards/application/hazard_providers.dart';
 import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
@@ -36,6 +37,19 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
       ref.read(appDatabaseProvider),
       ref.read(hazardIngestionServiceProvider),
     ).seedIfEmpty();
+
+    // M24: refresh environmental readings before M07 assesses risk, so
+    // the assessment below has fresh data available to be influenced by.
+    final environmentalDataService = ref.read(environmentalDataServiceProvider);
+    final habitationsResult = await ref.read(localHabitationRepositoryProvider).getAll();
+    for (final habitation in habitationsResult.dataOrNull ?? const []) {
+      await environmentalDataService.refreshForHabitation(
+        habitationId: habitation.id,
+        latitude: habitation.latitude,
+        longitude: habitation.longitude,
+      );
+    }
+
     await ref.read(riskAssessmentServiceProvider).assessAllHabitations();
     await ref.read(capacityAssessmentServiceProvider).assessAllHabitations();
     await ref.read(relocationPlanningServiceProvider).planForAllHabitations();

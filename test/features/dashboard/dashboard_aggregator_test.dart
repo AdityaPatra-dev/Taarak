@@ -45,6 +45,8 @@ void main() {
     riskClass: riskClass,
     modelVersion: '1.0.0',
     contributingHazardZoneIdsJson: '[]',
+    environmentalAdjustment: 0,
+    environmentalProvenanceJson: '[]',
     assessedAt: now,
     version: 1,
   );

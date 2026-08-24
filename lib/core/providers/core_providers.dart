@@ -5,6 +5,7 @@ import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_alert_repository.dart';
 import 'package:taarak/core/database/repositories/local_capacity_assessment_repository.dart';
+import 'package:taarak/core/database/repositories/local_environmental_observation_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
@@ -90,6 +91,12 @@ final localVulnerabilityAssessmentRepositoryProvider =
 final localCapacityAssessmentRepositoryProvider =
     Provider<LocalCapacityAssessmentRepository>(
       (ref) => LocalCapacityAssessmentRepository(ref.watch(appDatabaseProvider)),
+    );
+
+final localEnvironmentalObservationRepositoryProvider =
+    Provider<LocalEnvironmentalObservationRepository>(
+      (ref) =>
+          LocalEnvironmentalObservationRepository(ref.watch(appDatabaseProvider)),
     );
 
 final localRelocationPlanRepositoryProvider =

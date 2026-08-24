@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/environmental/application/environmental_providers.dart';
 import 'package:taarak/features/risk/application/risk_assessment_service.dart';
 import 'package:taarak/features/risk/domain/vulnerability_provider.dart';
 import 'package:taarak/features/vulnerability/application/real_vulnerability_provider.dart';
@@ -19,5 +20,6 @@ final riskAssessmentServiceProvider = Provider<RiskAssessmentService>(
     hazardZoneRepository: ref.watch(localHazardZoneRepositoryProvider),
     assessmentRepository: ref.watch(localRiskAssessmentRepositoryProvider),
     vulnerabilityProvider: ref.watch(vulnerabilityProviderProvider),
+    environmentalDataService: ref.watch(environmentalDataServiceProvider),
   ),
 );

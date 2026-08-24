@@ -1,3 +1,4 @@
+import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/risk/domain/risk_class.dart';
 
 /// M07's model version. Bump this whenever the scoring formula or weights
@@ -32,6 +33,15 @@ class RiskAssessmentResult {
   final String modelVersion;
   final DateTime assessedAt;
 
+  /// M24: how much fresh environmental data (if any was available) added
+  /// to [riskScore] above the base hazard/vulnerability figure — 0.0 when
+  /// no environmental input was wired in or nothing fresh was found.
+  final double environmentalAdjustment;
+
+  /// The fresh observations that actually produced [environmentalAdjustment]
+  /// — empty unless environmental data was supplied and contributed.
+  final List<LocalEnvironmentalObservation> environmentalProvenance;
+
   const RiskAssessmentResult({
     required this.habitationId,
     required this.hazardExposure,
@@ -43,5 +53,7 @@ class RiskAssessmentResult {
     required this.contributingHazardZoneIds,
     required this.modelVersion,
     required this.assessedAt,
+    this.environmentalAdjustment = 0.0,
+    this.environmentalProvenance = const [],
   });
 }
