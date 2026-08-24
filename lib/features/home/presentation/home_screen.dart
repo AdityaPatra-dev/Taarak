@@ -53,6 +53,43 @@ class HomeScreen extends ConsumerWidget {
           Text('Welcome, ${user.name}', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 4),
           Text(user.role.label, style: Theme.of(context).textTheme.bodyMedium),
+          if (user.role.can(Permission.submitIncidentReport) ||
+              user.role.can(Permission.sendSos) ||
+              user.role.can(Permission.updateSafeStatus)) ...[
+            const SizedBox(height: 24),
+            Text(
+              'Quick actions',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (user.role.can(Permission.submitIncidentReport))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/report'),
+                    icon: const Icon(Icons.report_outlined),
+                    label: const Text('Report Incident'),
+                  ),
+                if (user.role.can(Permission.sendSos))
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    onPressed: () => context.go('/sos'),
+                    icon: const Icon(Icons.sos),
+                    label: const Text('SOS'),
+                  ),
+                if (user.role.can(Permission.updateSafeStatus))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/safe-status'),
+                    icon: const Icon(Icons.health_and_safety_outlined),
+                    label: const Text('I Am Safe'),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
           Text(
             'Available to your role',

@@ -11,6 +11,9 @@ const _authRoutes = {'/login', '/register'};
 /// the same map engine once those modules land.
 const Map<String, Permission> defaultRoutePermissions = {
   '/map': Permission.viewRiskMap,
+  '/report': Permission.submitIncidentReport,
+  '/sos': Permission.sendSos,
+  '/safe-status': Permission.updateSafeStatus,
 };
 
 /// Pure redirect decision for the app router: unauthenticated users are sent

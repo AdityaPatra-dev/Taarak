@@ -57,6 +57,11 @@ dependencies:
   latlong2: ^0.9.1
   # Disk-cached tile images -> the map's offline cache strategy.
   cached_network_image: ^3.4.1
+  # Globally-unique ids for citizen reports (M12), so ids don't collide
+  # once reports from many devices reach the backend.
+  uuid: ^4.5.1
+  # Optional photo attachment on citizen reports (M12).
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

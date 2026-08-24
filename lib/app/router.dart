@@ -9,6 +9,9 @@ import 'package:taarak/features/home/presentation/home_screen.dart';
 import 'package:taarak/features/home/presentation/unauthorized_screen.dart';
 import 'package:taarak/features/map/presentation/risk_map_screen.dart';
 import 'package:taarak/features/profile/presentation/profile_screen.dart';
+import 'package:taarak/features/reporting/presentation/i_am_safe_screen.dart';
+import 'package:taarak/features/reporting/presentation/report_incident_screen.dart';
+import 'package:taarak/features/reporting/presentation/sos_screen.dart';
 
 /// Bridges Riverpod's `authControllerProvider` changes into GoRouter's
 /// `refreshListenable`, so a login/logout re-evaluates the redirect without
@@ -48,6 +51,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/map',
         builder: (context, state) => const RiskMapScreen(),
+      ),
+      GoRoute(
+        path: '/report',
+        builder: (context, state) => const ReportIncidentScreen(),
+      ),
+      GoRoute(path: '/sos', builder: (context, state) => const SosScreen()),
+      GoRoute(
+        path: '/safe-status',
+        builder: (context, state) => const IAmSafeScreen(),
       ),
       GoRoute(
         path: '/login',

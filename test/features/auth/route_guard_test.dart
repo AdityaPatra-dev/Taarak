@@ -64,5 +64,22 @@ void main() {
       final session = _sessionFor(UserRole.systemAdmin);
       expect(computeRedirect(session: session, location: '/map'), '/unauthorized');
     });
+
+    test('the real M12 routes admit citizens', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(computeRedirect(session: session, location: '/report'), isNull);
+      expect(computeRedirect(session: session, location: '/sos'), isNull);
+      expect(computeRedirect(session: session, location: '/safe-status'), isNull);
+    });
+
+    test('the real M12 routes turn away a role without those permissions', () {
+      final session = _sessionFor(UserRole.systemAdmin);
+      expect(computeRedirect(session: session, location: '/report'), '/unauthorized');
+      expect(computeRedirect(session: session, location: '/sos'), '/unauthorized');
+      expect(
+        computeRedirect(session: session, location: '/safe-status'),
+        '/unauthorized',
+      );
+    });
   });
 }

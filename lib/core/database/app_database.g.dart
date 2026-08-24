@@ -1680,6 +1680,17 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _reportTypeMeta = const VerificationMeta(
+    'reportType',
+  );
+  @override
+  late final GeneratedColumn<String> reportType = GeneratedColumn<String>(
+    'report_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _descriptionMeta = const VerificationMeta(
     'description',
   );
@@ -1703,6 +1714,27 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant('unknown'),
+  );
+  static const VerificationMeta _affectedPeopleCountMeta =
+      const VerificationMeta('affectedPeopleCount');
+  @override
+  late final GeneratedColumn<int> affectedPeopleCount = GeneratedColumn<int>(
+    'affected_people_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _mediaPathMeta = const VerificationMeta(
+    'mediaPath',
+  );
+  @override
+  late final GeneratedColumn<String> mediaPath = GeneratedColumn<String>(
+    'media_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
@@ -1760,8 +1792,11 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
     reporterId,
     latitude,
     longitude,
+    reportType,
     description,
     severity,
+    affectedPeopleCount,
+    mediaPath,
     createdAt,
     updatedAt,
     version,
@@ -1812,6 +1847,14 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
     } else if (isInserting) {
       context.missing(_longitudeMeta);
     }
+    if (data.containsKey('report_type')) {
+      context.handle(
+        _reportTypeMeta,
+        reportType.isAcceptableOrUnknown(data['report_type']!, _reportTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reportTypeMeta);
+    }
     if (data.containsKey('description')) {
       context.handle(
         _descriptionMeta,
@@ -1825,6 +1868,21 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
       context.handle(
         _severityMeta,
         severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    }
+    if (data.containsKey('affected_people_count')) {
+      context.handle(
+        _affectedPeopleCountMeta,
+        affectedPeopleCount.isAcceptableOrUnknown(
+          data['affected_people_count']!,
+          _affectedPeopleCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('media_path')) {
+      context.handle(
+        _mediaPathMeta,
+        mediaPath.isAcceptableOrUnknown(data['media_path']!, _mediaPathMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -1884,6 +1942,10 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
         DriftSqlType.double,
         data['${effectivePrefix}longitude'],
       )!,
+      reportType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}report_type'],
+      )!,
       description: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}description'],
@@ -1892,6 +1954,14 @@ class $LocalIncidentReportsTable extends LocalIncidentReports
         DriftSqlType.string,
         data['${effectivePrefix}severity'],
       )!,
+      affectedPeopleCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}affected_people_count'],
+      ),
+      mediaPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_path'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1924,11 +1994,27 @@ class LocalIncidentReport extends DataClass
   final String? reporterId;
   final double latitude;
   final double longitude;
+
+  /// One of [CitizenReportType]'s storage values — landslide/flood/
+  /// road_blockage/other for a hazard report, or 'sos'/'safe_status' for
+  /// the two special-case citizen actions (M12).
+  final String reportType;
   final String description;
   final String severity;
+
+  /// The reporting citizen's own estimate — not required for sos/safe_status.
+  final int? affectedPeopleCount;
+
+  /// Local file path to an optionally-attached photo. Compression/upload
+  /// prioritization for this is M21's job, not this module's.
+  final String? mediaPath;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int version;
+
+  /// Always false at submission time — every report is written locally
+  /// and queued first, regardless of current connectivity, and only M17's
+  /// future sync pass flips this once the backend has it.
   final bool isSynced;
   const LocalIncidentReport({
     required this.id,
@@ -1936,8 +2022,11 @@ class LocalIncidentReport extends DataClass
     this.reporterId,
     required this.latitude,
     required this.longitude,
+    required this.reportType,
     required this.description,
     required this.severity,
+    this.affectedPeopleCount,
+    this.mediaPath,
     required this.createdAt,
     required this.updatedAt,
     required this.version,
@@ -1955,8 +2044,15 @@ class LocalIncidentReport extends DataClass
     }
     map['latitude'] = Variable<double>(latitude);
     map['longitude'] = Variable<double>(longitude);
+    map['report_type'] = Variable<String>(reportType);
     map['description'] = Variable<String>(description);
     map['severity'] = Variable<String>(severity);
+    if (!nullToAbsent || affectedPeopleCount != null) {
+      map['affected_people_count'] = Variable<int>(affectedPeopleCount);
+    }
+    if (!nullToAbsent || mediaPath != null) {
+      map['media_path'] = Variable<String>(mediaPath);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
@@ -1975,8 +2071,15 @@ class LocalIncidentReport extends DataClass
           : Value(reporterId),
       latitude: Value(latitude),
       longitude: Value(longitude),
+      reportType: Value(reportType),
       description: Value(description),
       severity: Value(severity),
+      affectedPeopleCount: affectedPeopleCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(affectedPeopleCount),
+      mediaPath: mediaPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaPath),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       version: Value(version),
@@ -1995,8 +2098,13 @@ class LocalIncidentReport extends DataClass
       reporterId: serializer.fromJson<String?>(json['reporterId']),
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
+      reportType: serializer.fromJson<String>(json['reportType']),
       description: serializer.fromJson<String>(json['description']),
       severity: serializer.fromJson<String>(json['severity']),
+      affectedPeopleCount: serializer.fromJson<int?>(
+        json['affectedPeopleCount'],
+      ),
+      mediaPath: serializer.fromJson<String?>(json['mediaPath']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
@@ -2012,8 +2120,11 @@ class LocalIncidentReport extends DataClass
       'reporterId': serializer.toJson<String?>(reporterId),
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
+      'reportType': serializer.toJson<String>(reportType),
       'description': serializer.toJson<String>(description),
       'severity': serializer.toJson<String>(severity),
+      'affectedPeopleCount': serializer.toJson<int?>(affectedPeopleCount),
+      'mediaPath': serializer.toJson<String?>(mediaPath),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
@@ -2027,8 +2138,11 @@ class LocalIncidentReport extends DataClass
     Value<String?> reporterId = const Value.absent(),
     double? latitude,
     double? longitude,
+    String? reportType,
     String? description,
     String? severity,
+    Value<int?> affectedPeopleCount = const Value.absent(),
+    Value<String?> mediaPath = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
     int? version,
@@ -2039,8 +2153,13 @@ class LocalIncidentReport extends DataClass
     reporterId: reporterId.present ? reporterId.value : this.reporterId,
     latitude: latitude ?? this.latitude,
     longitude: longitude ?? this.longitude,
+    reportType: reportType ?? this.reportType,
     description: description ?? this.description,
     severity: severity ?? this.severity,
+    affectedPeopleCount: affectedPeopleCount.present
+        ? affectedPeopleCount.value
+        : this.affectedPeopleCount,
+    mediaPath: mediaPath.present ? mediaPath.value : this.mediaPath,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
@@ -2057,10 +2176,17 @@ class LocalIncidentReport extends DataClass
           : this.reporterId,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      reportType: data.reportType.present
+          ? data.reportType.value
+          : this.reportType,
       description: data.description.present
           ? data.description.value
           : this.description,
       severity: data.severity.present ? data.severity.value : this.severity,
+      affectedPeopleCount: data.affectedPeopleCount.present
+          ? data.affectedPeopleCount.value
+          : this.affectedPeopleCount,
+      mediaPath: data.mediaPath.present ? data.mediaPath.value : this.mediaPath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
@@ -2076,8 +2202,11 @@ class LocalIncidentReport extends DataClass
           ..write('reporterId: $reporterId, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('reportType: $reportType, ')
           ..write('description: $description, ')
           ..write('severity: $severity, ')
+          ..write('affectedPeopleCount: $affectedPeopleCount, ')
+          ..write('mediaPath: $mediaPath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
@@ -2093,8 +2222,11 @@ class LocalIncidentReport extends DataClass
     reporterId,
     latitude,
     longitude,
+    reportType,
     description,
     severity,
+    affectedPeopleCount,
+    mediaPath,
     createdAt,
     updatedAt,
     version,
@@ -2109,8 +2241,11 @@ class LocalIncidentReport extends DataClass
           other.reporterId == this.reporterId &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
+          other.reportType == this.reportType &&
           other.description == this.description &&
           other.severity == this.severity &&
+          other.affectedPeopleCount == this.affectedPeopleCount &&
+          other.mediaPath == this.mediaPath &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version &&
@@ -2124,8 +2259,11 @@ class LocalIncidentReportsCompanion
   final Value<String?> reporterId;
   final Value<double> latitude;
   final Value<double> longitude;
+  final Value<String> reportType;
   final Value<String> description;
   final Value<String> severity;
+  final Value<int?> affectedPeopleCount;
+  final Value<String?> mediaPath;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> version;
@@ -2137,8 +2275,11 @@ class LocalIncidentReportsCompanion
     this.reporterId = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
+    this.reportType = const Value.absent(),
     this.description = const Value.absent(),
     this.severity = const Value.absent(),
+    this.affectedPeopleCount = const Value.absent(),
+    this.mediaPath = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
@@ -2151,8 +2292,11 @@ class LocalIncidentReportsCompanion
     this.reporterId = const Value.absent(),
     required double latitude,
     required double longitude,
+    required String reportType,
     this.description = const Value.absent(),
     this.severity = const Value.absent(),
+    this.affectedPeopleCount = const Value.absent(),
+    this.mediaPath = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.version = const Value.absent(),
@@ -2161,6 +2305,7 @@ class LocalIncidentReportsCompanion
   }) : id = Value(id),
        latitude = Value(latitude),
        longitude = Value(longitude),
+       reportType = Value(reportType),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<LocalIncidentReport> custom({
@@ -2169,8 +2314,11 @@ class LocalIncidentReportsCompanion
     Expression<String>? reporterId,
     Expression<double>? latitude,
     Expression<double>? longitude,
+    Expression<String>? reportType,
     Expression<String>? description,
     Expression<String>? severity,
+    Expression<int>? affectedPeopleCount,
+    Expression<String>? mediaPath,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
@@ -2183,8 +2331,12 @@ class LocalIncidentReportsCompanion
       if (reporterId != null) 'reporter_id': reporterId,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
+      if (reportType != null) 'report_type': reportType,
       if (description != null) 'description': description,
       if (severity != null) 'severity': severity,
+      if (affectedPeopleCount != null)
+        'affected_people_count': affectedPeopleCount,
+      if (mediaPath != null) 'media_path': mediaPath,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
@@ -2199,8 +2351,11 @@ class LocalIncidentReportsCompanion
     Value<String?>? reporterId,
     Value<double>? latitude,
     Value<double>? longitude,
+    Value<String>? reportType,
     Value<String>? description,
     Value<String>? severity,
+    Value<int?>? affectedPeopleCount,
+    Value<String?>? mediaPath,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? version,
@@ -2213,8 +2368,11 @@ class LocalIncidentReportsCompanion
       reporterId: reporterId ?? this.reporterId,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      reportType: reportType ?? this.reportType,
       description: description ?? this.description,
       severity: severity ?? this.severity,
+      affectedPeopleCount: affectedPeopleCount ?? this.affectedPeopleCount,
+      mediaPath: mediaPath ?? this.mediaPath,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
@@ -2241,11 +2399,20 @@ class LocalIncidentReportsCompanion
     if (longitude.present) {
       map['longitude'] = Variable<double>(longitude.value);
     }
+    if (reportType.present) {
+      map['report_type'] = Variable<String>(reportType.value);
+    }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
     if (severity.present) {
       map['severity'] = Variable<String>(severity.value);
+    }
+    if (affectedPeopleCount.present) {
+      map['affected_people_count'] = Variable<int>(affectedPeopleCount.value);
+    }
+    if (mediaPath.present) {
+      map['media_path'] = Variable<String>(mediaPath.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2273,8 +2440,11 @@ class LocalIncidentReportsCompanion
           ..write('reporterId: $reporterId, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
+          ..write('reportType: $reportType, ')
           ..write('description: $description, ')
           ..write('severity: $severity, ')
+          ..write('affectedPeopleCount: $affectedPeopleCount, ')
+          ..write('mediaPath: $mediaPath, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
@@ -7885,8 +8055,11 @@ typedef $$LocalIncidentReportsTableCreateCompanionBuilder =
       Value<String?> reporterId,
       required double latitude,
       required double longitude,
+      required String reportType,
       Value<String> description,
       Value<String> severity,
+      Value<int?> affectedPeopleCount,
+      Value<String?> mediaPath,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> version,
@@ -7900,8 +8073,11 @@ typedef $$LocalIncidentReportsTableUpdateCompanionBuilder =
       Value<String?> reporterId,
       Value<double> latitude,
       Value<double> longitude,
+      Value<String> reportType,
       Value<String> description,
       Value<String> severity,
+      Value<int?> affectedPeopleCount,
+      Value<String?> mediaPath,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> version,
@@ -7943,6 +8119,11 @@ class $$LocalIncidentReportsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get reportType => $composableBuilder(
+    column: $table.reportType,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => ColumnFilters(column),
@@ -7950,6 +8131,16 @@ class $$LocalIncidentReportsTableFilterComposer
 
   ColumnFilters<String> get severity => $composableBuilder(
     column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get affectedPeopleCount => $composableBuilder(
+    column: $table.affectedPeopleCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaPath => $composableBuilder(
+    column: $table.mediaPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8008,6 +8199,11 @@ class $$LocalIncidentReportsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get reportType => $composableBuilder(
+    column: $table.reportType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => ColumnOrderings(column),
@@ -8015,6 +8211,16 @@ class $$LocalIncidentReportsTableOrderingComposer
 
   ColumnOrderings<String> get severity => $composableBuilder(
     column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get affectedPeopleCount => $composableBuilder(
+    column: $table.affectedPeopleCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaPath => $composableBuilder(
+    column: $table.mediaPath,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8067,6 +8273,11 @@ class $$LocalIncidentReportsTableAnnotationComposer
   GeneratedColumn<double> get longitude =>
       $composableBuilder(column: $table.longitude, builder: (column) => column);
 
+  GeneratedColumn<String> get reportType => $composableBuilder(
+    column: $table.reportType,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get description => $composableBuilder(
     column: $table.description,
     builder: (column) => column,
@@ -8074,6 +8285,14 @@ class $$LocalIncidentReportsTableAnnotationComposer
 
   GeneratedColumn<String> get severity =>
       $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<int> get affectedPeopleCount => $composableBuilder(
+    column: $table.affectedPeopleCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mediaPath =>
+      $composableBuilder(column: $table.mediaPath, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -8136,8 +8355,11 @@ class $$LocalIncidentReportsTableTableManager
                 Value<String?> reporterId = const Value.absent(),
                 Value<double> latitude = const Value.absent(),
                 Value<double> longitude = const Value.absent(),
+                Value<String> reportType = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<String> severity = const Value.absent(),
+                Value<int?> affectedPeopleCount = const Value.absent(),
+                Value<String?> mediaPath = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
@@ -8149,8 +8371,11 @@ class $$LocalIncidentReportsTableTableManager
                 reporterId: reporterId,
                 latitude: latitude,
                 longitude: longitude,
+                reportType: reportType,
                 description: description,
                 severity: severity,
+                affectedPeopleCount: affectedPeopleCount,
+                mediaPath: mediaPath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 version: version,
@@ -8164,8 +8389,11 @@ class $$LocalIncidentReportsTableTableManager
                 Value<String?> reporterId = const Value.absent(),
                 required double latitude,
                 required double longitude,
+                required String reportType,
                 Value<String> description = const Value.absent(),
                 Value<String> severity = const Value.absent(),
+                Value<int?> affectedPeopleCount = const Value.absent(),
+                Value<String?> mediaPath = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> version = const Value.absent(),
@@ -8177,8 +8405,11 @@ class $$LocalIncidentReportsTableTableManager
                 reporterId: reporterId,
                 latitude: latitude,
                 longitude: longitude,
+                reportType: reportType,
                 description: description,
                 severity: severity,
+                affectedPeopleCount: affectedPeopleCount,
+                mediaPath: mediaPath,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 version: version,

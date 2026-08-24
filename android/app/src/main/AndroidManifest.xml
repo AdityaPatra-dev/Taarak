@@ -3,6 +3,11 @@
          the user's position. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- M12: optional photo attachment on a citizen report. Gallery
+         selection uses the system photo picker and needs no permission;
+         camera capture does. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
         android:label="taarak"
         android:name="${applicationName}"
