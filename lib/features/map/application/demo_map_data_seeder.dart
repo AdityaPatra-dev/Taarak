@@ -98,8 +98,8 @@ class DemoMapDataSeeder {
           id: 'demo-incident-landslide',
           type: 'landslide',
           status: 'active',
-          latitude: c.latitude + 0.009,
-          longitude: c.longitude - 0.002,
+          latitude: c.latitude + 0.012,
+          longitude: c.longitude + 0.006,
           description: const Value('Debris flow reported near the ridge'),
           severity: const Value('high'),
           createdAt: now,
@@ -119,13 +119,16 @@ class DemoMapDataSeeder {
       ]);
 
       batch.insertAll(_db.localHabitations, [
-        // Sits inside the landslide hazard zone above — M07 should score
-        // this one high/red once assessed.
+        // Sits inside the landslide hazard zone above (but off its
+        // centroid, and away from the incident marker above, so the
+        // polygon's auto-drawn label and the two markers don't render on
+        // top of each other) — M07 should score this one high/red once
+        // assessed.
         LocalHabitationsCompanion.insert(
           id: 'demo-habitation-ridge-colony',
           name: 'Ridge Colony',
-          latitude: c.latitude + 0.007,
-          longitude: c.longitude + 0.0025,
+          latitude: c.latitude + 0.003,
+          longitude: c.longitude + 0.009,
           population: const Value(850),
           updatedAt: now,
         ),

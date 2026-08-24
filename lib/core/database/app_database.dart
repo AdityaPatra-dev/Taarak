@@ -39,5 +39,26 @@ class AppDatabase extends _$AppDatabase {
     : super(executor ?? driftDatabase(name: 'taarak_local'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // Pre-release: the schema has been growing quickly as modules land
+      // (M07-M10 each added tables/columns) without the version being
+      // bumped each time, so devices/emulators that installed an earlier
+      // build are stuck on an old, incomplete schema — "no such table"
+      // at runtime is the symptom. There's no real user data yet worth
+      // preserving, so the fix is to drop and recreate everything rather
+      // than write per-version migrations for schema history that was
+      // never actually released. Once the schema stabilizes toward a
+      // real release, replace this with proper data-preserving
+      // migrations.
+      for (final table in allTables) {
+        await m.deleteTable(table.actualTableName);
+      }
+      await m.createAll();
+    },
+  );
 }
