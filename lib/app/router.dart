@@ -8,6 +8,7 @@ import 'package:taarak/features/audit/presentation/audit_log_screen.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/dashboard/presentation/command_dashboard_screen.dart';
 import 'package:taarak/features/dashboard/presentation/incident_detail_screen.dart';
+import 'package:taarak/features/device_relay/presentation/device_relay_screen.dart';
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
@@ -96,6 +97,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sms-prototype',
         builder: (context, state) => const SmsPrototypeScreen(),
+      ),
+      GoRoute(
+        path: '/device-relay',
+        builder: (context, state) => const DeviceRelayScreen(),
       ),
       GoRoute(
         path: '/login',

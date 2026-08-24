@@ -160,6 +160,12 @@ class HomeScreen extends ConsumerWidget {
                     icon: const Icon(Icons.sms_outlined),
                     label: const Text('SMS Fallback (Prototype)'),
                   ),
+                if (isDevMode && user.role.can(Permission.sendSos))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/device-relay'),
+                    icon: const Icon(Icons.wifi_tethering),
+                    label: const Text('Device Relay (Prototype)'),
+                  ),
               ],
             ),
           ],

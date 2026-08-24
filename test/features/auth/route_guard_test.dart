@@ -134,6 +134,19 @@ void main() {
       );
     });
 
+    test('the real /device-relay route (M23) admits a citizen', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(computeRedirect(session: session, location: '/device-relay'), isNull);
+    });
+
+    test('the real /device-relay route (M23) turns away a role without sendSos', () {
+      final session = _sessionFor(UserRole.stateAdmin);
+      expect(
+        computeRedirect(session: session, location: '/device-relay'),
+        '/unauthorized',
+      );
+    });
+
     test(
       'an incident drill-down (M18) is gated the same as /dashboard, despite the varying path',
       () {

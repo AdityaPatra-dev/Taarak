@@ -20,6 +20,7 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/dashboard': Permission.monitorZones,
   '/audit': Permission.reviewAudit,
   '/sms-prototype': Permission.sendSos,
+  '/device-relay': Permission.sendSos,
 };
 
 /// [defaultRoutePermissions] only matches exact locations; a route with a
