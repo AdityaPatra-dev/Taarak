@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:taarak/core/providers/core_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
@@ -25,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
     final permissions = user.role.permissions.toList()
       ..sort((a, b) => a.label.compareTo(b.label));
     final pendingSyncCount = ref.watch(pendingSyncCountProvider).valueOrNull ?? 0;
+    final isDevMode = ref.watch(appConfigProvider).isDevMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -151,6 +153,12 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/audit'),
                     icon: const Icon(Icons.history_outlined),
                     label: const Text('Audit Log'),
+                  ),
+                if (isDevMode && user.role.can(Permission.sendSos))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/sms-prototype'),
+                    icon: const Icon(Icons.sms_outlined),
+                    label: const Text('SMS Fallback (Prototype)'),
                   ),
               ],
             ),

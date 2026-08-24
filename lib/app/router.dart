@@ -18,6 +18,7 @@ import 'package:taarak/features/reporting/presentation/i_am_safe_screen.dart';
 import 'package:taarak/features/reporting/presentation/report_incident_screen.dart';
 import 'package:taarak/features/reporting/presentation/sos_screen.dart';
 import 'package:taarak/features/shelters/presentation/shelter_management_screen.dart';
+import 'package:taarak/features/sms_prototype/presentation/sms_prototype_screen.dart';
 import 'package:taarak/features/verification/presentation/verification_screen.dart';
 
 /// Bridges Riverpod's `authControllerProvider` changes into GoRouter's
@@ -92,6 +93,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/audit', builder: (context, state) => const AuditLogScreen()),
+      GoRoute(
+        path: '/sms-prototype',
+        builder: (context, state) => const SmsPrototypeScreen(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),

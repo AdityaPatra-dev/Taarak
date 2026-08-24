@@ -121,6 +121,19 @@ void main() {
       );
     });
 
+    test('the real /sms-prototype route (M22) admits a citizen', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(computeRedirect(session: session, location: '/sms-prototype'), isNull);
+    });
+
+    test('the real /sms-prototype route (M22) turns away a role without sendSos', () {
+      final session = _sessionFor(UserRole.stateAdmin);
+      expect(
+        computeRedirect(session: session, location: '/sms-prototype'),
+        '/unauthorized',
+      );
+    });
+
     test(
       'an incident drill-down (M18) is gated the same as /dashboard, despite the varying path',
       () {
