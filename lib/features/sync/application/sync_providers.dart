@@ -3,6 +3,7 @@ import 'package:taarak/core/providers/core_providers.dart';
 import 'package:taarak/features/sync/application/sync_coordinator_service.dart';
 import 'package:taarak/features/sync/application/sync_engine.dart';
 import 'package:taarak/features/sync/application/sync_transport.dart';
+import 'package:taarak/features/sync/domain/sync_queue_summary.dart';
 
 final syncEngineProvider = Provider<SyncEngine>((ref) => SyncEngine());
 
@@ -22,6 +23,17 @@ final syncCoordinatorServiceProvider = Provider<SyncCoordinatorService>(
 final pendingSyncCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final result = await ref.watch(syncQueueDaoProvider).listSyncable();
   return result.dataOrNull?.length ?? 0;
+});
+
+/// The honest breakdown behind [pendingSyncCountProvider]'s single number
+/// — see [SyncQueueSummary] for why a flat count alone can't distinguish
+/// "not attempted yet" from "has been failing repeatedly".
+final syncQueueSummaryProvider = FutureProvider.autoDispose<SyncQueueSummary>((
+  ref,
+) async {
+  final result = await ref.watch(syncQueueDaoProvider).listSyncable();
+  final entries = result.dataOrNull ?? const [];
+  return ref.watch(syncEngineProvider).summarize(entries);
 });
 
 /// Watched once from the app root ([TaarakApp]) so it lives for the whole

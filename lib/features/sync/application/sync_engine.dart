@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/sync/domain/dedupe_result.dart';
 import 'package:taarak/features/sync/domain/sync_conflict_resolution.dart';
+import 'package:taarak/features/sync/domain/sync_queue_summary.dart';
 
 const String syncModelVersion = '1.0.0';
 
@@ -101,5 +102,24 @@ class SyncEngine {
   int localVersionOf(SyncQueueEntry entry) {
     final version = _decodePayload(entry)['version'];
     return version is int ? version : 1;
+  }
+
+  /// The honest breakdown behind a UI's "N items waiting to sync" — see
+  /// [SyncQueueSummary] for why a flat count alone can't distinguish
+  /// "not attempted yet" from "has been failing repeatedly".
+  SyncQueueSummary summarize(List<SyncQueueEntry> entries) {
+    var pending = 0;
+    var retrying = 0;
+    var stalled = 0;
+    for (final entry in entries) {
+      if (entry.status == 'pending') {
+        pending++;
+      } else if (shouldGiveUp(entry)) {
+        stalled++;
+      } else {
+        retrying++;
+      }
+    }
+    return SyncQueueSummary(pendingCount: pending, retryingCount: retrying, stalledCount: stalled);
   }
 }

@@ -221,4 +221,51 @@ void main() {
       expect(engine.localVersionOf(entry(id: 1, payload: const {})), 1);
     });
   });
+
+  group('summarize', () {
+    test('a never-attempted entry counts as pending', () {
+      final summary = engine.summarize([entry(id: 1, status: 'pending')]);
+      expect(summary.pendingCount, 1);
+      expect(summary.retryingCount, 0);
+      expect(summary.stalledCount, 0);
+    });
+
+    test('a failed entry still under the retry budget counts as retrying', () {
+      final summary = engine.summarize([
+        entry(id: 1, status: 'failed', attemptCount: 2),
+      ]);
+      expect(summary.retryingCount, 1);
+      expect(summary.pendingCount, 0);
+      expect(summary.stalledCount, 0);
+    });
+
+    test(
+      'FIX SYNC SO IT DOES NOT LIE TO THE USER — the acceptance criterion: an entry '
+      'that exhausted its retry budget counts as stalled, not just "still failed"',
+      () {
+        final summary = engine.summarize([
+          entry(id: 1, status: 'failed', attemptCount: SyncEngine.defaultMaxAttempts),
+        ]);
+        expect(summary.stalledCount, 1);
+        expect(summary.retryingCount, 0);
+      },
+    );
+
+    test('a mixed queue is partitioned into all three categories correctly', () {
+      final summary = engine.summarize([
+        entry(id: 1, status: 'pending'),
+        entry(id: 2, status: 'pending'),
+        entry(id: 3, status: 'failed', attemptCount: 1),
+        entry(id: 4, status: 'failed', attemptCount: SyncEngine.defaultMaxAttempts),
+      ]);
+      expect(summary.pendingCount, 2);
+      expect(summary.retryingCount, 1);
+      expect(summary.stalledCount, 1);
+      expect(summary.totalCount, 4);
+    });
+
+    test('an empty queue summarizes to an empty summary', () {
+      expect(engine.summarize(const []).isEmpty, isTrue);
+    });
+  });
 }
