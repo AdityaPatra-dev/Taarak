@@ -56,7 +56,8 @@ class HomeScreen extends ConsumerWidget {
           if (user.role.can(Permission.submitIncidentReport) ||
               user.role.can(Permission.sendSos) ||
               user.role.can(Permission.updateSafeStatus) ||
-              user.role.can(Permission.verifyReports)) ...[
+              user.role.can(Permission.verifyReports) ||
+              user.role.can(Permission.manageSheltersResources)) ...[
             const SizedBox(height: 24),
             Text(
               'Quick actions',
@@ -93,6 +94,12 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/verification'),
                     icon: const Icon(Icons.fact_check_outlined),
                     label: const Text('Verify Reports'),
+                  ),
+                if (user.role.can(Permission.manageSheltersResources))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/shelters/manage'),
+                    icon: const Icon(Icons.home_work_outlined),
+                    label: const Text('Shelters & Resources'),
                   ),
               ],
             ),

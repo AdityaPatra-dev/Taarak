@@ -26,6 +26,15 @@ PolygonLayer buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
   );
 }
 
+/// M15 made visible: a citizen deciding where to go should see whether a
+/// shelter still has room, not just that it exists.
+String _shelterTooltip(LocalShelter shelter) {
+  final available = shelter.capacityTotal - shelter.occupancy;
+  if (shelter.capacityTotal <= 0) return shelter.name;
+  return '${shelter.name}\n${shelter.occupancy}/${shelter.capacityTotal} occupied '
+      '(${available > 0 ? '$available available' : 'full'})';
+}
+
 MarkerLayer buildShelterLayer(List<LocalShelter> shelters) {
   return MarkerLayer(
     markers: [
@@ -35,8 +44,14 @@ MarkerLayer buildShelterLayer(List<LocalShelter> shelters) {
           width: 36,
           height: 36,
           child: Tooltip(
-            message: shelter.name,
-            child: const Icon(Icons.home_filled, color: Colors.blue),
+            message: _shelterTooltip(shelter),
+            child: Icon(
+              Icons.home_filled,
+              color: shelter.capacityTotal > 0 &&
+                      shelter.occupancy >= shelter.capacityTotal
+                  ? Colors.grey
+                  : Colors.blue,
+            ),
           ),
         ),
     ],

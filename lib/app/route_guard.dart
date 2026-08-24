@@ -15,6 +15,7 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/sos': Permission.sendSos,
   '/safe-status': Permission.updateSafeStatus,
   '/verification': Permission.verifyReports,
+  '/shelters/manage': Permission.manageSheltersResources,
 };
 
 /// Pure redirect decision for the app router: unauthenticated users are sent
