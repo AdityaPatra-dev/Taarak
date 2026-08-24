@@ -2367,6 +2367,17 @@ class $LocalSheltersTable extends LocalShelters
     requiredDuringInsert: false,
     defaultValue: const Constant('[]'),
   );
+  static const VerificationMeta _accessQualityMeta = const VerificationMeta(
+    'accessQuality',
+  );
+  @override
+  late final GeneratedColumn<double> accessQuality = GeneratedColumn<double>(
+    'access_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -2399,6 +2410,7 @@ class $LocalSheltersTable extends LocalShelters
     capacityTotal,
     occupancy,
     facilitiesJson,
+    accessQuality,
     updatedAt,
     version,
   ];
@@ -2467,6 +2479,15 @@ class $LocalSheltersTable extends LocalShelters
         ),
       );
     }
+    if (data.containsKey('access_quality')) {
+      context.handle(
+        _accessQualityMeta,
+        accessQuality.isAcceptableOrUnknown(
+          data['access_quality']!,
+          _accessQualityMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -2518,6 +2539,10 @@ class $LocalSheltersTable extends LocalShelters
         DriftSqlType.string,
         data['${effectivePrefix}facilities_json'],
       )!,
+      accessQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}access_quality'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -2543,6 +2568,11 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
   final int capacityTotal;
   final int occupancy;
   final String facilitiesJson;
+
+  /// M10's "access" factor: 0.0 (easy road access) – 1.0 (difficult),
+  /// configured the same way as a habitation's indicators (M08) — null
+  /// means "not yet surveyed", not "assumed easy".
+  final double? accessQuality;
   final DateTime updatedAt;
   final int version;
   const LocalShelter({
@@ -2553,6 +2583,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
     required this.capacityTotal,
     required this.occupancy,
     required this.facilitiesJson,
+    this.accessQuality,
     required this.updatedAt,
     required this.version,
   });
@@ -2566,6 +2597,9 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
     map['capacity_total'] = Variable<int>(capacityTotal);
     map['occupancy'] = Variable<int>(occupancy);
     map['facilities_json'] = Variable<String>(facilitiesJson);
+    if (!nullToAbsent || accessQuality != null) {
+      map['access_quality'] = Variable<double>(accessQuality);
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
     return map;
@@ -2580,6 +2614,9 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
       capacityTotal: Value(capacityTotal),
       occupancy: Value(occupancy),
       facilitiesJson: Value(facilitiesJson),
+      accessQuality: accessQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accessQuality),
       updatedAt: Value(updatedAt),
       version: Value(version),
     );
@@ -2598,6 +2635,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
       capacityTotal: serializer.fromJson<int>(json['capacityTotal']),
       occupancy: serializer.fromJson<int>(json['occupancy']),
       facilitiesJson: serializer.fromJson<String>(json['facilitiesJson']),
+      accessQuality: serializer.fromJson<double?>(json['accessQuality']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
     );
@@ -2613,6 +2651,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
       'capacityTotal': serializer.toJson<int>(capacityTotal),
       'occupancy': serializer.toJson<int>(occupancy),
       'facilitiesJson': serializer.toJson<String>(facilitiesJson),
+      'accessQuality': serializer.toJson<double?>(accessQuality),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
     };
@@ -2626,6 +2665,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
     int? capacityTotal,
     int? occupancy,
     String? facilitiesJson,
+    Value<double?> accessQuality = const Value.absent(),
     DateTime? updatedAt,
     int? version,
   }) => LocalShelter(
@@ -2636,6 +2676,9 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
     capacityTotal: capacityTotal ?? this.capacityTotal,
     occupancy: occupancy ?? this.occupancy,
     facilitiesJson: facilitiesJson ?? this.facilitiesJson,
+    accessQuality: accessQuality.present
+        ? accessQuality.value
+        : this.accessQuality,
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
   );
@@ -2652,6 +2695,9 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
       facilitiesJson: data.facilitiesJson.present
           ? data.facilitiesJson.value
           : this.facilitiesJson,
+      accessQuality: data.accessQuality.present
+          ? data.accessQuality.value
+          : this.accessQuality,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
     );
@@ -2667,6 +2713,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
           ..write('capacityTotal: $capacityTotal, ')
           ..write('occupancy: $occupancy, ')
           ..write('facilitiesJson: $facilitiesJson, ')
+          ..write('accessQuality: $accessQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version')
           ..write(')'))
@@ -2682,6 +2729,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
     capacityTotal,
     occupancy,
     facilitiesJson,
+    accessQuality,
     updatedAt,
     version,
   );
@@ -2696,6 +2744,7 @@ class LocalShelter extends DataClass implements Insertable<LocalShelter> {
           other.capacityTotal == this.capacityTotal &&
           other.occupancy == this.occupancy &&
           other.facilitiesJson == this.facilitiesJson &&
+          other.accessQuality == this.accessQuality &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version);
 }
@@ -2708,6 +2757,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
   final Value<int> capacityTotal;
   final Value<int> occupancy;
   final Value<String> facilitiesJson;
+  final Value<double?> accessQuality;
   final Value<DateTime> updatedAt;
   final Value<int> version;
   final Value<int> rowid;
@@ -2719,6 +2769,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
     this.capacityTotal = const Value.absent(),
     this.occupancy = const Value.absent(),
     this.facilitiesJson = const Value.absent(),
+    this.accessQuality = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2731,6 +2782,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
     this.capacityTotal = const Value.absent(),
     this.occupancy = const Value.absent(),
     this.facilitiesJson = const Value.absent(),
+    this.accessQuality = const Value.absent(),
     required DateTime updatedAt,
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2747,6 +2799,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
     Expression<int>? capacityTotal,
     Expression<int>? occupancy,
     Expression<String>? facilitiesJson,
+    Expression<double>? accessQuality,
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
     Expression<int>? rowid,
@@ -2759,6 +2812,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
       if (capacityTotal != null) 'capacity_total': capacityTotal,
       if (occupancy != null) 'occupancy': occupancy,
       if (facilitiesJson != null) 'facilities_json': facilitiesJson,
+      if (accessQuality != null) 'access_quality': accessQuality,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
@@ -2773,6 +2827,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
     Value<int>? capacityTotal,
     Value<int>? occupancy,
     Value<String>? facilitiesJson,
+    Value<double?>? accessQuality,
     Value<DateTime>? updatedAt,
     Value<int>? version,
     Value<int>? rowid,
@@ -2785,6 +2840,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
       capacityTotal: capacityTotal ?? this.capacityTotal,
       occupancy: occupancy ?? this.occupancy,
       facilitiesJson: facilitiesJson ?? this.facilitiesJson,
+      accessQuality: accessQuality ?? this.accessQuality,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       rowid: rowid ?? this.rowid,
@@ -2815,6 +2871,9 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
     if (facilitiesJson.present) {
       map['facilities_json'] = Variable<String>(facilitiesJson.value);
     }
+    if (accessQuality.present) {
+      map['access_quality'] = Variable<double>(accessQuality.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -2837,6 +2896,7 @@ class LocalSheltersCompanion extends UpdateCompanion<LocalShelter> {
           ..write('capacityTotal: $capacityTotal, ')
           ..write('occupancy: $occupancy, ')
           ..write('facilitiesJson: $facilitiesJson, ')
+          ..write('accessQuality: $accessQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('rowid: $rowid')
@@ -5877,6 +5937,458 @@ class LocalCapacityAssessmentsCompanion
   }
 }
 
+class $LocalRelocationPlansTable extends LocalRelocationPlans
+    with TableInfo<$LocalRelocationPlansTable, LocalRelocationPlan> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalRelocationPlansTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _populationToRelocateMeta =
+      const VerificationMeta('populationToRelocate');
+  @override
+  late final GeneratedColumn<int> populationToRelocate = GeneratedColumn<int>(
+    'population_to_relocate',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rankedCandidatesJsonMeta =
+      const VerificationMeta('rankedCandidatesJson');
+  @override
+  late final GeneratedColumn<String> rankedCandidatesJson =
+      GeneratedColumn<String>(
+        'ranked_candidates_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _modelVersionMeta = const VerificationMeta(
+    'modelVersion',
+  );
+  @override
+  late final GeneratedColumn<String> modelVersion = GeneratedColumn<String>(
+    'model_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _plannedAtMeta = const VerificationMeta(
+    'plannedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> plannedAt = GeneratedColumn<DateTime>(
+    'planned_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    habitationId,
+    populationToRelocate,
+    rankedCandidatesJson,
+    modelVersion,
+    plannedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_relocation_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalRelocationPlan> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('population_to_relocate')) {
+      context.handle(
+        _populationToRelocateMeta,
+        populationToRelocate.isAcceptableOrUnknown(
+          data['population_to_relocate']!,
+          _populationToRelocateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_populationToRelocateMeta);
+    }
+    if (data.containsKey('ranked_candidates_json')) {
+      context.handle(
+        _rankedCandidatesJsonMeta,
+        rankedCandidatesJson.isAcceptableOrUnknown(
+          data['ranked_candidates_json']!,
+          _rankedCandidatesJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_rankedCandidatesJsonMeta);
+    }
+    if (data.containsKey('model_version')) {
+      context.handle(
+        _modelVersionMeta,
+        modelVersion.isAcceptableOrUnknown(
+          data['model_version']!,
+          _modelVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_modelVersionMeta);
+    }
+    if (data.containsKey('planned_at')) {
+      context.handle(
+        _plannedAtMeta,
+        plannedAt.isAcceptableOrUnknown(data['planned_at']!, _plannedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_plannedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {habitationId};
+  @override
+  LocalRelocationPlan map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalRelocationPlan(
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      populationToRelocate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}population_to_relocate'],
+      )!,
+      rankedCandidatesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ranked_candidates_json'],
+      )!,
+      modelVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_version'],
+      )!,
+      plannedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}planned_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalRelocationPlansTable createAlias(String alias) {
+    return $LocalRelocationPlansTable(attachedDatabase, alias);
+  }
+}
+
+class LocalRelocationPlan extends DataClass
+    implements Insertable<LocalRelocationPlan> {
+  final String habitationId;
+  final int populationToRelocate;
+
+  /// JSON list of {shelterId, shelterName, availableCapacity,
+  /// distanceMeters, distanceScore, capacityScore, accessScore,
+  /// facilitiesScore, compositeScore, reasons} — ranked best-first.
+  final String rankedCandidatesJson;
+  final String modelVersion;
+  final DateTime plannedAt;
+  final int version;
+  const LocalRelocationPlan({
+    required this.habitationId,
+    required this.populationToRelocate,
+    required this.rankedCandidatesJson,
+    required this.modelVersion,
+    required this.plannedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['population_to_relocate'] = Variable<int>(populationToRelocate);
+    map['ranked_candidates_json'] = Variable<String>(rankedCandidatesJson);
+    map['model_version'] = Variable<String>(modelVersion);
+    map['planned_at'] = Variable<DateTime>(plannedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalRelocationPlansCompanion toCompanion(bool nullToAbsent) {
+    return LocalRelocationPlansCompanion(
+      habitationId: Value(habitationId),
+      populationToRelocate: Value(populationToRelocate),
+      rankedCandidatesJson: Value(rankedCandidatesJson),
+      modelVersion: Value(modelVersion),
+      plannedAt: Value(plannedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalRelocationPlan.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalRelocationPlan(
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      populationToRelocate: serializer.fromJson<int>(
+        json['populationToRelocate'],
+      ),
+      rankedCandidatesJson: serializer.fromJson<String>(
+        json['rankedCandidatesJson'],
+      ),
+      modelVersion: serializer.fromJson<String>(json['modelVersion']),
+      plannedAt: serializer.fromJson<DateTime>(json['plannedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'habitationId': serializer.toJson<String>(habitationId),
+      'populationToRelocate': serializer.toJson<int>(populationToRelocate),
+      'rankedCandidatesJson': serializer.toJson<String>(rankedCandidatesJson),
+      'modelVersion': serializer.toJson<String>(modelVersion),
+      'plannedAt': serializer.toJson<DateTime>(plannedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalRelocationPlan copyWith({
+    String? habitationId,
+    int? populationToRelocate,
+    String? rankedCandidatesJson,
+    String? modelVersion,
+    DateTime? plannedAt,
+    int? version,
+  }) => LocalRelocationPlan(
+    habitationId: habitationId ?? this.habitationId,
+    populationToRelocate: populationToRelocate ?? this.populationToRelocate,
+    rankedCandidatesJson: rankedCandidatesJson ?? this.rankedCandidatesJson,
+    modelVersion: modelVersion ?? this.modelVersion,
+    plannedAt: plannedAt ?? this.plannedAt,
+    version: version ?? this.version,
+  );
+  LocalRelocationPlan copyWithCompanion(LocalRelocationPlansCompanion data) {
+    return LocalRelocationPlan(
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      populationToRelocate: data.populationToRelocate.present
+          ? data.populationToRelocate.value
+          : this.populationToRelocate,
+      rankedCandidatesJson: data.rankedCandidatesJson.present
+          ? data.rankedCandidatesJson.value
+          : this.rankedCandidatesJson,
+      modelVersion: data.modelVersion.present
+          ? data.modelVersion.value
+          : this.modelVersion,
+      plannedAt: data.plannedAt.present ? data.plannedAt.value : this.plannedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRelocationPlan(')
+          ..write('habitationId: $habitationId, ')
+          ..write('populationToRelocate: $populationToRelocate, ')
+          ..write('rankedCandidatesJson: $rankedCandidatesJson, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('plannedAt: $plannedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    habitationId,
+    populationToRelocate,
+    rankedCandidatesJson,
+    modelVersion,
+    plannedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalRelocationPlan &&
+          other.habitationId == this.habitationId &&
+          other.populationToRelocate == this.populationToRelocate &&
+          other.rankedCandidatesJson == this.rankedCandidatesJson &&
+          other.modelVersion == this.modelVersion &&
+          other.plannedAt == this.plannedAt &&
+          other.version == this.version);
+}
+
+class LocalRelocationPlansCompanion
+    extends UpdateCompanion<LocalRelocationPlan> {
+  final Value<String> habitationId;
+  final Value<int> populationToRelocate;
+  final Value<String> rankedCandidatesJson;
+  final Value<String> modelVersion;
+  final Value<DateTime> plannedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalRelocationPlansCompanion({
+    this.habitationId = const Value.absent(),
+    this.populationToRelocate = const Value.absent(),
+    this.rankedCandidatesJson = const Value.absent(),
+    this.modelVersion = const Value.absent(),
+    this.plannedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalRelocationPlansCompanion.insert({
+    required String habitationId,
+    required int populationToRelocate,
+    required String rankedCandidatesJson,
+    required String modelVersion,
+    required DateTime plannedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : habitationId = Value(habitationId),
+       populationToRelocate = Value(populationToRelocate),
+       rankedCandidatesJson = Value(rankedCandidatesJson),
+       modelVersion = Value(modelVersion),
+       plannedAt = Value(plannedAt);
+  static Insertable<LocalRelocationPlan> custom({
+    Expression<String>? habitationId,
+    Expression<int>? populationToRelocate,
+    Expression<String>? rankedCandidatesJson,
+    Expression<String>? modelVersion,
+    Expression<DateTime>? plannedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (populationToRelocate != null)
+        'population_to_relocate': populationToRelocate,
+      if (rankedCandidatesJson != null)
+        'ranked_candidates_json': rankedCandidatesJson,
+      if (modelVersion != null) 'model_version': modelVersion,
+      if (plannedAt != null) 'planned_at': plannedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalRelocationPlansCompanion copyWith({
+    Value<String>? habitationId,
+    Value<int>? populationToRelocate,
+    Value<String>? rankedCandidatesJson,
+    Value<String>? modelVersion,
+    Value<DateTime>? plannedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalRelocationPlansCompanion(
+      habitationId: habitationId ?? this.habitationId,
+      populationToRelocate: populationToRelocate ?? this.populationToRelocate,
+      rankedCandidatesJson: rankedCandidatesJson ?? this.rankedCandidatesJson,
+      modelVersion: modelVersion ?? this.modelVersion,
+      plannedAt: plannedAt ?? this.plannedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (populationToRelocate.present) {
+      map['population_to_relocate'] = Variable<int>(populationToRelocate.value);
+    }
+    if (rankedCandidatesJson.present) {
+      map['ranked_candidates_json'] = Variable<String>(
+        rankedCandidatesJson.value,
+      );
+    }
+    if (modelVersion.present) {
+      map['model_version'] = Variable<String>(modelVersion.value);
+    }
+    if (plannedAt.present) {
+      map['planned_at'] = Variable<DateTime>(plannedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRelocationPlansCompanion(')
+          ..write('habitationId: $habitationId, ')
+          ..write('populationToRelocate: $populationToRelocate, ')
+          ..write('rankedCandidatesJson: $rankedCandidatesJson, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('plannedAt: $plannedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -6466,6 +6978,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalVulnerabilityAssessmentsTable(this);
   late final $LocalCapacityAssessmentsTable localCapacityAssessments =
       $LocalCapacityAssessmentsTable(this);
+  late final $LocalRelocationPlansTable localRelocationPlans =
+      $LocalRelocationPlansTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -6484,6 +6998,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localRiskAssessments,
     localVulnerabilityAssessments,
     localCapacityAssessments,
+    localRelocationPlans,
     syncQueueEntries,
   ];
 }
@@ -7657,6 +8172,7 @@ typedef $$LocalSheltersTableCreateCompanionBuilder =
       Value<int> capacityTotal,
       Value<int> occupancy,
       Value<String> facilitiesJson,
+      Value<double?> accessQuality,
       required DateTime updatedAt,
       Value<int> version,
       Value<int> rowid,
@@ -7670,6 +8186,7 @@ typedef $$LocalSheltersTableUpdateCompanionBuilder =
       Value<int> capacityTotal,
       Value<int> occupancy,
       Value<String> facilitiesJson,
+      Value<double?> accessQuality,
       Value<DateTime> updatedAt,
       Value<int> version,
       Value<int> rowid,
@@ -7716,6 +8233,11 @@ class $$LocalSheltersTableFilterComposer
 
   ColumnFilters<String> get facilitiesJson => $composableBuilder(
     column: $table.facilitiesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7774,6 +8296,11 @@ class $$LocalSheltersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -7816,6 +8343,11 @@ class $$LocalSheltersTableAnnotationComposer
 
   GeneratedColumn<String> get facilitiesJson => $composableBuilder(
     column: $table.facilitiesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
     builder: (column) => column,
   );
 
@@ -7864,6 +8396,7 @@ class $$LocalSheltersTableTableManager
                 Value<int> capacityTotal = const Value.absent(),
                 Value<int> occupancy = const Value.absent(),
                 Value<String> facilitiesJson = const Value.absent(),
+                Value<double?> accessQuality = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7875,6 +8408,7 @@ class $$LocalSheltersTableTableManager
                 capacityTotal: capacityTotal,
                 occupancy: occupancy,
                 facilitiesJson: facilitiesJson,
+                accessQuality: accessQuality,
                 updatedAt: updatedAt,
                 version: version,
                 rowid: rowid,
@@ -7888,6 +8422,7 @@ class $$LocalSheltersTableTableManager
                 Value<int> capacityTotal = const Value.absent(),
                 Value<int> occupancy = const Value.absent(),
                 Value<String> facilitiesJson = const Value.absent(),
+                Value<double?> accessQuality = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7899,6 +8434,7 @@ class $$LocalSheltersTableTableManager
                 capacityTotal: capacityTotal,
                 occupancy: occupancy,
                 facilitiesJson: facilitiesJson,
+                accessQuality: accessQuality,
                 updatedAt: updatedAt,
                 version: version,
                 rowid: rowid,
@@ -9426,6 +9962,249 @@ typedef $$LocalCapacityAssessmentsTableProcessedTableManager =
       LocalCapacityAssessment,
       PrefetchHooks Function()
     >;
+typedef $$LocalRelocationPlansTableCreateCompanionBuilder =
+    LocalRelocationPlansCompanion Function({
+      required String habitationId,
+      required int populationToRelocate,
+      required String rankedCandidatesJson,
+      required String modelVersion,
+      required DateTime plannedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalRelocationPlansTableUpdateCompanionBuilder =
+    LocalRelocationPlansCompanion Function({
+      Value<String> habitationId,
+      Value<int> populationToRelocate,
+      Value<String> rankedCandidatesJson,
+      Value<String> modelVersion,
+      Value<DateTime> plannedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalRelocationPlansTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalRelocationPlansTable> {
+  $$LocalRelocationPlansTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get populationToRelocate => $composableBuilder(
+    column: $table.populationToRelocate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rankedCandidatesJson => $composableBuilder(
+    column: $table.rankedCandidatesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get plannedAt => $composableBuilder(
+    column: $table.plannedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalRelocationPlansTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalRelocationPlansTable> {
+  $$LocalRelocationPlansTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get populationToRelocate => $composableBuilder(
+    column: $table.populationToRelocate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rankedCandidatesJson => $composableBuilder(
+    column: $table.rankedCandidatesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get plannedAt => $composableBuilder(
+    column: $table.plannedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalRelocationPlansTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalRelocationPlansTable> {
+  $$LocalRelocationPlansTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get populationToRelocate => $composableBuilder(
+    column: $table.populationToRelocate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rankedCandidatesJson => $composableBuilder(
+    column: $table.rankedCandidatesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get plannedAt =>
+      $composableBuilder(column: $table.plannedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalRelocationPlansTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalRelocationPlansTable,
+          LocalRelocationPlan,
+          $$LocalRelocationPlansTableFilterComposer,
+          $$LocalRelocationPlansTableOrderingComposer,
+          $$LocalRelocationPlansTableAnnotationComposer,
+          $$LocalRelocationPlansTableCreateCompanionBuilder,
+          $$LocalRelocationPlansTableUpdateCompanionBuilder,
+          (
+            LocalRelocationPlan,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalRelocationPlansTable,
+              LocalRelocationPlan
+            >,
+          ),
+          LocalRelocationPlan,
+          PrefetchHooks Function()
+        > {
+  $$LocalRelocationPlansTableTableManager(
+    _$AppDatabase db,
+    $LocalRelocationPlansTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalRelocationPlansTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalRelocationPlansTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalRelocationPlansTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> habitationId = const Value.absent(),
+                Value<int> populationToRelocate = const Value.absent(),
+                Value<String> rankedCandidatesJson = const Value.absent(),
+                Value<String> modelVersion = const Value.absent(),
+                Value<DateTime> plannedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalRelocationPlansCompanion(
+                habitationId: habitationId,
+                populationToRelocate: populationToRelocate,
+                rankedCandidatesJson: rankedCandidatesJson,
+                modelVersion: modelVersion,
+                plannedAt: plannedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String habitationId,
+                required int populationToRelocate,
+                required String rankedCandidatesJson,
+                required String modelVersion,
+                required DateTime plannedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalRelocationPlansCompanion.insert(
+                habitationId: habitationId,
+                populationToRelocate: populationToRelocate,
+                rankedCandidatesJson: rankedCandidatesJson,
+                modelVersion: modelVersion,
+                plannedAt: plannedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalRelocationPlansTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalRelocationPlansTable,
+      LocalRelocationPlan,
+      $$LocalRelocationPlansTableFilterComposer,
+      $$LocalRelocationPlansTableOrderingComposer,
+      $$LocalRelocationPlansTableAnnotationComposer,
+      $$LocalRelocationPlansTableCreateCompanionBuilder,
+      $$LocalRelocationPlansTableUpdateCompanionBuilder,
+      (
+        LocalRelocationPlan,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalRelocationPlansTable,
+          LocalRelocationPlan
+        >,
+      ),
+      LocalRelocationPlan,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -9741,6 +10520,8 @@ class $AppDatabaseManager {
         _db,
         _db.localCapacityAssessments,
       );
+  $$LocalRelocationPlansTableTableManager get localRelocationPlans =>
+      $$LocalRelocationPlansTableTableManager(_db, _db.localRelocationPlans);
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }

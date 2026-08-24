@@ -50,12 +50,21 @@ final habitationsOverviewProvider = FutureProvider<List<HabitationOverview>>((
       assessment.habitationId: assessment,
   };
 
+  final relocationPlansResult = await ref
+      .watch(localRelocationPlanRepositoryProvider)
+      .getAll();
+  final relocationPlansByHabitationId = {
+    for (final plan in relocationPlansResult.dataOrNull ?? const [])
+      plan.habitationId: plan,
+  };
+
   return [
     for (final habitation in habitations)
       HabitationOverview(
         habitation: habitation,
         riskAssessment: riskAssessmentsByHabitationId[habitation.id],
         capacityAssessment: capacityAssessmentsByHabitationId[habitation.id],
+        relocationPlan: relocationPlansByHabitationId[habitation.id],
       ),
   ];
 });

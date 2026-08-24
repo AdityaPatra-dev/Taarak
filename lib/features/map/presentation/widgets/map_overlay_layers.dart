@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -93,6 +95,18 @@ String _habitationTooltip(HabitationOverview item) {
           : '\nCapacity gap: short by ${capacity.capacityGap} '
                 '(${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})',
     );
+  }
+
+  final relocation = item.relocationPlan;
+  if (relocation != null && relocation.populationToRelocate > 0) {
+    final candidates = jsonDecode(relocation.rankedCandidatesJson) as List;
+    if (candidates.isNotEmpty) {
+      final top = candidates.first as Map<String, dynamic>;
+      final distanceKm = ((top['distanceMeters'] as num) / 1000).toStringAsFixed(1);
+      buffer.write('\nBest relocation option: ${top['shelterName']} ($distanceKm km)');
+    } else {
+      buffer.write('\nNo safe relocation candidate found nearby');
+    }
   }
 
   return buffer.toString();

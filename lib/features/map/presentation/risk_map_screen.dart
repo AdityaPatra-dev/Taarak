@@ -11,6 +11,7 @@ import 'package:taarak/features/map/presentation/widgets/map_legend.dart';
 import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart';
 import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
+import 'package:taarak/features/relocation/application/relocation_providers.dart';
 import 'package:taarak/features/risk/application/risk_providers.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
@@ -36,6 +37,7 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     ).seedIfEmpty();
     await ref.read(riskAssessmentServiceProvider).assessAllHabitations();
     await ref.read(capacityAssessmentServiceProvider).assessAllHabitations();
+    await ref.read(relocationPlanningServiceProvider).planForAllHabitations();
     ref.invalidate(hazardZonesProvider);
     ref.invalidate(sheltersProvider);
     ref.invalidate(incidentsProvider);

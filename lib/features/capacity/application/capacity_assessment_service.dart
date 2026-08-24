@@ -6,8 +6,7 @@ import 'package:taarak/core/database/repositories/local_capacity_assessment_repo
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
-import 'package:taarak/core/gis/geometry_codec.dart';
-import 'package:taarak/core/gis/point_in_polygon.dart';
+import 'package:taarak/core/gis/hazard_exposure.dart';
 import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/capacity/application/capacity_gap_engine.dart';
 import 'package:taarak/features/capacity/domain/capacity_gap_result.dart';
@@ -53,9 +52,7 @@ class CapacityAssessmentService {
     final shelters = sheltersResult.dataOrNull ?? const [];
 
     final habitationPoint = LatLng(habitation.latitude, habitation.longitude);
-    final isExposed = hazardZones.any(
-      (zone) => isPointInPolygon(habitationPoint, decodePolygonPoints(zone.geometryJson)),
-    );
+    final isExposed = isPointHazardExposed(habitationPoint, hazardZones);
     final exposedPopulation = isExposed ? habitation.population : 0;
 
     final assessment = _engine.assess(

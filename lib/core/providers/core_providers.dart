@@ -6,6 +6,7 @@ import 'package:taarak/core/database/repositories/local_habitation_repository.da
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
+import 'package:taarak/core/database/repositories/local_relocation_plan_repository.dart';
 import 'package:taarak/core/database/repositories/local_risk_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_route_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
@@ -86,6 +87,11 @@ final localVulnerabilityAssessmentRepositoryProvider =
 final localCapacityAssessmentRepositoryProvider =
     Provider<LocalCapacityAssessmentRepository>(
       (ref) => LocalCapacityAssessmentRepository(ref.watch(appDatabaseProvider)),
+    );
+
+final localRelocationPlanRepositoryProvider =
+    Provider<LocalRelocationPlanRepository>(
+      (ref) => LocalRelocationPlanRepository(ref.watch(appDatabaseProvider)),
     );
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(

@@ -5,6 +5,7 @@ import 'package:taarak/core/database/tables/local_habitations_table.dart';
 import 'package:taarak/core/database/tables/local_hazard_zones_table.dart';
 import 'package:taarak/core/database/tables/local_incident_reports_table.dart';
 import 'package:taarak/core/database/tables/local_incidents_table.dart';
+import 'package:taarak/core/database/tables/local_relocation_plans_table.dart';
 import 'package:taarak/core/database/tables/local_risk_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_routes_table.dart';
 import 'package:taarak/core/database/tables/local_shelters_table.dart';
@@ -29,6 +30,7 @@ part 'app_database.g.dart';
     LocalRiskAssessments,
     LocalVulnerabilityAssessments,
     LocalCapacityAssessments,
+    LocalRelocationPlans,
     SyncQueueEntries,
   ],
 )

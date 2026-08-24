@@ -1,7 +1,6 @@
 import 'package:latlong2/latlong.dart';
 import 'package:taarak/core/database/app_database.dart';
-import 'package:taarak/core/gis/geometry_codec.dart';
-import 'package:taarak/core/gis/point_in_polygon.dart';
+import 'package:taarak/core/gis/hazard_exposure.dart';
 import 'package:taarak/features/capacity/domain/capacity_gap_result.dart';
 
 const _distance = Distance();
@@ -27,18 +26,12 @@ class CapacityGapEngine {
     DateTime? now,
   }) {
     final habitationPoint = LatLng(habitation.latitude, habitation.longitude);
-    final hazardPolygons = [
-      for (final zone in hazardZones) decodePolygonPoints(zone.geometryJson),
-    ];
 
     final contributing = <ContributingShelter>[];
     for (final shelter in shelters) {
       final shelterPoint = LatLng(shelter.latitude, shelter.longitude);
 
-      final isShelterHazardExposed = hazardPolygons.any(
-        (polygon) => isPointInPolygon(shelterPoint, polygon),
-      );
-      if (isShelterHazardExposed) continue;
+      if (isPointHazardExposed(shelterPoint, hazardZones)) continue;
 
       final distanceMeters = _distance.as(
         LengthUnit.Meter,

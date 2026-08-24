@@ -77,6 +77,8 @@ class DemoMapDataSeeder {
           longitude: c.longitude + 0.006,
           capacityTotal: const Value(400),
           occupancy: const Value(50),
+          facilitiesJson: const Value('["medical","food"]'),
+          accessQuality: const Value(0.2),
           updatedAt: now,
         ),
         LocalSheltersCompanion.insert(
@@ -86,6 +88,7 @@ class DemoMapDataSeeder {
           longitude: c.longitude - 0.016,
           capacityTotal: const Value(300),
           occupancy: const Value(20),
+          facilitiesJson: const Value('["food"]'),
           updatedAt: now,
         ),
       ]);
