@@ -23,6 +23,11 @@ final incidentsProvider = FutureProvider<List<LocalIncident>>((ref) async {
   return result.dataOrNull ?? const [];
 });
 
+final routesProvider = FutureProvider<List<LocalRoute>>((ref) async {
+  final result = await ref.watch(localRouteRepositoryProvider).getAll();
+  return result.dataOrNull ?? const [];
+});
+
 /// Habitations paired with their latest M07 risk and M09 capacity
 /// assessments, if any have been run yet — a habitation with no
 /// assessment renders unscored rather than being hidden.

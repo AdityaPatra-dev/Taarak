@@ -11,6 +11,12 @@ class LocalRoutes extends Table {
   TextColumn get polylineJson => text()();
   RealColumn get distanceMeters => real().withDefault(const Constant(0))();
   IntColumn get etaSeconds => integer().withDefault(const Constant(0))();
+
+  /// Whether every segment of the cached (recommended) route cleared M11's
+  /// hazard/blockage checks — lets the map color a route without needing
+  /// the full per-segment breakdown just to render it.
+  BoolColumn get isSafe => boolean().withDefault(const Constant(true))();
+
   DateTimeColumn get cachedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();
 

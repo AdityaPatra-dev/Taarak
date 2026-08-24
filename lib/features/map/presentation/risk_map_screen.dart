@@ -13,6 +13,7 @@ import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/relocation/application/relocation_providers.dart';
 import 'package:taarak/features/risk/application/risk_providers.dart';
+import 'package:taarak/features/routing/application/routing_providers.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
 /// composition of [TaarakMapView] + overlay layers that the official
@@ -38,10 +39,14 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     await ref.read(riskAssessmentServiceProvider).assessAllHabitations();
     await ref.read(capacityAssessmentServiceProvider).assessAllHabitations();
     await ref.read(relocationPlanningServiceProvider).planForAllHabitations();
+    await ref
+        .read(routingServiceProvider)
+        .planEvacuationRoutesForAllHabitations();
     ref.invalidate(hazardZonesProvider);
     ref.invalidate(sheltersProvider);
     ref.invalidate(incidentsProvider);
     ref.invalidate(habitationsOverviewProvider);
+    ref.invalidate(routesProvider);
     if (mounted) setState(() => _isSeeding = false);
   }
 
@@ -52,6 +57,7 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     final incidents = ref.watch(incidentsProvider).valueOrNull ?? const [];
     final habitations =
         ref.watch(habitationsOverviewProvider).valueOrNull ?? const [];
+    final routes = ref.watch(routesProvider).valueOrNull ?? const [];
     final isDevMode = ref.watch(appConfigProvider).isDevMode;
 
     final searchIndex = buildSearchIndex(
@@ -72,6 +78,7 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
               buildShelterLayer(shelters),
               buildIncidentLayer(incidents),
               buildHabitationLayer(habitations),
+              buildRouteLayer(routes),
             ],
           ),
           Positioned(

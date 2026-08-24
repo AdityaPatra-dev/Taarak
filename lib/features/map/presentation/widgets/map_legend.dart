@@ -32,6 +32,9 @@ class MapLegend extends StatelessWidget {
                 riskClassColor(riskClass),
                 riskClassLabel(riskClass),
               ),
+            const Divider(height: 12),
+            _lineRow(Colors.green.shade700, 'Safe route'),
+            _lineRow(Colors.orange.shade900, 'Route detours around a hazard'),
           ],
         ),
       ),
@@ -43,6 +46,17 @@ class MapLegend extends StatelessWidget {
     child: Row(
       children: [
         Container(width: 14, height: 14, color: color),
+        const SizedBox(width: 8),
+        Text(label),
+      ],
+    ),
+  );
+
+  Widget _lineRow(Color color, String label) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      children: [
+        Container(width: 14, height: 3, color: color),
         const SizedBox(width: 8),
         Text(label),
       ],

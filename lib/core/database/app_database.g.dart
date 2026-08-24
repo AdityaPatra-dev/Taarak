@@ -2999,6 +2999,19 @@ class $LocalRoutesTable extends LocalRoutes
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isSafeMeta = const VerificationMeta('isSafe');
+  @override
+  late final GeneratedColumn<bool> isSafe = GeneratedColumn<bool>(
+    'is_safe',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_safe" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _cachedAtMeta = const VerificationMeta(
     'cachedAt',
   );
@@ -3032,6 +3045,7 @@ class $LocalRoutesTable extends LocalRoutes
     polylineJson,
     distanceMeters,
     etaSeconds,
+    isSafe,
     cachedAt,
     version,
   ];
@@ -3110,6 +3124,12 @@ class $LocalRoutesTable extends LocalRoutes
         etaSeconds.isAcceptableOrUnknown(data['eta_seconds']!, _etaSecondsMeta),
       );
     }
+    if (data.containsKey('is_safe')) {
+      context.handle(
+        _isSafeMeta,
+        isSafe.isAcceptableOrUnknown(data['is_safe']!, _isSafeMeta),
+      );
+    }
     if (data.containsKey('cached_at')) {
       context.handle(
         _cachedAtMeta,
@@ -3165,6 +3185,10 @@ class $LocalRoutesTable extends LocalRoutes
         DriftSqlType.int,
         data['${effectivePrefix}eta_seconds'],
       )!,
+      isSafe: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_safe'],
+      )!,
       cachedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}cached_at'],
@@ -3191,6 +3215,11 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
   final String polylineJson;
   final double distanceMeters;
   final int etaSeconds;
+
+  /// Whether every segment of the cached (recommended) route cleared M11's
+  /// hazard/blockage checks — lets the map color a route without needing
+  /// the full per-segment breakdown just to render it.
+  final bool isSafe;
   final DateTime cachedAt;
   final int version;
   const LocalRoute({
@@ -3202,6 +3231,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     required this.polylineJson,
     required this.distanceMeters,
     required this.etaSeconds,
+    required this.isSafe,
     required this.cachedAt,
     required this.version,
   });
@@ -3216,6 +3246,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     map['polyline_json'] = Variable<String>(polylineJson);
     map['distance_meters'] = Variable<double>(distanceMeters);
     map['eta_seconds'] = Variable<int>(etaSeconds);
+    map['is_safe'] = Variable<bool>(isSafe);
     map['cached_at'] = Variable<DateTime>(cachedAt);
     map['version'] = Variable<int>(version);
     return map;
@@ -3231,6 +3262,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       polylineJson: Value(polylineJson),
       distanceMeters: Value(distanceMeters),
       etaSeconds: Value(etaSeconds),
+      isSafe: Value(isSafe),
       cachedAt: Value(cachedAt),
       version: Value(version),
     );
@@ -3250,6 +3282,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       polylineJson: serializer.fromJson<String>(json['polylineJson']),
       distanceMeters: serializer.fromJson<double>(json['distanceMeters']),
       etaSeconds: serializer.fromJson<int>(json['etaSeconds']),
+      isSafe: serializer.fromJson<bool>(json['isSafe']),
       cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
       version: serializer.fromJson<int>(json['version']),
     );
@@ -3266,6 +3299,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       'polylineJson': serializer.toJson<String>(polylineJson),
       'distanceMeters': serializer.toJson<double>(distanceMeters),
       'etaSeconds': serializer.toJson<int>(etaSeconds),
+      'isSafe': serializer.toJson<bool>(isSafe),
       'cachedAt': serializer.toJson<DateTime>(cachedAt),
       'version': serializer.toJson<int>(version),
     };
@@ -3280,6 +3314,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     String? polylineJson,
     double? distanceMeters,
     int? etaSeconds,
+    bool? isSafe,
     DateTime? cachedAt,
     int? version,
   }) => LocalRoute(
@@ -3291,6 +3326,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     polylineJson: polylineJson ?? this.polylineJson,
     distanceMeters: distanceMeters ?? this.distanceMeters,
     etaSeconds: etaSeconds ?? this.etaSeconds,
+    isSafe: isSafe ?? this.isSafe,
     cachedAt: cachedAt ?? this.cachedAt,
     version: version ?? this.version,
   );
@@ -3310,6 +3346,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       etaSeconds: data.etaSeconds.present
           ? data.etaSeconds.value
           : this.etaSeconds,
+      isSafe: data.isSafe.present ? data.isSafe.value : this.isSafe,
       cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
       version: data.version.present ? data.version.value : this.version,
     );
@@ -3326,6 +3363,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
           ..write('polylineJson: $polylineJson, ')
           ..write('distanceMeters: $distanceMeters, ')
           ..write('etaSeconds: $etaSeconds, ')
+          ..write('isSafe: $isSafe, ')
           ..write('cachedAt: $cachedAt, ')
           ..write('version: $version')
           ..write(')'))
@@ -3342,6 +3380,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     polylineJson,
     distanceMeters,
     etaSeconds,
+    isSafe,
     cachedAt,
     version,
   );
@@ -3357,6 +3396,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
           other.polylineJson == this.polylineJson &&
           other.distanceMeters == this.distanceMeters &&
           other.etaSeconds == this.etaSeconds &&
+          other.isSafe == this.isSafe &&
           other.cachedAt == this.cachedAt &&
           other.version == this.version);
 }
@@ -3370,6 +3410,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
   final Value<String> polylineJson;
   final Value<double> distanceMeters;
   final Value<int> etaSeconds;
+  final Value<bool> isSafe;
   final Value<DateTime> cachedAt;
   final Value<int> version;
   final Value<int> rowid;
@@ -3382,6 +3423,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     this.polylineJson = const Value.absent(),
     this.distanceMeters = const Value.absent(),
     this.etaSeconds = const Value.absent(),
+    this.isSafe = const Value.absent(),
     this.cachedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3395,6 +3437,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     required String polylineJson,
     this.distanceMeters = const Value.absent(),
     this.etaSeconds = const Value.absent(),
+    this.isSafe = const Value.absent(),
     required DateTime cachedAt,
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3414,6 +3457,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     Expression<String>? polylineJson,
     Expression<double>? distanceMeters,
     Expression<int>? etaSeconds,
+    Expression<bool>? isSafe,
     Expression<DateTime>? cachedAt,
     Expression<int>? version,
     Expression<int>? rowid,
@@ -3427,6 +3471,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
       if (polylineJson != null) 'polyline_json': polylineJson,
       if (distanceMeters != null) 'distance_meters': distanceMeters,
       if (etaSeconds != null) 'eta_seconds': etaSeconds,
+      if (isSafe != null) 'is_safe': isSafe,
       if (cachedAt != null) 'cached_at': cachedAt,
       if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
@@ -3442,6 +3487,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     Value<String>? polylineJson,
     Value<double>? distanceMeters,
     Value<int>? etaSeconds,
+    Value<bool>? isSafe,
     Value<DateTime>? cachedAt,
     Value<int>? version,
     Value<int>? rowid,
@@ -3455,6 +3501,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
       polylineJson: polylineJson ?? this.polylineJson,
       distanceMeters: distanceMeters ?? this.distanceMeters,
       etaSeconds: etaSeconds ?? this.etaSeconds,
+      isSafe: isSafe ?? this.isSafe,
       cachedAt: cachedAt ?? this.cachedAt,
       version: version ?? this.version,
       rowid: rowid ?? this.rowid,
@@ -3488,6 +3535,9 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     if (etaSeconds.present) {
       map['eta_seconds'] = Variable<int>(etaSeconds.value);
     }
+    if (isSafe.present) {
+      map['is_safe'] = Variable<bool>(isSafe.value);
+    }
     if (cachedAt.present) {
       map['cached_at'] = Variable<DateTime>(cachedAt.value);
     }
@@ -3511,6 +3561,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
           ..write('polylineJson: $polylineJson, ')
           ..write('distanceMeters: $distanceMeters, ')
           ..write('etaSeconds: $etaSeconds, ')
+          ..write('isSafe: $isSafe, ')
           ..write('cachedAt: $cachedAt, ')
           ..write('version: $version, ')
           ..write('rowid: $rowid')
@@ -8474,6 +8525,7 @@ typedef $$LocalRoutesTableCreateCompanionBuilder =
       required String polylineJson,
       Value<double> distanceMeters,
       Value<int> etaSeconds,
+      Value<bool> isSafe,
       required DateTime cachedAt,
       Value<int> version,
       Value<int> rowid,
@@ -8488,6 +8540,7 @@ typedef $$LocalRoutesTableUpdateCompanionBuilder =
       Value<String> polylineJson,
       Value<double> distanceMeters,
       Value<int> etaSeconds,
+      Value<bool> isSafe,
       Value<DateTime> cachedAt,
       Value<int> version,
       Value<int> rowid,
@@ -8539,6 +8592,11 @@ class $$LocalRoutesTableFilterComposer
 
   ColumnFilters<int> get etaSeconds => $composableBuilder(
     column: $table.etaSeconds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSafe => $composableBuilder(
+    column: $table.isSafe,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8602,6 +8660,11 @@ class $$LocalRoutesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isSafe => $composableBuilder(
+    column: $table.isSafe,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get cachedAt => $composableBuilder(
     column: $table.cachedAt,
     builder: (column) => ColumnOrderings(column),
@@ -8652,6 +8715,9 @@ class $$LocalRoutesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get isSafe =>
+      $composableBuilder(column: $table.isSafe, builder: (column) => column);
+
   GeneratedColumn<DateTime> get cachedAt =>
       $composableBuilder(column: $table.cachedAt, builder: (column) => column);
 
@@ -8698,6 +8764,7 @@ class $$LocalRoutesTableTableManager
                 Value<String> polylineJson = const Value.absent(),
                 Value<double> distanceMeters = const Value.absent(),
                 Value<int> etaSeconds = const Value.absent(),
+                Value<bool> isSafe = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8710,6 +8777,7 @@ class $$LocalRoutesTableTableManager
                 polylineJson: polylineJson,
                 distanceMeters: distanceMeters,
                 etaSeconds: etaSeconds,
+                isSafe: isSafe,
                 cachedAt: cachedAt,
                 version: version,
                 rowid: rowid,
@@ -8724,6 +8792,7 @@ class $$LocalRoutesTableTableManager
                 required String polylineJson,
                 Value<double> distanceMeters = const Value.absent(),
                 Value<int> etaSeconds = const Value.absent(),
+                Value<bool> isSafe = const Value.absent(),
                 required DateTime cachedAt,
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -8736,6 +8805,7 @@ class $$LocalRoutesTableTableManager
                 polylineJson: polylineJson,
                 distanceMeters: distanceMeters,
                 etaSeconds: etaSeconds,
+                isSafe: isSafe,
                 cachedAt: cachedAt,
                 version: version,
                 rowid: rowid,

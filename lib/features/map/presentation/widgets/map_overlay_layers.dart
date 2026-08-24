@@ -112,6 +112,22 @@ String _habitationTooltip(HabitationOverview item) {
   return buffer.toString();
 }
 
+/// M11's recommended routes, each colored green when every segment cleared
+/// the hazard/blockage checks and orange when it's a detour (or the best
+/// still-imperfect option) around a blocked/hazard-exposed direct path.
+PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
+  return PolylineLayer(
+    polylines: [
+      for (final route in routes)
+        Polyline(
+          points: decodePolygonPoints(route.polylineJson),
+          strokeWidth: 4,
+          color: route.isSafe ? Colors.green.shade700 : Colors.orange.shade900,
+        ),
+    ],
+  );
+}
+
 MarkerLayer buildIncidentLayer(List<LocalIncident> incidents) {
   return MarkerLayer(
     markers: [
