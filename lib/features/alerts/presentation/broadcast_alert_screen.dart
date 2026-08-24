@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
+import 'package:taarak/shared/widgets/async_state_views.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 const _severities = ['low', 'medium', 'high', 'critical'];
 const _validityOptions = {
@@ -20,7 +23,8 @@ class BroadcastAlertScreen extends ConsumerStatefulWidget {
   const BroadcastAlertScreen({super.key});
 
   @override
-  ConsumerState<BroadcastAlertScreen> createState() => _BroadcastAlertScreenState();
+  ConsumerState<BroadcastAlertScreen> createState() =>
+      _BroadcastAlertScreenState();
 }
 
 class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
@@ -45,67 +49,80 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Broadcast Alert')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
         children: [
-          Text('New broadcast', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedZoneId,
-            decoration: const InputDecoration(labelText: 'Target zone'),
-            items: [
-              for (final zone in zones)
-                DropdownMenuItem(
-                  value: zone.id,
-                  child: Text('${zone.hazardType} (${zone.severity})'),
+          ContentWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'New broadcast',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-            ],
-            onChanged: (value) => setState(() => _selectedZoneId = value),
+                const SizedBox(height: Spacing.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedZoneId,
+                  decoration: const InputDecoration(labelText: 'Target zone'),
+                  items: [
+                    for (final zone in zones)
+                      DropdownMenuItem(
+                        value: zone.id,
+                        child: Text('${zone.hazardType} (${zone.severity})'),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _selectedZoneId = value),
+                ),
+                const SizedBox(height: Spacing.sm),
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                const SizedBox(height: Spacing.sm),
+                TextField(
+                  controller: _messageController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(labelText: 'Message'),
+                ),
+                const SizedBox(height: Spacing.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: _severity,
+                  decoration: const InputDecoration(labelText: 'Severity'),
+                  items: [
+                    for (final severity in _severities)
+                      DropdownMenuItem(value: severity, child: Text(severity)),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _severity = value ?? _severity),
+                ),
+                const SizedBox(height: Spacing.sm),
+                DropdownButtonFormField<String>(
+                  initialValue: _validityLabel,
+                  decoration: const InputDecoration(labelText: 'Valid for'),
+                  items: [
+                    for (final label in _validityOptions.keys)
+                      DropdownMenuItem(value: label, child: Text(label)),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _validityLabel = value ?? _validityLabel),
+                ),
+                const SizedBox(height: Spacing.md),
+                FilledButton.icon(
+                  onPressed: zones.isEmpty ? null : _broadcast,
+                  icon: const Icon(Icons.campaign_outlined),
+                  label: const Text('Broadcast'),
+                ),
+                const SizedBox(height: Spacing.lg),
+                Text('History', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: Spacing.sm),
+                if (history.isEmpty)
+                  const EmptyView(
+                    icon: Icons.campaign_outlined,
+                    title: 'No alerts broadcast yet',
+                  )
+                else
+                  for (final alert in history) _AlertHistoryCard(alert: alert),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(labelText: 'Title'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _messageController,
-            maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Message'),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _severity,
-            decoration: const InputDecoration(labelText: 'Severity'),
-            items: [
-              for (final severity in _severities)
-                DropdownMenuItem(value: severity, child: Text(severity)),
-            ],
-            onChanged: (value) => setState(() => _severity = value ?? _severity),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _validityLabel,
-            decoration: const InputDecoration(labelText: 'Valid for'),
-            items: [
-              for (final label in _validityOptions.keys)
-                DropdownMenuItem(value: label, child: Text(label)),
-            ],
-            onChanged: (value) =>
-                setState(() => _validityLabel = value ?? _validityLabel),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: zones.isEmpty ? null : _broadcast,
-            icon: const Icon(Icons.campaign_outlined),
-            label: const Text('Broadcast'),
-          ),
-          const SizedBox(height: 24),
-          Text('History', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (history.isEmpty)
-            const Text('No alerts broadcast yet.')
-          else
-            for (final alert in history) _AlertHistoryCard(alert: alert),
         ],
       ),
     );
@@ -139,9 +156,9 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
           const SnackBar(content: Text('Alert broadcast to zone')),
         );
       },
-      failure: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      ),
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
     );
   }
 }
@@ -161,7 +178,7 @@ class _AlertHistoryCard extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -175,7 +192,7 @@ class _AlertHistoryCard extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Text(
                     alert.title,
@@ -184,11 +201,15 @@ class _AlertHistoryCard extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(alert.message),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(
-              '${alert.zoneLabel} · ${isActive ? "Active" : alert.cancelledAt != null ? "Cancelled" : "Expired"} '
+              '${alert.zoneLabel} · ${isActive
+                  ? "Active"
+                  : alert.cancelledAt != null
+                  ? "Cancelled"
+                  : "Expired"} '
               '· valid until ${alert.validUntil.toLocal()}'
               '${acknowledgements == null ? "" : " · $acknowledgements acknowledged"}',
               style: Theme.of(context).textTheme.bodySmall,

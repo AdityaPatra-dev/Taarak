@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/verification/application/verification_providers.dart';
 import 'package:taarak/features/verification/domain/incident_verification_status.dart';
+import 'package:taarak/shared/widgets/async_state_views.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 /// Official Verification (M13): unlinked citizen reports (M12) waiting to
 /// be acknowledged into a tracked incident, and tracked incidents an
@@ -17,50 +20,78 @@ class VerificationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pendingReports = ref.watch(pendingReportsProvider).valueOrNull ?? const [];
+    final pendingReports =
+        ref.watch(pendingReportsProvider).valueOrNull ?? const [];
     final incidents = ref.watch(incidentsProvider).valueOrNull ?? const [];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Official Verification')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
         children: [
-          Text('Pending reports', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (pendingReports.isEmpty)
-            const Text('No unlinked reports waiting for review.')
-          else
-            for (final report in pendingReports)
-              Card(
-                child: ListTile(
-                  title: Text(
-                    report.description.isEmpty ? report.reportType : report.description,
-                  ),
-                  subtitle: Text(
-                    '${report.reportType} · severity ${report.severity}\n'
-                    '${report.latitude.toStringAsFixed(4)}, ${report.longitude.toStringAsFixed(4)}',
-                  ),
-                  isThreeLine: true,
-                  trailing: FilledButton(
-                    onPressed: () => _acknowledge(context, ref, report.id),
-                    child: const Text('Acknowledge'),
-                  ),
+          ContentWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pending reports',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              ),
-          const SizedBox(height: 24),
-          Text('Tracked incidents', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          if (incidents.isEmpty)
-            const Text('No incidents tracked yet.')
-          else
-            for (final incident in incidents)
-              _IncidentCard(incident: incident),
+                const SizedBox(height: Spacing.sm),
+                if (pendingReports.isEmpty)
+                  const EmptyView(
+                    icon: Icons.fact_check_outlined,
+                    title: 'No unlinked reports',
+                    message: 'Nothing is waiting for review right now.',
+                  )
+                else
+                  for (final report in pendingReports)
+                    Card(
+                      margin: const EdgeInsets.only(bottom: Spacing.sm),
+                      child: ListTile(
+                        title: Text(
+                          report.description.isEmpty
+                              ? report.reportType
+                              : report.description,
+                        ),
+                        subtitle: Text(
+                          '${report.reportType} · severity ${report.severity}\n'
+                          '${report.latitude.toStringAsFixed(4)}, ${report.longitude.toStringAsFixed(4)}',
+                        ),
+                        isThreeLine: true,
+                        trailing: FilledButton(
+                          onPressed: () =>
+                              _acknowledge(context, ref, report.id),
+                          child: const Text('Acknowledge'),
+                        ),
+                      ),
+                    ),
+                const SizedBox(height: Spacing.lg),
+                Text(
+                  'Tracked incidents',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: Spacing.sm),
+                if (incidents.isEmpty)
+                  const EmptyView(
+                    icon: Icons.report_outlined,
+                    title: 'No incidents tracked yet',
+                  )
+                else
+                  for (final incident in incidents)
+                    _IncidentCard(incident: incident),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Future<void> _acknowledge(BuildContext context, WidgetRef ref, String reportId) async {
+  Future<void> _acknowledge(
+    BuildContext context,
+    WidgetRef ref,
+    String reportId,
+  ) async {
     final officialId = ref.read(currentUserProvider)?.id;
     if (officialId == null) return;
 
@@ -73,12 +104,12 @@ class VerificationScreen extends ConsumerWidget {
 
     if (!context.mounted) return;
     result.when(
-      success: (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Report acknowledged')),
-      ),
-      failure: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      ),
+      success: (_) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Report acknowledged'))),
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
     );
   }
 }
@@ -96,16 +127,20 @@ class _IncidentCard extends ConsumerWidget {
     final nextOptions = allowedIncidentStatusTransitions[status] ?? const {};
 
     return Card(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${incident.type} — ${status.label}', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              '${incident.type} — ${status.label}',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             if (incident.description.isNotEmpty) Text(incident.description),
             if (incident.independentSourceCount > 1)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: Spacing.xs),
                 child: Text(
                   'Confirmed by ${incident.independentSourceCount} independent sources '
                   '(${(incident.confidence * 100).round()}% confidence)',
@@ -114,9 +149,9 @@ class _IncidentCard extends ConsumerWidget {
                   ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             Wrap(
-              spacing: 8,
+              spacing: Spacing.sm,
               children: [
                 for (final next in nextOptions)
                   OutlinedButton(
@@ -152,7 +187,9 @@ class _IncidentCard extends ConsumerWidget {
             ),
             TextField(
               controller: evidenceController,
-              decoration: const InputDecoration(labelText: 'Evidence (optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Evidence (optional)',
+              ),
             ),
           ],
         ),
@@ -180,8 +217,12 @@ class _IncidentCard extends ConsumerWidget {
           incidentId: incident.id,
           to: to,
           officialId: officialId,
-          reason: reasonController.text.trim().isEmpty ? null : reasonController.text.trim(),
-          evidence: evidenceController.text.trim().isEmpty ? null : evidenceController.text.trim(),
+          reason: reasonController.text.trim().isEmpty
+              ? null
+              : reasonController.text.trim(),
+          evidence: evidenceController.text.trim().isEmpty
+              ? null
+              : evidenceController.text.trim(),
         );
 
     ref.invalidate(incidentsProvider);
@@ -191,9 +232,9 @@ class _IncidentCard extends ConsumerWidget {
       success: (_) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Incident moved to "${to.label}"')),
       ),
-      failure: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      ),
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
     );
   }
 }

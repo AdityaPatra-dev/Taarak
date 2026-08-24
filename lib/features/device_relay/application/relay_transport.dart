@@ -34,7 +34,8 @@ class LoopbackRelayTransport implements RelayTransport {
   @override
   Stream<String> get incomingBroadcasts => _incomingController.stream;
 
-  void simulateIncoming(String rawMessage) => _incomingController.add(rawMessage);
+  void simulateIncoming(String rawMessage) =>
+      _incomingController.add(rawMessage);
 
   void dispose() => _incomingController.close();
 }

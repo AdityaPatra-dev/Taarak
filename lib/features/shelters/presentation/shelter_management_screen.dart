@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/shelters/application/shelter_management_providers.dart';
 import 'package:taarak/features/shelters/domain/shelter_facility_type.dart';
+import 'package:taarak/shared/widgets/async_state_views.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 /// M15: lets a Local Official ([Permission.manageSheltersResources]) keep
 /// shelter capacity, occupancy and facilities current. This is the write
@@ -26,13 +29,39 @@ class ShelterManagementScreen extends ConsumerWidget {
         label: const Text('Add shelter'),
       ),
       body: shelters.isEmpty
-          ? const Center(child: Text('No shelters recorded yet.'))
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                for (final shelter in shelters)
-                  _ShelterCard(shelter: shelter),
-              ],
+          ? const EmptyView(
+              icon: Icons.home_work_outlined,
+              title: 'No shelters recorded yet',
+              message: 'Add one with the button below.',
+            )
+          : ResponsiveBuilder(
+              builder: (context, size) {
+                if (size == ScreenSize.mobile) {
+                  return ListView(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    children: [
+                      for (final shelter in shelters)
+                        _ShelterCard(shelter: shelter),
+                    ],
+                  );
+                }
+                // Wide viewport: a real grid instead of one long stretched
+                // column of cards.
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(Spacing.lg),
+                  child: Wrap(
+                    spacing: Spacing.md,
+                    runSpacing: Spacing.md,
+                    children: [
+                      for (final shelter in shelters)
+                        SizedBox(
+                          width: 360,
+                          child: _ShelterCard(shelter: shelter),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
     );
   }
@@ -52,30 +81,30 @@ class _ShelterCard extends ConsumerWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(shelter.name, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(
               '${shelter.occupancy}/${shelter.capacityTotal} occupied · '
               '$available available',
             ),
             if (facilities.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: Spacing.xs),
                 child: Wrap(
-                  spacing: 6,
+                  spacing: Spacing.xs,
                   children: [
                     for (final facility in facilities)
                       Chip(label: Text(facility.label)),
                   ],
                 ),
               ),
-            const SizedBox(height: 8),
+            const SizedBox(height: Spacing.sm),
             Wrap(
-              spacing: 8,
+              spacing: Spacing.sm,
               children: [
                 OutlinedButton(
                   onPressed: () => _showOccupancyDialog(context, ref),
@@ -95,7 +124,9 @@ class _ShelterCard extends ConsumerWidget {
   }
 
   Future<void> _showOccupancyDialog(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController(text: shelter.occupancy.toString());
+    final controller = TextEditingController(
+      text: shelter.occupancy.toString(),
+    );
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -138,12 +169,12 @@ class _ShelterCard extends ConsumerWidget {
 
     if (!context.mounted) return;
     result.when(
-      success: (_) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Occupancy updated')),
-      ),
-      failure: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message)),
-      ),
+      success: (_) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Occupancy updated'))),
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
     );
   }
 }
@@ -242,7 +273,10 @@ Future<void> _showEditDialog(
   final longitude = double.tryParse(lngController.text.trim());
   final capacityTotal = int.tryParse(capacityController.text.trim());
   final name = nameController.text.trim();
-  if (name.isEmpty || latitude == null || longitude == null || capacityTotal == null) {
+  if (name.isEmpty ||
+      latitude == null ||
+      longitude == null ||
+      capacityTotal == null) {
     return;
   }
 
@@ -266,10 +300,12 @@ Future<void> _showEditDialog(
   if (!context.mounted) return;
   result.when(
     success: (_) => ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(existing == null ? 'Shelter added' : 'Shelter updated')),
+      SnackBar(
+        content: Text(existing == null ? 'Shelter added' : 'Shelter updated'),
+      ),
     ),
-    failure: (failure) => ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(failure.message)),
-    ),
+    failure: (failure) => ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(failure.message))),
   );
 }

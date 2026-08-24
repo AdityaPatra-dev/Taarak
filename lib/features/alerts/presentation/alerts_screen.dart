@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
+import 'package:taarak/shared/widgets/async_state_views.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 /// M16, citizen-facing ([Permission.viewAlerts]): active alerts for the
 /// citizen's current location up top, full broadcast history below —
@@ -25,32 +28,53 @@ class AlertsScreen extends ConsumerWidget {
           ref.invalidate(alertHistoryProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
           children: [
-            Text('Active for your location', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            activeAlerts.when(
-              data: (alerts) => alerts.isEmpty
-                  ? const Text('No active alerts for your current location.')
-                  : Column(
-                      children: [
-                        for (final alert in alerts)
-                          _AlertCard(alert: alert, showAcknowledge: true),
-                      ],
+            ContentWidth(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Active for your location',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  activeAlerts.when(
+                    data: (alerts) => alerts.isEmpty
+                        ? const EmptyView(
+                            icon: Icons.campaign_outlined,
+                            title: 'No active alerts',
+                            message:
+                                'Nothing has been broadcast to your current location.',
+                          )
+                        : Column(
+                            children: [
+                              for (final alert in alerts)
+                                _AlertCard(alert: alert, showAcknowledge: true),
+                            ],
+                          ),
+                    loading: () => const LoadingView(),
+                    error: (_, _) => const ErrorView(
+                      message:
+                          "Couldn't determine your location — check location permissions.",
                     ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Text(
-                "Couldn't determine your location — check location permissions.",
+                  ),
+                  const SizedBox(height: Spacing.lg),
+                  Text(
+                    'History',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  if (history.isEmpty)
+                    const EmptyView(
+                      icon: Icons.history,
+                      title: 'No alerts broadcast yet',
+                    )
+                  else
+                    for (final alert in history)
+                      _AlertCard(alert: alert, showAcknowledge: false),
+                ],
               ),
             ),
-            const SizedBox(height: 24),
-            Text('History', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            if (history.isEmpty)
-              const Text('No alerts broadcast yet.')
-            else
-              for (final alert in history)
-                _AlertCard(alert: alert, showAcknowledge: false),
           ],
         ),
       ),
@@ -74,11 +98,13 @@ class _AlertCardState extends ConsumerState<_AlertCard> {
   @override
   Widget build(BuildContext context) {
     final alert = widget.alert;
-    final isActive = alert.cancelledAt == null && DateTime.now().isBefore(alert.validUntil);
+    final isActive =
+        alert.cancelledAt == null && DateTime.now().isBefore(alert.validUntil);
 
     return Card(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -92,15 +118,18 @@ class _AlertCardState extends ConsumerState<_AlertCard> {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: Spacing.sm),
                 Expanded(
-                  child: Text(alert.title, style: Theme.of(context).textTheme.titleSmall),
+                  child: Text(
+                    alert.title,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(alert.message),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text(
               '${alert.zoneLabel} · ${isActive ? "Active" : "Not active"} · '
               'valid until ${alert.validUntil.toLocal()}',

@@ -27,7 +27,10 @@ class LoopbackSmsTransport implements SmsTransport {
   final _incomingController = StreamController<String>.broadcast();
 
   @override
-  Future<Result<void>> send({required String toNumber, required String body}) async {
+  Future<Result<void>> send({
+    required String toNumber,
+    required String body,
+  }) async {
     sentMessages.add((toNumber: toNumber, body: body));
     return const Result.success(null);
   }
@@ -35,7 +38,8 @@ class LoopbackSmsTransport implements SmsTransport {
   @override
   Stream<String> get incomingMessages => _incomingController.stream;
 
-  void simulateIncoming(String rawMessage) => _incomingController.add(rawMessage);
+  void simulateIncoming(String rawMessage) =>
+      _incomingController.add(rawMessage);
 
   void dispose() => _incomingController.close();
 }

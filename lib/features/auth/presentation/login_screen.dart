@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/providers/core_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 
@@ -51,20 +52,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final useMockAuth = ref.watch(appConfigProvider).useMockAuth;
 
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(Spacing.lg),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('TAARAK', style: Theme.of(context).textTheme.headlineMedium),
-                  const SizedBox(height: 24),
+                  Icon(Icons.shield_outlined, size: 40, color: scheme.primary),
+                  const SizedBox(height: Spacing.sm),
+                  Text(
+                    'TAARAK',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: Spacing.xl),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -74,7 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? 'Enter a valid email'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.sm),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -84,15 +92,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         : null,
                   ),
                   if (_errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
+                    const SizedBox(height: Spacing.sm),
+                    Text(_errorMessage!, style: TextStyle(color: scheme.error)),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: Spacing.lg),
                   FilledButton(
                     onPressed: _isSubmitting ? null : _submit,
                     child: _isSubmitting
@@ -108,20 +111,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: const Text("Don't have an account? Register"),
                   ),
                   if (useMockAuth) ...[
-                    const Divider(height: 32),
+                    const Divider(height: Spacing.xl),
                     Text(
                       'Demo accounts (dev mode — no backend yet)',
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    const SizedBox(height: Spacing.xs),
+                    Text(
                       'citizen@taarak.dev / citizen123\n'
                       'responder@taarak.dev / responder123\n'
                       'official@taarak.dev / official123\n'
                       'command@taarak.dev / command123\n'
                       'stateadmin@taarak.dev / stateadmin123\n'
                       'sysadmin@taarak.dev / sysadmin123',
-                      style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
                     ),
                   ],
                 ],

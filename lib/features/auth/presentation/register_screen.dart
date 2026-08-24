@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 
 /// Public self-registration always creates a Citizen account. Field
@@ -61,7 +62,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(Spacing.lg),
             child: Form(
               key: _formKey,
               child: Column(
@@ -70,11 +71,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(labelText: 'Full name'),
-                    validator: (value) => (value == null || value.trim().isEmpty)
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty)
                         ? 'Enter your name'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.sm),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -84,7 +86,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ? 'Enter a valid email'
                         : null,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: Spacing.sm),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: true,
@@ -94,7 +96,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         : null,
                   ),
                   if (_errorMessage != null) ...[
-                    const SizedBox(height: 12),
+                    const SizedBox(height: Spacing.sm),
                     Text(
                       _errorMessage!,
                       style: TextStyle(
@@ -102,7 +104,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: Spacing.lg),
                   FilledButton(
                     onPressed: _isSubmitting ? null : _submit,
                     child: _isSubmitting
@@ -117,7 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     onPressed: () => context.go('/login'),
                     child: const Text('Already have an account? Sign in'),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: Spacing.sm),
                   Text(
                     'Field responder, official and admin accounts are '
                     'provisioned by a system admin, not self-registered.',

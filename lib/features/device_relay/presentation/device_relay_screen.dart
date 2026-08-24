@@ -7,6 +7,7 @@ import 'package:taarak/features/device_relay/domain/device_relay_outcome.dart';
 import 'package:taarak/features/sms_prototype/application/emergency_packet_codec.dart';
 import 'package:taarak/features/sms_prototype/application/sms_prototype_providers.dart';
 import 'package:taarak/features/sms_prototype/domain/emergency_packet_priority.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 final _demoCodec = EmergencyPacketCodec();
 
@@ -70,14 +71,17 @@ class _DeviceRelayScreenState extends ConsumerState<DeviceRelayScreen> {
     final packet = ref
         .read(smsPrototypeServiceProvider)
         .buildPacket(
-          originId: 'peer-device-${DateTime.now().millisecondsSinceEpoch % 1000}',
+          originId:
+              'peer-device-${DateTime.now().millisecondsSinceEpoch % 1000}',
           priority: EmergencyPacketPriority.critical,
           type: 'landslide',
           latitude: 12.97,
           longitude: 77.59,
           note: 'Relayed from a nearby device',
         );
-    ref.read(relayTransportProvider).simulateIncoming(_demoCodec.encode(packet));
+    ref
+        .read(relayTransportProvider)
+        .simulateIncoming(_demoCodec.encode(packet));
   }
 
   @override
@@ -88,51 +92,70 @@ class _DeviceRelayScreenState extends ConsumerState<DeviceRelayScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Nearby Device Relay (Prototype)')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: const Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(
-                'Controlled prototype: nothing leaves this device over Bluetooth/WiFi. '
-                'This demonstrates the relay decision (TTL, origin, duplicate '
-                'suppression) that a real nearby-connections transport would use once '
-                'one is wired in behind the same interface.',
-              ),
+          ContentWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Card(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'Controlled prototype: nothing leaves this device over Bluetooth/WiFi. '
+                      'This demonstrates the relay decision (TTL, origin, duplicate '
+                      'suppression) that a real nearby-connections transport would use once '
+                      'one is wired in behind the same interface.',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _isBusy ? null : _broadcastOwnPacket,
+                        icon: const Icon(Icons.wifi_tethering),
+                        label: const Text('Broadcast my emergency packet'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  onPressed: _simulateIncomingFromPeer,
+                  icon: const Icon(Icons.call_received),
+                  label: const Text(
+                    'Simulate a broadcast arriving from a nearby device',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Broadcasts sent (${sentLog.length})',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                for (final sent in sentLog)
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.wifi_tethering),
+                    title: Text(sent),
+                  ),
+                const SizedBox(height: 24),
+                Text(
+                  'Relay activity (${activity.length})',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                if (activity.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Text('No broadcasts received yet.'),
+                  )
+                else
+                  for (final outcome in activity)
+                    _RelayOutcomeTile(outcome: outcome),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _isBusy ? null : _broadcastOwnPacket,
-                  icon: const Icon(Icons.wifi_tethering),
-                  label: const Text('Broadcast my emergency packet'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: _simulateIncomingFromPeer,
-            icon: const Icon(Icons.call_received),
-            label: const Text('Simulate a broadcast arriving from a nearby device'),
-          ),
-          const SizedBox(height: 24),
-          Text('Broadcasts sent (${sentLog.length})', style: Theme.of(context).textTheme.titleSmall),
-          for (final sent in sentLog)
-            ListTile(dense: true, leading: const Icon(Icons.wifi_tethering), title: Text(sent)),
-          const SizedBox(height: 24),
-          Text('Relay activity (${activity.length})', style: Theme.of(context).textTheme.titleSmall),
-          if (activity.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(top: 4),
-              child: Text('No broadcasts received yet.'),
-            )
-          else
-            for (final outcome in activity) _RelayOutcomeTile(outcome: outcome),
         ],
       ),
     );
@@ -158,7 +181,9 @@ class _RelayOutcomeTile extends StatelessWidget {
           '(${outcome.packet.priority.name})',
         ),
         subtitle: Text(
-          outcome.wasRelayed ? 'Relayed to nearby devices' : 'Not relayed: ${outcome.reason}',
+          outcome.wasRelayed
+              ? 'Relayed to nearby devices'
+              : 'Not relayed: ${outcome.reason}',
         ),
       ),
     );

@@ -82,7 +82,10 @@ class SmsPrototypeService {
     List<EmergencyPacket> alreadySeen = const [],
     DateTime? now,
   }) {
-    final decoded = rawMessages.map(_codec.decode).whereType<EmergencyPacket>().toList();
+    final decoded = rawMessages
+        .map(_codec.decode)
+        .whereType<EmergencyPacket>()
+        .toList();
     return _engine.process([...alreadySeen, ...decoded], now ?? DateTime.now());
   }
 

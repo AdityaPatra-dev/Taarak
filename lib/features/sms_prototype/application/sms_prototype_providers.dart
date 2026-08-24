@@ -22,10 +22,14 @@ final smsPrototypeServiceProvider = Provider<SmsPrototypeService>(
 /// transport directly rather than polling, so a simulated incoming
 /// message shows up immediately.
 final receivedPacketsProvider =
-    StateNotifierProvider<ReceivedPacketsNotifier, List<EmergencyPacket>>((ref) {
+    StateNotifierProvider<ReceivedPacketsNotifier, List<EmergencyPacket>>((
+      ref,
+    ) {
       final service = ref.watch(smsPrototypeServiceProvider);
       final notifier = ReceivedPacketsNotifier(service);
-      final subscription = service.incomingRawMessages.listen(notifier.addRawMessage);
+      final subscription = service.incomingRawMessages.listen(
+        notifier.addRawMessage,
+      );
       ref.onDispose(subscription.cancel);
       return notifier;
     });

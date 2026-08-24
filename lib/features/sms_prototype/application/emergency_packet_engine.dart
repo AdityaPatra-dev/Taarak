@@ -21,8 +21,10 @@ class EmergencyPacketEngine {
     return result;
   }
 
-  List<EmergencyPacket> excludeExpired(List<EmergencyPacket> packets, DateTime now) =>
-      packets.where((packet) => !packet.isExpired(now)).toList();
+  List<EmergencyPacket> excludeExpired(
+    List<EmergencyPacket> packets,
+    DateTime now,
+  ) => packets.where((packet) => !packet.isExpired(now)).toList();
 
   /// SOS first, then critical, then routine; oldest-expiring first within
   /// a tier as a tiebreaker (the one with the least time left is the most

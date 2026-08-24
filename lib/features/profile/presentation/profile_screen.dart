@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/location/location_permission_status.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -38,39 +40,53 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
         children: [
-          if (user != null) ...[
-            Text(user.name, style: Theme.of(context).textTheme.headlineSmall),
-            Text(user.email),
-            Text(user.role.label),
-            const SizedBox(height: 24),
-          ],
-          Text('Location', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          locationStatus.when(
-            data: (status) => _LocationStatusView(status: status),
-            loading: () => const CircularProgressIndicator(),
-            error: (error, _) => Text('$error'),
-          ),
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              _errorMessage!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ContentWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (user != null) ...[
+                  Text(
+                    user.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  Text(user.email),
+                  Text(user.role.label),
+                  const SizedBox(height: Spacing.lg),
+                ],
+                Text(
+                  'Location',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: Spacing.sm),
+                locationStatus.when(
+                  data: (status) => _LocationStatusView(status: status),
+                  loading: () => const CircularProgressIndicator(),
+                  error: (error, _) => Text('$error'),
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: Spacing.sm),
+                  Text(
+                    _errorMessage!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: Spacing.md),
+                FilledButton.icon(
+                  onPressed: _isRefreshing ? null : _refreshLocation,
+                  icon: _isRefreshing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.my_location),
+                  label: const Text('Refresh location'),
+                ),
+              ],
             ),
-          ],
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _isRefreshing ? null : _refreshLocation,
-            icon: _isRefreshing
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.my_location),
-            label: const Text('Refresh location'),
           ),
         ],
       ),
@@ -108,9 +124,7 @@ class _LocationStatusView extends StatelessWidget {
             'Lng ${geoTag.fix.longitude.toStringAsFixed(5)} '
             '(±${geoTag.fix.accuracyMeters.toStringAsFixed(0)}m)',
           ),
-          Text(
-            'Captured ${geoTag.fix.ageAsOf(DateTime.now()).inSeconds}s ago',
-          ),
+          Text('Captured ${geoTag.fix.ageAsOf(DateTime.now()).inSeconds}s ago'),
           Text(
             geoTag.administrativeContext == null
                 ? 'Administrative region: not available yet (needs GIS boundary data)'

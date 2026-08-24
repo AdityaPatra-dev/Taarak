@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/audit/application/audit_log_filter.dart';
 import 'package:taarak/features/audit/application/audit_providers.dart';
+import 'package:taarak/shared/widgets/async_state_views.dart';
+import 'package:taarak/shared/widgets/responsive.dart';
 
 /// M19: a System Admin's ([Permission.reviewAudit]) view into every
 /// critical change recorded by [AuditLogDao] — actor, action, object,
@@ -45,10 +48,14 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
         ],
       ),
       body: eventsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Could not load the audit log: $error')),
+        loading: () => const LoadingView(message: 'Loading the audit log…'),
+        error: (error, _) => ErrorView(
+          message: 'Could not load the audit log: $error',
+          onRetry: () => ref.invalidate(auditEventsProvider),
+        ),
         data: (events) {
-          final objectTypes = events.map((e) => e.objectType).toSet().toList()..sort();
+          final objectTypes = events.map((e) => e.objectType).toSet().toList()
+            ..sort();
           final filtered = filterAuditEvents(
             events,
             objectType: _objectTypeFilter,
@@ -57,8 +64,14 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
 
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
+              ContentWidth(
+                maxWidth: 900,
+                padding: const EdgeInsets.fromLTRB(
+                  Spacing.md,
+                  Spacing.md,
+                  Spacing.md,
+                  0,
+                ),
                 child: Column(
                   children: [
                     TextField(
@@ -69,14 +82,15 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                       ),
                       onChanged: (value) => setState(() => _query = value),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: Spacing.sm),
                     Wrap(
-                      spacing: 8,
+                      spacing: Spacing.sm,
                       children: [
                         ChoiceChip(
                           label: const Text('All'),
                           selected: _objectTypeFilter == null,
-                          onSelected: (_) => setState(() => _objectTypeFilter = null),
+                          onSelected: (_) =>
+                              setState(() => _objectTypeFilter = null),
                         ),
                         for (final type in objectTypes)
                           ChoiceChip(
@@ -92,11 +106,23 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
               ),
               Expanded(
                 child: filtered.isEmpty
-                    ? const Center(child: Text('No matching audit events.'))
+                    ? const EmptyView(
+                        icon: Icons.manage_search,
+                        title: 'No matching audit events',
+                        message: 'Try a different search term or filter.',
+                      )
                     : ListView(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         children: [
-                          for (final event in filtered) _AuditEventCard(event: event),
+                          ContentWidth(
+                            maxWidth: 900,
+                            padding: const EdgeInsets.all(Spacing.md),
+                            child: Column(
+                              children: [
+                                for (final event in filtered)
+                                  _AuditEventCard(event: event),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
               ),
@@ -116,14 +142,14 @@ class _AuditEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(Spacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(event.action, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 4),
+            const SizedBox(height: Spacing.xs),
             Text('Actor: ${event.actorId}'),
             Text('Object: ${event.objectType} · ${event.objectId}'),
             Text('Time: ${event.occurredAt.toLocal()}'),

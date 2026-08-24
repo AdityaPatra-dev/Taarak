@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/app/spacing.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/reporting/application/reporting_providers.dart';
 
@@ -43,44 +44,56 @@ class _IAmSafeScreenState extends ConsumerState<IAmSafeScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('I Am Safe')),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_wasSent) ...[
-                Icon(Icons.check_circle, color: Colors.green.shade700, size: 64),
-                const SizedBox(height: 16),
-                const Text(
-                  'Your safe status has been recorded with your location.',
-                  textAlign: TextAlign.center,
-                ),
-              ] else ...[
-                const Text(
-                  'Let responders know you\'re safe. Your current location '
-                  'is attached automatically.',
-                  textAlign: TextAlign.center,
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Padding(
+            padding: const EdgeInsets.all(Spacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_wasSent) ...[
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green.shade700,
+                    size: 64,
+                  ),
+                  const SizedBox(height: Spacing.md),
+                  const Text(
+                    'Your safe status has been recorded with your location.',
+                    textAlign: TextAlign.center,
+                  ),
+                ] else ...[
+                  const Text(
+                    'Let responders know you\'re safe. Your current location '
+                    'is attached automatically.',
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_errorMessage != null) ...[
+                    const SizedBox(height: Spacing.sm),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: Spacing.lg),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 72,
+                    child: FilledButton(
+                      onPressed: _isSubmitting ? null : _markSafe,
+                      child: _isSubmitting
+                          ? const CircularProgressIndicator()
+                          : const Text(
+                              'I\'M SAFE',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                    ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 72,
-                  child: FilledButton(
-                    onPressed: _isSubmitting ? null : _markSafe,
-                    child: _isSubmitting
-                        ? const CircularProgressIndicator()
-                        : const Text('I\'M SAFE', style: TextStyle(fontSize: 20)),
-                  ),
-                ),
               ],
-            ],
+            ),
           ),
         ),
       ),

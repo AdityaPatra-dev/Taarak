@@ -26,11 +26,14 @@ class EmergencyPacketCodec {
       packet.version,
     ].join(_delimiter);
 
-    final budgetForNote = maxEncodedLength - fixedFields.length - _delimiter.length;
+    final budgetForNote =
+        maxEncodedLength - fixedFields.length - _delimiter.length;
     final safeNote = packet.note.replaceAll(_delimiter, ' ');
     final note = budgetForNote <= 0
         ? ''
-        : (safeNote.length > budgetForNote ? safeNote.substring(0, budgetForNote) : safeNote);
+        : (safeNote.length > budgetForNote
+              ? safeNote.substring(0, budgetForNote)
+              : safeNote);
 
     return '$fixedFields$_delimiter$note';
   }
@@ -65,7 +68,10 @@ class EmergencyPacketCodec {
       type: parts[4],
       latitude: latitude,
       longitude: longitude,
-      expiresAt: DateTime.fromMillisecondsSinceEpoch(expiresAtSeconds * 1000, isUtc: true),
+      expiresAt: DateTime.fromMillisecondsSinceEpoch(
+        expiresAtSeconds * 1000,
+        isUtc: true,
+      ),
       version: version,
       note: note,
     );
