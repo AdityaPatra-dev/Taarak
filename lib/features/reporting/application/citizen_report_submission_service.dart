@@ -80,6 +80,7 @@ class CitizenReportSubmissionService {
         'affectedPeopleCount': report.affectedPeopleCount,
         'mediaPath': report.mediaPath,
         'createdAt': report.createdAt.toIso8601String(),
+        'version': report.version,
       }),
     );
 

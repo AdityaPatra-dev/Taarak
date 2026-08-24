@@ -5,6 +5,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 /// (see blueprint section 2).
 abstract class NetworkInfo {
   Future<bool> get isConnected;
+
+  /// Emits the current connectivity state on every change — M17's sync
+  /// coordinator listens for offline→online transitions on this to trigger
+  /// a sync run right after reconnection, rather than only on a timer or
+  /// user action.
+  Stream<bool> get onConnectivityChanged;
 }
 
 class NetworkInfoImpl implements NetworkInfo {
@@ -18,4 +24,8 @@ class NetworkInfoImpl implements NetworkInfo {
     final results = await _connectivity.checkConnectivity();
     return results.any((result) => result != ConnectivityResult.none);
   }
+
+  @override
+  Stream<bool> get onConnectivityChanged => _connectivity.onConnectivityChanged
+      .map((results) => results.any((result) => result != ConnectivityResult.none));
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
+import 'package:taarak/features/sync/application/sync_providers.dart';
 
 /// Temporary shared landing screen. Its job right now is to prove RBAC
 /// works — each role sees only the capability list the blueprint's role
@@ -23,6 +24,7 @@ class HomeScreen extends ConsumerWidget {
     final user = session.user;
     final permissions = user.role.permissions.toList()
       ..sort((a, b) => a.label.compareTo(b.label));
+    final pendingSyncCount = ref.watch(pendingSyncCountProvider).valueOrNull ?? 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -53,6 +55,27 @@ class HomeScreen extends ConsumerWidget {
           Text('Welcome, ${user.name}', style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 4),
           Text(user.role.label, style: Theme.of(context).textTheme.bodyMedium),
+          if (pendingSyncCount > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.sync, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  '$pendingSyncCount item${pendingSyncCount == 1 ? '' : 's'} waiting to sync',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () async {
+                    await ref.read(syncCoordinatorServiceProvider).syncPendingEntries();
+                    ref.invalidate(pendingSyncCountProvider);
+                  },
+                  child: const Text('Sync now'),
+                ),
+              ],
+            ),
+          ],
           if (user.role.can(Permission.submitIncidentReport) ||
               user.role.can(Permission.sendSos) ||
               user.role.can(Permission.updateSafeStatus) ||

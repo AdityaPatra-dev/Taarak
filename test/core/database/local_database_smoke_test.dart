@@ -134,5 +134,25 @@ void main() {
       final pendingAfter = await dao.listPending();
       expect(pendingAfter.dataOrNull, isEmpty);
     });
+
+    test('markFailed records the injected clock, not the wall clock', () async {
+      final enqueueResult = await dao.enqueue(
+        entityTable: 'local_incidents',
+        entityId: 'incident-1',
+        operation: 'create',
+        payloadJson: '{"id":"incident-1"}',
+      );
+      final queueId = enqueueResult.dataOrNull!;
+      final fixedNow = DateTime.utc(2026, 1, 1);
+
+      await dao.markFailed(queueId, now: fixedNow);
+
+      final syncable = await dao.listSyncable();
+      expect(
+        syncable.dataOrNull!.single.lastAttemptAt!.isAtSameMomentAs(fixedNow),
+        isTrue,
+      );
+      expect(syncable.dataOrNull!.single.attemptCount, 1);
+    });
   });
 }

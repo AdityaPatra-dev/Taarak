@@ -37,6 +37,17 @@ class SyncQueueDao {
     )..where((t) => t.status.equals('pending'))).get(),
   );
 
+  /// M17's input queue: everything not yet synced, including entries a
+  /// previous run marked 'failed' — those are still retry candidates
+  /// (subject to [SyncEngine.isReadyToRetry]/[SyncEngine.shouldGiveUp]),
+  /// not abandoned just because one attempt didn't land.
+  Future<Result<List<SyncQueueEntry>>> listSyncable() => guardCacheOperation(
+    () => (_db.select(_db.syncQueueEntries)
+          ..where((t) => t.status.isIn(['pending', 'failed']))
+          ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+        .get(),
+  );
+
   Future<Result<void>> markSynced(int id) => guardCacheOperation(
     () => (_db.update(
       _db.syncQueueEntries,
@@ -45,20 +56,21 @@ class SyncQueueDao {
     ),
   );
 
-  Future<Result<void>> markFailed(int id) => guardCacheOperation(() async {
-    final entry = await (_db.select(
-      _db.syncQueueEntries,
-    )..where((t) => t.id.equals(id))).getSingleOrNull();
-    final attempts = (entry?.attemptCount ?? 0) + 1;
-    await (_db.update(_db.syncQueueEntries)..where((t) => t.id.equals(id)))
-        .write(
-          SyncQueueEntriesCompanion(
-            status: const Value('failed'),
-            attemptCount: Value(attempts),
-            lastAttemptAt: Value(DateTime.now()),
-          ),
-        );
-  });
+  Future<Result<void>> markFailed(int id, {DateTime? now}) =>
+      guardCacheOperation(() async {
+        final entry = await (_db.select(
+          _db.syncQueueEntries,
+        )..where((t) => t.id.equals(id))).getSingleOrNull();
+        final attempts = (entry?.attemptCount ?? 0) + 1;
+        await (_db.update(_db.syncQueueEntries)..where((t) => t.id.equals(id)))
+            .write(
+              SyncQueueEntriesCompanion(
+                status: const Value('failed'),
+                attemptCount: Value(attempts),
+                lastAttemptAt: Value(now ?? DateTime.now()),
+              ),
+            );
+      });
 
   Future<Result<void>> delete(int id) => guardCacheOperation(
     () => (_db.delete(

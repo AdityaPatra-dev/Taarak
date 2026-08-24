@@ -39,6 +39,9 @@ class _InMemoryNoteRepository implements LocalRepository<String, int> {
 class _AlwaysOffline implements NetworkInfo {
   @override
   Future<bool> get isConnected async => false;
+
+  @override
+  Stream<bool> get onConnectivityChanged => const Stream.empty();
 }
 
 void main() {
