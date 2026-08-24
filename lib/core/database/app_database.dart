@@ -8,6 +8,7 @@ import 'package:taarak/core/database/tables/local_risk_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_routes_table.dart';
 import 'package:taarak/core/database/tables/local_shelters_table.dart';
 import 'package:taarak/core/database/tables/local_users_table.dart';
+import 'package:taarak/core/database/tables/local_vulnerability_assessments_table.dart';
 import 'package:taarak/core/database/tables/sync_queue_table.dart';
 
 part 'app_database.g.dart';
@@ -25,6 +26,7 @@ part 'app_database.g.dart';
     LocalRoutes,
     LocalHabitations,
     LocalRiskAssessments,
+    LocalVulnerabilityAssessments,
     SyncQueueEntries,
   ],
 )

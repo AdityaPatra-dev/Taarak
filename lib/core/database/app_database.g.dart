@@ -3528,6 +3528,28 @@ class $LocalHabitationsTable extends LocalHabitations
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _infrastructureQualityMeta =
+      const VerificationMeta('infrastructureQuality');
+  @override
+  late final GeneratedColumn<double> infrastructureQuality =
+      GeneratedColumn<double>(
+        'infrastructure_quality',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _accessQualityMeta = const VerificationMeta(
+    'accessQuality',
+  );
+  @override
+  late final GeneratedColumn<double> accessQuality = GeneratedColumn<double>(
+    'access_quality',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -3559,6 +3581,8 @@ class $LocalHabitationsTable extends LocalHabitations
     longitude,
     population,
     administrativeRegionName,
+    infrastructureQuality,
+    accessQuality,
     updatedAt,
     version,
   ];
@@ -3618,6 +3642,24 @@ class $LocalHabitationsTable extends LocalHabitations
         ),
       );
     }
+    if (data.containsKey('infrastructure_quality')) {
+      context.handle(
+        _infrastructureQualityMeta,
+        infrastructureQuality.isAcceptableOrUnknown(
+          data['infrastructure_quality']!,
+          _infrastructureQualityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('access_quality')) {
+      context.handle(
+        _accessQualityMeta,
+        accessQuality.isAcceptableOrUnknown(
+          data['access_quality']!,
+          _accessQualityMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -3665,6 +3707,14 @@ class $LocalHabitationsTable extends LocalHabitations
         DriftSqlType.string,
         data['${effectivePrefix}administrative_region_name'],
       ),
+      infrastructureQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}infrastructure_quality'],
+      ),
+      accessQuality: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}access_quality'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -3689,6 +3739,14 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
   final double longitude;
   final int population;
   final String? administrativeRegionName;
+
+  /// M08's "configured indicators": 0.0 (robust/easy) – 1.0
+  /// (fragile/remote), set manually by an official once that data-entry
+  /// flow exists. Null means "not yet configured" — the vulnerability
+  /// engine falls back to a neutral value rather than treating unset data
+  /// as either safe or unsafe.
+  final double? infrastructureQuality;
+  final double? accessQuality;
   final DateTime updatedAt;
   final int version;
   const LocalHabitation({
@@ -3698,6 +3756,8 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
     required this.longitude,
     required this.population,
     this.administrativeRegionName,
+    this.infrastructureQuality,
+    this.accessQuality,
     required this.updatedAt,
     required this.version,
   });
@@ -3714,6 +3774,12 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
         administrativeRegionName,
       );
     }
+    if (!nullToAbsent || infrastructureQuality != null) {
+      map['infrastructure_quality'] = Variable<double>(infrastructureQuality);
+    }
+    if (!nullToAbsent || accessQuality != null) {
+      map['access_quality'] = Variable<double>(accessQuality);
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
     return map;
@@ -3729,6 +3795,12 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
       administrativeRegionName: administrativeRegionName == null && nullToAbsent
           ? const Value.absent()
           : Value(administrativeRegionName),
+      infrastructureQuality: infrastructureQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(infrastructureQuality),
+      accessQuality: accessQuality == null && nullToAbsent
+          ? const Value.absent()
+          : Value(accessQuality),
       updatedAt: Value(updatedAt),
       version: Value(version),
     );
@@ -3748,6 +3820,10 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
       administrativeRegionName: serializer.fromJson<String?>(
         json['administrativeRegionName'],
       ),
+      infrastructureQuality: serializer.fromJson<double?>(
+        json['infrastructureQuality'],
+      ),
+      accessQuality: serializer.fromJson<double?>(json['accessQuality']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
     );
@@ -3764,6 +3840,10 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
       'administrativeRegionName': serializer.toJson<String?>(
         administrativeRegionName,
       ),
+      'infrastructureQuality': serializer.toJson<double?>(
+        infrastructureQuality,
+      ),
+      'accessQuality': serializer.toJson<double?>(accessQuality),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
     };
@@ -3776,6 +3856,8 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
     double? longitude,
     int? population,
     Value<String?> administrativeRegionName = const Value.absent(),
+    Value<double?> infrastructureQuality = const Value.absent(),
+    Value<double?> accessQuality = const Value.absent(),
     DateTime? updatedAt,
     int? version,
   }) => LocalHabitation(
@@ -3787,6 +3869,12 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
     administrativeRegionName: administrativeRegionName.present
         ? administrativeRegionName.value
         : this.administrativeRegionName,
+    infrastructureQuality: infrastructureQuality.present
+        ? infrastructureQuality.value
+        : this.infrastructureQuality,
+    accessQuality: accessQuality.present
+        ? accessQuality.value
+        : this.accessQuality,
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
   );
@@ -3802,6 +3890,12 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
       administrativeRegionName: data.administrativeRegionName.present
           ? data.administrativeRegionName.value
           : this.administrativeRegionName,
+      infrastructureQuality: data.infrastructureQuality.present
+          ? data.infrastructureQuality.value
+          : this.infrastructureQuality,
+      accessQuality: data.accessQuality.present
+          ? data.accessQuality.value
+          : this.accessQuality,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
     );
@@ -3816,6 +3910,8 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
           ..write('longitude: $longitude, ')
           ..write('population: $population, ')
           ..write('administrativeRegionName: $administrativeRegionName, ')
+          ..write('infrastructureQuality: $infrastructureQuality, ')
+          ..write('accessQuality: $accessQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version')
           ..write(')'))
@@ -3830,6 +3926,8 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
     longitude,
     population,
     administrativeRegionName,
+    infrastructureQuality,
+    accessQuality,
     updatedAt,
     version,
   );
@@ -3843,6 +3941,8 @@ class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
           other.longitude == this.longitude &&
           other.population == this.population &&
           other.administrativeRegionName == this.administrativeRegionName &&
+          other.infrastructureQuality == this.infrastructureQuality &&
+          other.accessQuality == this.accessQuality &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version);
 }
@@ -3854,6 +3954,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
   final Value<double> longitude;
   final Value<int> population;
   final Value<String?> administrativeRegionName;
+  final Value<double?> infrastructureQuality;
+  final Value<double?> accessQuality;
   final Value<DateTime> updatedAt;
   final Value<int> version;
   final Value<int> rowid;
@@ -3864,6 +3966,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
     this.longitude = const Value.absent(),
     this.population = const Value.absent(),
     this.administrativeRegionName = const Value.absent(),
+    this.infrastructureQuality = const Value.absent(),
+    this.accessQuality = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3875,6 +3979,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
     required double longitude,
     this.population = const Value.absent(),
     this.administrativeRegionName = const Value.absent(),
+    this.infrastructureQuality = const Value.absent(),
+    this.accessQuality = const Value.absent(),
     required DateTime updatedAt,
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3890,6 +3996,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
     Expression<double>? longitude,
     Expression<int>? population,
     Expression<String>? administrativeRegionName,
+    Expression<double>? infrastructureQuality,
+    Expression<double>? accessQuality,
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
     Expression<int>? rowid,
@@ -3902,6 +4010,9 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
       if (population != null) 'population': population,
       if (administrativeRegionName != null)
         'administrative_region_name': administrativeRegionName,
+      if (infrastructureQuality != null)
+        'infrastructure_quality': infrastructureQuality,
+      if (accessQuality != null) 'access_quality': accessQuality,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
@@ -3915,6 +4026,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
     Value<double>? longitude,
     Value<int>? population,
     Value<String?>? administrativeRegionName,
+    Value<double?>? infrastructureQuality,
+    Value<double?>? accessQuality,
     Value<DateTime>? updatedAt,
     Value<int>? version,
     Value<int>? rowid,
@@ -3927,6 +4040,9 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
       population: population ?? this.population,
       administrativeRegionName:
           administrativeRegionName ?? this.administrativeRegionName,
+      infrastructureQuality:
+          infrastructureQuality ?? this.infrastructureQuality,
+      accessQuality: accessQuality ?? this.accessQuality,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       rowid: rowid ?? this.rowid,
@@ -3956,6 +4072,14 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
         administrativeRegionName.value,
       );
     }
+    if (infrastructureQuality.present) {
+      map['infrastructure_quality'] = Variable<double>(
+        infrastructureQuality.value,
+      );
+    }
+    if (accessQuality.present) {
+      map['access_quality'] = Variable<double>(accessQuality.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -3977,6 +4101,8 @@ class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
           ..write('longitude: $longitude, ')
           ..write('population: $population, ')
           ..write('administrativeRegionName: $administrativeRegionName, ')
+          ..write('infrastructureQuality: $infrastructureQuality, ')
+          ..write('accessQuality: $accessQuality, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('rowid: $rowid')
@@ -4594,6 +4720,464 @@ class LocalRiskAssessmentsCompanion
   }
 }
 
+class $LocalVulnerabilityAssessmentsTable extends LocalVulnerabilityAssessments
+    with
+        TableInfo<
+          $LocalVulnerabilityAssessmentsTable,
+          LocalVulnerabilityAssessment
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalVulnerabilityAssessmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vulnerabilityIndexMeta =
+      const VerificationMeta('vulnerabilityIndex');
+  @override
+  late final GeneratedColumn<double> vulnerabilityIndex =
+      GeneratedColumn<double>(
+        'vulnerability_index',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _factorsJsonMeta = const VerificationMeta(
+    'factorsJson',
+  );
+  @override
+  late final GeneratedColumn<String> factorsJson = GeneratedColumn<String>(
+    'factors_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modelVersionMeta = const VerificationMeta(
+    'modelVersion',
+  );
+  @override
+  late final GeneratedColumn<String> modelVersion = GeneratedColumn<String>(
+    'model_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assessedAtMeta = const VerificationMeta(
+    'assessedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> assessedAt = GeneratedColumn<DateTime>(
+    'assessed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    habitationId,
+    vulnerabilityIndex,
+    factorsJson,
+    modelVersion,
+    assessedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_vulnerability_assessments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalVulnerabilityAssessment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('vulnerability_index')) {
+      context.handle(
+        _vulnerabilityIndexMeta,
+        vulnerabilityIndex.isAcceptableOrUnknown(
+          data['vulnerability_index']!,
+          _vulnerabilityIndexMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_vulnerabilityIndexMeta);
+    }
+    if (data.containsKey('factors_json')) {
+      context.handle(
+        _factorsJsonMeta,
+        factorsJson.isAcceptableOrUnknown(
+          data['factors_json']!,
+          _factorsJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_factorsJsonMeta);
+    }
+    if (data.containsKey('model_version')) {
+      context.handle(
+        _modelVersionMeta,
+        modelVersion.isAcceptableOrUnknown(
+          data['model_version']!,
+          _modelVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_modelVersionMeta);
+    }
+    if (data.containsKey('assessed_at')) {
+      context.handle(
+        _assessedAtMeta,
+        assessedAt.isAcceptableOrUnknown(data['assessed_at']!, _assessedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assessedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {habitationId};
+  @override
+  LocalVulnerabilityAssessment map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalVulnerabilityAssessment(
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      vulnerabilityIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}vulnerability_index'],
+      )!,
+      factorsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}factors_json'],
+      )!,
+      modelVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_version'],
+      )!,
+      assessedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}assessed_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalVulnerabilityAssessmentsTable createAlias(String alias) {
+    return $LocalVulnerabilityAssessmentsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalVulnerabilityAssessment extends DataClass
+    implements Insertable<LocalVulnerabilityAssessment> {
+  final String habitationId;
+  final double vulnerabilityIndex;
+
+  /// JSON list of {key, label, normalizedScore, weight,
+  /// weightedContribution} — the "factor-by-factor" breakdown the
+  /// acceptance criterion asks for.
+  final String factorsJson;
+  final String modelVersion;
+  final DateTime assessedAt;
+  final int version;
+  const LocalVulnerabilityAssessment({
+    required this.habitationId,
+    required this.vulnerabilityIndex,
+    required this.factorsJson,
+    required this.modelVersion,
+    required this.assessedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['vulnerability_index'] = Variable<double>(vulnerabilityIndex);
+    map['factors_json'] = Variable<String>(factorsJson);
+    map['model_version'] = Variable<String>(modelVersion);
+    map['assessed_at'] = Variable<DateTime>(assessedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalVulnerabilityAssessmentsCompanion toCompanion(bool nullToAbsent) {
+    return LocalVulnerabilityAssessmentsCompanion(
+      habitationId: Value(habitationId),
+      vulnerabilityIndex: Value(vulnerabilityIndex),
+      factorsJson: Value(factorsJson),
+      modelVersion: Value(modelVersion),
+      assessedAt: Value(assessedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalVulnerabilityAssessment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalVulnerabilityAssessment(
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      vulnerabilityIndex: serializer.fromJson<double>(
+        json['vulnerabilityIndex'],
+      ),
+      factorsJson: serializer.fromJson<String>(json['factorsJson']),
+      modelVersion: serializer.fromJson<String>(json['modelVersion']),
+      assessedAt: serializer.fromJson<DateTime>(json['assessedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'habitationId': serializer.toJson<String>(habitationId),
+      'vulnerabilityIndex': serializer.toJson<double>(vulnerabilityIndex),
+      'factorsJson': serializer.toJson<String>(factorsJson),
+      'modelVersion': serializer.toJson<String>(modelVersion),
+      'assessedAt': serializer.toJson<DateTime>(assessedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalVulnerabilityAssessment copyWith({
+    String? habitationId,
+    double? vulnerabilityIndex,
+    String? factorsJson,
+    String? modelVersion,
+    DateTime? assessedAt,
+    int? version,
+  }) => LocalVulnerabilityAssessment(
+    habitationId: habitationId ?? this.habitationId,
+    vulnerabilityIndex: vulnerabilityIndex ?? this.vulnerabilityIndex,
+    factorsJson: factorsJson ?? this.factorsJson,
+    modelVersion: modelVersion ?? this.modelVersion,
+    assessedAt: assessedAt ?? this.assessedAt,
+    version: version ?? this.version,
+  );
+  LocalVulnerabilityAssessment copyWithCompanion(
+    LocalVulnerabilityAssessmentsCompanion data,
+  ) {
+    return LocalVulnerabilityAssessment(
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      vulnerabilityIndex: data.vulnerabilityIndex.present
+          ? data.vulnerabilityIndex.value
+          : this.vulnerabilityIndex,
+      factorsJson: data.factorsJson.present
+          ? data.factorsJson.value
+          : this.factorsJson,
+      modelVersion: data.modelVersion.present
+          ? data.modelVersion.value
+          : this.modelVersion,
+      assessedAt: data.assessedAt.present
+          ? data.assessedAt.value
+          : this.assessedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalVulnerabilityAssessment(')
+          ..write('habitationId: $habitationId, ')
+          ..write('vulnerabilityIndex: $vulnerabilityIndex, ')
+          ..write('factorsJson: $factorsJson, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    habitationId,
+    vulnerabilityIndex,
+    factorsJson,
+    modelVersion,
+    assessedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalVulnerabilityAssessment &&
+          other.habitationId == this.habitationId &&
+          other.vulnerabilityIndex == this.vulnerabilityIndex &&
+          other.factorsJson == this.factorsJson &&
+          other.modelVersion == this.modelVersion &&
+          other.assessedAt == this.assessedAt &&
+          other.version == this.version);
+}
+
+class LocalVulnerabilityAssessmentsCompanion
+    extends UpdateCompanion<LocalVulnerabilityAssessment> {
+  final Value<String> habitationId;
+  final Value<double> vulnerabilityIndex;
+  final Value<String> factorsJson;
+  final Value<String> modelVersion;
+  final Value<DateTime> assessedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalVulnerabilityAssessmentsCompanion({
+    this.habitationId = const Value.absent(),
+    this.vulnerabilityIndex = const Value.absent(),
+    this.factorsJson = const Value.absent(),
+    this.modelVersion = const Value.absent(),
+    this.assessedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalVulnerabilityAssessmentsCompanion.insert({
+    required String habitationId,
+    required double vulnerabilityIndex,
+    required String factorsJson,
+    required String modelVersion,
+    required DateTime assessedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : habitationId = Value(habitationId),
+       vulnerabilityIndex = Value(vulnerabilityIndex),
+       factorsJson = Value(factorsJson),
+       modelVersion = Value(modelVersion),
+       assessedAt = Value(assessedAt);
+  static Insertable<LocalVulnerabilityAssessment> custom({
+    Expression<String>? habitationId,
+    Expression<double>? vulnerabilityIndex,
+    Expression<String>? factorsJson,
+    Expression<String>? modelVersion,
+    Expression<DateTime>? assessedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (vulnerabilityIndex != null) 'vulnerability_index': vulnerabilityIndex,
+      if (factorsJson != null) 'factors_json': factorsJson,
+      if (modelVersion != null) 'model_version': modelVersion,
+      if (assessedAt != null) 'assessed_at': assessedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalVulnerabilityAssessmentsCompanion copyWith({
+    Value<String>? habitationId,
+    Value<double>? vulnerabilityIndex,
+    Value<String>? factorsJson,
+    Value<String>? modelVersion,
+    Value<DateTime>? assessedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalVulnerabilityAssessmentsCompanion(
+      habitationId: habitationId ?? this.habitationId,
+      vulnerabilityIndex: vulnerabilityIndex ?? this.vulnerabilityIndex,
+      factorsJson: factorsJson ?? this.factorsJson,
+      modelVersion: modelVersion ?? this.modelVersion,
+      assessedAt: assessedAt ?? this.assessedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (vulnerabilityIndex.present) {
+      map['vulnerability_index'] = Variable<double>(vulnerabilityIndex.value);
+    }
+    if (factorsJson.present) {
+      map['factors_json'] = Variable<String>(factorsJson.value);
+    }
+    if (modelVersion.present) {
+      map['model_version'] = Variable<String>(modelVersion.value);
+    }
+    if (assessedAt.present) {
+      map['assessed_at'] = Variable<DateTime>(assessedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalVulnerabilityAssessmentsCompanion(')
+          ..write('habitationId: $habitationId, ')
+          ..write('vulnerabilityIndex: $vulnerabilityIndex, ')
+          ..write('factorsJson: $factorsJson, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -5179,6 +5763,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $LocalRiskAssessmentsTable localRiskAssessments =
       $LocalRiskAssessmentsTable(this);
+  late final $LocalVulnerabilityAssessmentsTable localVulnerabilityAssessments =
+      $LocalVulnerabilityAssessmentsTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -5195,6 +5781,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localRoutes,
     localHabitations,
     localRiskAssessments,
+    localVulnerabilityAssessments,
     syncQueueEntries,
   ];
 }
@@ -6948,6 +7535,8 @@ typedef $$LocalHabitationsTableCreateCompanionBuilder =
       required double longitude,
       Value<int> population,
       Value<String?> administrativeRegionName,
+      Value<double?> infrastructureQuality,
+      Value<double?> accessQuality,
       required DateTime updatedAt,
       Value<int> version,
       Value<int> rowid,
@@ -6960,6 +7549,8 @@ typedef $$LocalHabitationsTableUpdateCompanionBuilder =
       Value<double> longitude,
       Value<int> population,
       Value<String?> administrativeRegionName,
+      Value<double?> infrastructureQuality,
+      Value<double?> accessQuality,
       Value<DateTime> updatedAt,
       Value<int> version,
       Value<int> rowid,
@@ -7001,6 +7592,16 @@ class $$LocalHabitationsTableFilterComposer
 
   ColumnFilters<String> get administrativeRegionName => $composableBuilder(
     column: $table.administrativeRegionName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get infrastructureQuality => $composableBuilder(
+    column: $table.infrastructureQuality,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7054,6 +7655,16 @@ class $$LocalHabitationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get infrastructureQuality => $composableBuilder(
+    column: $table.infrastructureQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -7093,6 +7704,16 @@ class $$LocalHabitationsTableAnnotationComposer
 
   GeneratedColumn<String> get administrativeRegionName => $composableBuilder(
     column: $table.administrativeRegionName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get infrastructureQuality => $composableBuilder(
+    column: $table.infrastructureQuality,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get accessQuality => $composableBuilder(
+    column: $table.accessQuality,
     builder: (column) => column,
   );
 
@@ -7146,6 +7767,8 @@ class $$LocalHabitationsTableTableManager
                 Value<double> longitude = const Value.absent(),
                 Value<int> population = const Value.absent(),
                 Value<String?> administrativeRegionName = const Value.absent(),
+                Value<double?> infrastructureQuality = const Value.absent(),
+                Value<double?> accessQuality = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7156,6 +7779,8 @@ class $$LocalHabitationsTableTableManager
                 longitude: longitude,
                 population: population,
                 administrativeRegionName: administrativeRegionName,
+                infrastructureQuality: infrastructureQuality,
+                accessQuality: accessQuality,
                 updatedAt: updatedAt,
                 version: version,
                 rowid: rowid,
@@ -7168,6 +7793,8 @@ class $$LocalHabitationsTableTableManager
                 required double longitude,
                 Value<int> population = const Value.absent(),
                 Value<String?> administrativeRegionName = const Value.absent(),
+                Value<double?> infrastructureQuality = const Value.absent(),
+                Value<double?> accessQuality = const Value.absent(),
                 required DateTime updatedAt,
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7178,6 +7805,8 @@ class $$LocalHabitationsTableTableManager
                 longitude: longitude,
                 population: population,
                 administrativeRegionName: administrativeRegionName,
+                infrastructureQuality: infrastructureQuality,
+                accessQuality: accessQuality,
                 updatedAt: updatedAt,
                 version: version,
                 rowid: rowid,
@@ -7515,6 +8144,254 @@ typedef $$LocalRiskAssessmentsTableProcessedTableManager =
       LocalRiskAssessment,
       PrefetchHooks Function()
     >;
+typedef $$LocalVulnerabilityAssessmentsTableCreateCompanionBuilder =
+    LocalVulnerabilityAssessmentsCompanion Function({
+      required String habitationId,
+      required double vulnerabilityIndex,
+      required String factorsJson,
+      required String modelVersion,
+      required DateTime assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalVulnerabilityAssessmentsTableUpdateCompanionBuilder =
+    LocalVulnerabilityAssessmentsCompanion Function({
+      Value<String> habitationId,
+      Value<double> vulnerabilityIndex,
+      Value<String> factorsJson,
+      Value<String> modelVersion,
+      Value<DateTime> assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalVulnerabilityAssessmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalVulnerabilityAssessmentsTable> {
+  $$LocalVulnerabilityAssessmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get factorsJson => $composableBuilder(
+    column: $table.factorsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalVulnerabilityAssessmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalVulnerabilityAssessmentsTable> {
+  $$LocalVulnerabilityAssessmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get factorsJson => $composableBuilder(
+    column: $table.factorsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalVulnerabilityAssessmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalVulnerabilityAssessmentsTable> {
+  $$LocalVulnerabilityAssessmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get factorsJson => $composableBuilder(
+    column: $table.factorsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalVulnerabilityAssessmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalVulnerabilityAssessmentsTable,
+          LocalVulnerabilityAssessment,
+          $$LocalVulnerabilityAssessmentsTableFilterComposer,
+          $$LocalVulnerabilityAssessmentsTableOrderingComposer,
+          $$LocalVulnerabilityAssessmentsTableAnnotationComposer,
+          $$LocalVulnerabilityAssessmentsTableCreateCompanionBuilder,
+          $$LocalVulnerabilityAssessmentsTableUpdateCompanionBuilder,
+          (
+            LocalVulnerabilityAssessment,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalVulnerabilityAssessmentsTable,
+              LocalVulnerabilityAssessment
+            >,
+          ),
+          LocalVulnerabilityAssessment,
+          PrefetchHooks Function()
+        > {
+  $$LocalVulnerabilityAssessmentsTableTableManager(
+    _$AppDatabase db,
+    $LocalVulnerabilityAssessmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalVulnerabilityAssessmentsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalVulnerabilityAssessmentsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalVulnerabilityAssessmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> habitationId = const Value.absent(),
+                Value<double> vulnerabilityIndex = const Value.absent(),
+                Value<String> factorsJson = const Value.absent(),
+                Value<String> modelVersion = const Value.absent(),
+                Value<DateTime> assessedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalVulnerabilityAssessmentsCompanion(
+                habitationId: habitationId,
+                vulnerabilityIndex: vulnerabilityIndex,
+                factorsJson: factorsJson,
+                modelVersion: modelVersion,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String habitationId,
+                required double vulnerabilityIndex,
+                required String factorsJson,
+                required String modelVersion,
+                required DateTime assessedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalVulnerabilityAssessmentsCompanion.insert(
+                habitationId: habitationId,
+                vulnerabilityIndex: vulnerabilityIndex,
+                factorsJson: factorsJson,
+                modelVersion: modelVersion,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalVulnerabilityAssessmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalVulnerabilityAssessmentsTable,
+      LocalVulnerabilityAssessment,
+      $$LocalVulnerabilityAssessmentsTableFilterComposer,
+      $$LocalVulnerabilityAssessmentsTableOrderingComposer,
+      $$LocalVulnerabilityAssessmentsTableAnnotationComposer,
+      $$LocalVulnerabilityAssessmentsTableCreateCompanionBuilder,
+      $$LocalVulnerabilityAssessmentsTableUpdateCompanionBuilder,
+      (
+        LocalVulnerabilityAssessment,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalVulnerabilityAssessmentsTable,
+          LocalVulnerabilityAssessment
+        >,
+      ),
+      LocalVulnerabilityAssessment,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -7819,6 +8696,12 @@ class $AppDatabaseManager {
       $$LocalHabitationsTableTableManager(_db, _db.localHabitations);
   $$LocalRiskAssessmentsTableTableManager get localRiskAssessments =>
       $$LocalRiskAssessmentsTableTableManager(_db, _db.localRiskAssessments);
+  $$LocalVulnerabilityAssessmentsTableTableManager
+  get localVulnerabilityAssessments =>
+      $$LocalVulnerabilityAssessmentsTableTableManager(
+        _db,
+        _db.localVulnerabilityAssessments,
+      );
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }
