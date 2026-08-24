@@ -94,5 +94,41 @@ void main() {
         '/unauthorized',
       );
     });
+
+    test('the real /dashboard route (M18) admits district/command', () {
+      final session = _sessionFor(UserRole.districtCommand);
+      expect(computeRedirect(session: session, location: '/dashboard'), isNull);
+    });
+
+    test('the real /dashboard route (M18) turns away a citizen', () {
+      final session = _sessionFor(UserRole.citizen);
+      expect(
+        computeRedirect(session: session, location: '/dashboard'),
+        '/unauthorized',
+      );
+    });
+
+    test(
+      'an incident drill-down (M18) is gated the same as /dashboard, despite the varying path',
+      () {
+        final command = _sessionFor(UserRole.districtCommand);
+        expect(
+          computeRedirect(
+            session: command,
+            location: '/dashboard/incidents/incident-42',
+          ),
+          isNull,
+        );
+
+        final citizen = _sessionFor(UserRole.citizen);
+        expect(
+          computeRedirect(
+            session: citizen,
+            location: '/dashboard/incidents/incident-42',
+          ),
+          '/unauthorized',
+        );
+      },
+    );
   });
 }

@@ -5,6 +5,8 @@ import 'package:taarak/app/route_guard.dart';
 import 'package:taarak/features/alerts/presentation/alerts_screen.dart';
 import 'package:taarak/features/alerts/presentation/broadcast_alert_screen.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
+import 'package:taarak/features/dashboard/presentation/command_dashboard_screen.dart';
+import 'package:taarak/features/dashboard/presentation/incident_detail_screen.dart';
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
@@ -77,6 +79,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/alerts/broadcast',
         builder: (context, state) => const BroadcastAlertScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const CommandDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard/incidents/:incidentId',
+        builder: (context, state) => IncidentDetailScreen(
+          incidentId: state.pathParameters['incidentId']!,
+        ),
       ),
       GoRoute(
         path: '/login',
