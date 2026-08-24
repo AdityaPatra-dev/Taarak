@@ -1,7 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
+import 'package:taarak/core/gis/geometry_codec.dart';
+import 'package:taarak/core/gis/point_in_polygon.dart';
 import 'package:taarak/features/hazards/application/hazard_ingestion_service.dart';
 import 'package:taarak/features/hazards/application/hazard_normalizer.dart';
 import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
@@ -48,6 +51,40 @@ void main() {
     );
     expect(landslideZone.severity, 'high');
     expect(landslideZone.confidence, closeTo(0.9, 0.001));
+  });
+
+  test('seeds habitations, one of them inside the landslide zone', () async {
+    await seeder.seedIfEmpty();
+
+    final habitations = await db.select(db.localHabitations).get();
+    expect(habitations, hasLength(2));
+
+    final landslideZone = await (db.select(
+      db.localHazardZones,
+    )..where((t) => t.id.equals('demo-hazard-landslide'))).getSingle();
+    final zonePoints = decodePolygonPoints(landslideZone.geometryJson);
+
+    final ridgeColony = habitations.firstWhere(
+      (h) => h.id == 'demo-habitation-ridge-colony',
+    );
+    expect(
+      isPointInPolygon(
+        LatLng(ridgeColony.latitude, ridgeColony.longitude),
+        zonePoints,
+      ),
+      isTrue,
+    );
+
+    final valleyTown = habitations.firstWhere(
+      (h) => h.id == 'demo-habitation-valley-town',
+    );
+    expect(
+      isPointInPolygon(
+        LatLng(valleyTown.latitude, valleyTown.longitude),
+        zonePoints,
+      ),
+      isFalse,
+    );
   });
 
   test('seeding twice does not duplicate data', () async {

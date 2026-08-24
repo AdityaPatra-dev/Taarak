@@ -3459,6 +3459,1141 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
   }
 }
 
+class $LocalHabitationsTable extends LocalHabitations
+    with TableInfo<$LocalHabitationsTable, LocalHabitation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalHabitationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _populationMeta = const VerificationMeta(
+    'population',
+  );
+  @override
+  late final GeneratedColumn<int> population = GeneratedColumn<int>(
+    'population',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _administrativeRegionNameMeta =
+      const VerificationMeta('administrativeRegionName');
+  @override
+  late final GeneratedColumn<String> administrativeRegionName =
+      GeneratedColumn<String>(
+        'administrative_region_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    latitude,
+    longitude,
+    population,
+    administrativeRegionName,
+    updatedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_habitations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalHabitation> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_latitudeMeta);
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_longitudeMeta);
+    }
+    if (data.containsKey('population')) {
+      context.handle(
+        _populationMeta,
+        population.isAcceptableOrUnknown(data['population']!, _populationMeta),
+      );
+    }
+    if (data.containsKey('administrative_region_name')) {
+      context.handle(
+        _administrativeRegionNameMeta,
+        administrativeRegionName.isAcceptableOrUnknown(
+          data['administrative_region_name']!,
+          _administrativeRegionNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalHabitation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalHabitation(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      population: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}population'],
+      )!,
+      administrativeRegionName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}administrative_region_name'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalHabitationsTable createAlias(String alias) {
+    return $LocalHabitationsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalHabitation extends DataClass implements Insertable<LocalHabitation> {
+  final String id;
+  final String name;
+  final double latitude;
+  final double longitude;
+  final int population;
+  final String? administrativeRegionName;
+  final DateTime updatedAt;
+  final int version;
+  const LocalHabitation({
+    required this.id,
+    required this.name,
+    required this.latitude,
+    required this.longitude,
+    required this.population,
+    this.administrativeRegionName,
+    required this.updatedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    map['population'] = Variable<int>(population);
+    if (!nullToAbsent || administrativeRegionName != null) {
+      map['administrative_region_name'] = Variable<String>(
+        administrativeRegionName,
+      );
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalHabitationsCompanion toCompanion(bool nullToAbsent) {
+    return LocalHabitationsCompanion(
+      id: Value(id),
+      name: Value(name),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      population: Value(population),
+      administrativeRegionName: administrativeRegionName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(administrativeRegionName),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalHabitation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalHabitation(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      population: serializer.fromJson<int>(json['population']),
+      administrativeRegionName: serializer.fromJson<String?>(
+        json['administrativeRegionName'],
+      ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'population': serializer.toJson<int>(population),
+      'administrativeRegionName': serializer.toJson<String?>(
+        administrativeRegionName,
+      ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalHabitation copyWith({
+    String? id,
+    String? name,
+    double? latitude,
+    double? longitude,
+    int? population,
+    Value<String?> administrativeRegionName = const Value.absent(),
+    DateTime? updatedAt,
+    int? version,
+  }) => LocalHabitation(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    population: population ?? this.population,
+    administrativeRegionName: administrativeRegionName.present
+        ? administrativeRegionName.value
+        : this.administrativeRegionName,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+  );
+  LocalHabitation copyWithCompanion(LocalHabitationsCompanion data) {
+    return LocalHabitation(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      population: data.population.present
+          ? data.population.value
+          : this.population,
+      administrativeRegionName: data.administrativeRegionName.present
+          ? data.administrativeRegionName.value
+          : this.administrativeRegionName,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalHabitation(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('population: $population, ')
+          ..write('administrativeRegionName: $administrativeRegionName, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    latitude,
+    longitude,
+    population,
+    administrativeRegionName,
+    updatedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalHabitation &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.population == this.population &&
+          other.administrativeRegionName == this.administrativeRegionName &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version);
+}
+
+class LocalHabitationsCompanion extends UpdateCompanion<LocalHabitation> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<int> population;
+  final Value<String?> administrativeRegionName;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalHabitationsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.population = const Value.absent(),
+    this.administrativeRegionName = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalHabitationsCompanion.insert({
+    required String id,
+    required String name,
+    required double latitude,
+    required double longitude,
+    this.population = const Value.absent(),
+    this.administrativeRegionName = const Value.absent(),
+    required DateTime updatedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       latitude = Value(latitude),
+       longitude = Value(longitude),
+       updatedAt = Value(updatedAt);
+  static Insertable<LocalHabitation> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<int>? population,
+    Expression<String>? administrativeRegionName,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (population != null) 'population': population,
+      if (administrativeRegionName != null)
+        'administrative_region_name': administrativeRegionName,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalHabitationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<double>? latitude,
+    Value<double>? longitude,
+    Value<int>? population,
+    Value<String?>? administrativeRegionName,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalHabitationsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      population: population ?? this.population,
+      administrativeRegionName:
+          administrativeRegionName ?? this.administrativeRegionName,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (population.present) {
+      map['population'] = Variable<int>(population.value);
+    }
+    if (administrativeRegionName.present) {
+      map['administrative_region_name'] = Variable<String>(
+        administrativeRegionName.value,
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalHabitationsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('population: $population, ')
+          ..write('administrativeRegionName: $administrativeRegionName, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalRiskAssessmentsTable extends LocalRiskAssessments
+    with TableInfo<$LocalRiskAssessmentsTable, LocalRiskAssessment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalRiskAssessmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hazardExposureMeta = const VerificationMeta(
+    'hazardExposure',
+  );
+  @override
+  late final GeneratedColumn<double> hazardExposure = GeneratedColumn<double>(
+    'hazard_exposure',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vulnerabilityIndexMeta =
+      const VerificationMeta('vulnerabilityIndex');
+  @override
+  late final GeneratedColumn<double> vulnerabilityIndex =
+      GeneratedColumn<double>(
+        'vulnerability_index',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _riskScoreMeta = const VerificationMeta(
+    'riskScore',
+  );
+  @override
+  late final GeneratedColumn<double> riskScore = GeneratedColumn<double>(
+    'risk_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _riskClassMeta = const VerificationMeta(
+    'riskClass',
+  );
+  @override
+  late final GeneratedColumn<String> riskClass = GeneratedColumn<String>(
+    'risk_class',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _modelVersionMeta = const VerificationMeta(
+    'modelVersion',
+  );
+  @override
+  late final GeneratedColumn<String> modelVersion = GeneratedColumn<String>(
+    'model_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contributingHazardZoneIdsJsonMeta =
+      const VerificationMeta('contributingHazardZoneIdsJson');
+  @override
+  late final GeneratedColumn<String> contributingHazardZoneIdsJson =
+      GeneratedColumn<String>(
+        'contributing_hazard_zone_ids_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _assessedAtMeta = const VerificationMeta(
+    'assessedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> assessedAt = GeneratedColumn<DateTime>(
+    'assessed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    habitationId,
+    hazardExposure,
+    vulnerabilityIndex,
+    riskScore,
+    riskClass,
+    modelVersion,
+    contributingHazardZoneIdsJson,
+    assessedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_risk_assessments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalRiskAssessment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('hazard_exposure')) {
+      context.handle(
+        _hazardExposureMeta,
+        hazardExposure.isAcceptableOrUnknown(
+          data['hazard_exposure']!,
+          _hazardExposureMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_hazardExposureMeta);
+    }
+    if (data.containsKey('vulnerability_index')) {
+      context.handle(
+        _vulnerabilityIndexMeta,
+        vulnerabilityIndex.isAcceptableOrUnknown(
+          data['vulnerability_index']!,
+          _vulnerabilityIndexMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_vulnerabilityIndexMeta);
+    }
+    if (data.containsKey('risk_score')) {
+      context.handle(
+        _riskScoreMeta,
+        riskScore.isAcceptableOrUnknown(data['risk_score']!, _riskScoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_riskScoreMeta);
+    }
+    if (data.containsKey('risk_class')) {
+      context.handle(
+        _riskClassMeta,
+        riskClass.isAcceptableOrUnknown(data['risk_class']!, _riskClassMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_riskClassMeta);
+    }
+    if (data.containsKey('model_version')) {
+      context.handle(
+        _modelVersionMeta,
+        modelVersion.isAcceptableOrUnknown(
+          data['model_version']!,
+          _modelVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_modelVersionMeta);
+    }
+    if (data.containsKey('contributing_hazard_zone_ids_json')) {
+      context.handle(
+        _contributingHazardZoneIdsJsonMeta,
+        contributingHazardZoneIdsJson.isAcceptableOrUnknown(
+          data['contributing_hazard_zone_ids_json']!,
+          _contributingHazardZoneIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('assessed_at')) {
+      context.handle(
+        _assessedAtMeta,
+        assessedAt.isAcceptableOrUnknown(data['assessed_at']!, _assessedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assessedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {habitationId};
+  @override
+  LocalRiskAssessment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalRiskAssessment(
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      hazardExposure: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hazard_exposure'],
+      )!,
+      vulnerabilityIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}vulnerability_index'],
+      )!,
+      riskScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}risk_score'],
+      )!,
+      riskClass: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}risk_class'],
+      )!,
+      modelVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_version'],
+      )!,
+      contributingHazardZoneIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contributing_hazard_zone_ids_json'],
+      )!,
+      assessedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}assessed_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalRiskAssessmentsTable createAlias(String alias) {
+    return $LocalRiskAssessmentsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalRiskAssessment extends DataClass
+    implements Insertable<LocalRiskAssessment> {
+  /// Same as the habitation's id — one current assessment per habitation.
+  final String habitationId;
+  final double hazardExposure;
+  final double vulnerabilityIndex;
+  final double riskScore;
+  final String riskClass;
+  final String modelVersion;
+  final String contributingHazardZoneIdsJson;
+  final DateTime assessedAt;
+  final int version;
+  const LocalRiskAssessment({
+    required this.habitationId,
+    required this.hazardExposure,
+    required this.vulnerabilityIndex,
+    required this.riskScore,
+    required this.riskClass,
+    required this.modelVersion,
+    required this.contributingHazardZoneIdsJson,
+    required this.assessedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['hazard_exposure'] = Variable<double>(hazardExposure);
+    map['vulnerability_index'] = Variable<double>(vulnerabilityIndex);
+    map['risk_score'] = Variable<double>(riskScore);
+    map['risk_class'] = Variable<String>(riskClass);
+    map['model_version'] = Variable<String>(modelVersion);
+    map['contributing_hazard_zone_ids_json'] = Variable<String>(
+      contributingHazardZoneIdsJson,
+    );
+    map['assessed_at'] = Variable<DateTime>(assessedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalRiskAssessmentsCompanion toCompanion(bool nullToAbsent) {
+    return LocalRiskAssessmentsCompanion(
+      habitationId: Value(habitationId),
+      hazardExposure: Value(hazardExposure),
+      vulnerabilityIndex: Value(vulnerabilityIndex),
+      riskScore: Value(riskScore),
+      riskClass: Value(riskClass),
+      modelVersion: Value(modelVersion),
+      contributingHazardZoneIdsJson: Value(contributingHazardZoneIdsJson),
+      assessedAt: Value(assessedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalRiskAssessment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalRiskAssessment(
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      hazardExposure: serializer.fromJson<double>(json['hazardExposure']),
+      vulnerabilityIndex: serializer.fromJson<double>(
+        json['vulnerabilityIndex'],
+      ),
+      riskScore: serializer.fromJson<double>(json['riskScore']),
+      riskClass: serializer.fromJson<String>(json['riskClass']),
+      modelVersion: serializer.fromJson<String>(json['modelVersion']),
+      contributingHazardZoneIdsJson: serializer.fromJson<String>(
+        json['contributingHazardZoneIdsJson'],
+      ),
+      assessedAt: serializer.fromJson<DateTime>(json['assessedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'habitationId': serializer.toJson<String>(habitationId),
+      'hazardExposure': serializer.toJson<double>(hazardExposure),
+      'vulnerabilityIndex': serializer.toJson<double>(vulnerabilityIndex),
+      'riskScore': serializer.toJson<double>(riskScore),
+      'riskClass': serializer.toJson<String>(riskClass),
+      'modelVersion': serializer.toJson<String>(modelVersion),
+      'contributingHazardZoneIdsJson': serializer.toJson<String>(
+        contributingHazardZoneIdsJson,
+      ),
+      'assessedAt': serializer.toJson<DateTime>(assessedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalRiskAssessment copyWith({
+    String? habitationId,
+    double? hazardExposure,
+    double? vulnerabilityIndex,
+    double? riskScore,
+    String? riskClass,
+    String? modelVersion,
+    String? contributingHazardZoneIdsJson,
+    DateTime? assessedAt,
+    int? version,
+  }) => LocalRiskAssessment(
+    habitationId: habitationId ?? this.habitationId,
+    hazardExposure: hazardExposure ?? this.hazardExposure,
+    vulnerabilityIndex: vulnerabilityIndex ?? this.vulnerabilityIndex,
+    riskScore: riskScore ?? this.riskScore,
+    riskClass: riskClass ?? this.riskClass,
+    modelVersion: modelVersion ?? this.modelVersion,
+    contributingHazardZoneIdsJson:
+        contributingHazardZoneIdsJson ?? this.contributingHazardZoneIdsJson,
+    assessedAt: assessedAt ?? this.assessedAt,
+    version: version ?? this.version,
+  );
+  LocalRiskAssessment copyWithCompanion(LocalRiskAssessmentsCompanion data) {
+    return LocalRiskAssessment(
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      hazardExposure: data.hazardExposure.present
+          ? data.hazardExposure.value
+          : this.hazardExposure,
+      vulnerabilityIndex: data.vulnerabilityIndex.present
+          ? data.vulnerabilityIndex.value
+          : this.vulnerabilityIndex,
+      riskScore: data.riskScore.present ? data.riskScore.value : this.riskScore,
+      riskClass: data.riskClass.present ? data.riskClass.value : this.riskClass,
+      modelVersion: data.modelVersion.present
+          ? data.modelVersion.value
+          : this.modelVersion,
+      contributingHazardZoneIdsJson: data.contributingHazardZoneIdsJson.present
+          ? data.contributingHazardZoneIdsJson.value
+          : this.contributingHazardZoneIdsJson,
+      assessedAt: data.assessedAt.present
+          ? data.assessedAt.value
+          : this.assessedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRiskAssessment(')
+          ..write('habitationId: $habitationId, ')
+          ..write('hazardExposure: $hazardExposure, ')
+          ..write('vulnerabilityIndex: $vulnerabilityIndex, ')
+          ..write('riskScore: $riskScore, ')
+          ..write('riskClass: $riskClass, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write(
+            'contributingHazardZoneIdsJson: $contributingHazardZoneIdsJson, ',
+          )
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    habitationId,
+    hazardExposure,
+    vulnerabilityIndex,
+    riskScore,
+    riskClass,
+    modelVersion,
+    contributingHazardZoneIdsJson,
+    assessedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalRiskAssessment &&
+          other.habitationId == this.habitationId &&
+          other.hazardExposure == this.hazardExposure &&
+          other.vulnerabilityIndex == this.vulnerabilityIndex &&
+          other.riskScore == this.riskScore &&
+          other.riskClass == this.riskClass &&
+          other.modelVersion == this.modelVersion &&
+          other.contributingHazardZoneIdsJson ==
+              this.contributingHazardZoneIdsJson &&
+          other.assessedAt == this.assessedAt &&
+          other.version == this.version);
+}
+
+class LocalRiskAssessmentsCompanion
+    extends UpdateCompanion<LocalRiskAssessment> {
+  final Value<String> habitationId;
+  final Value<double> hazardExposure;
+  final Value<double> vulnerabilityIndex;
+  final Value<double> riskScore;
+  final Value<String> riskClass;
+  final Value<String> modelVersion;
+  final Value<String> contributingHazardZoneIdsJson;
+  final Value<DateTime> assessedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalRiskAssessmentsCompanion({
+    this.habitationId = const Value.absent(),
+    this.hazardExposure = const Value.absent(),
+    this.vulnerabilityIndex = const Value.absent(),
+    this.riskScore = const Value.absent(),
+    this.riskClass = const Value.absent(),
+    this.modelVersion = const Value.absent(),
+    this.contributingHazardZoneIdsJson = const Value.absent(),
+    this.assessedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalRiskAssessmentsCompanion.insert({
+    required String habitationId,
+    required double hazardExposure,
+    required double vulnerabilityIndex,
+    required double riskScore,
+    required String riskClass,
+    required String modelVersion,
+    this.contributingHazardZoneIdsJson = const Value.absent(),
+    required DateTime assessedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : habitationId = Value(habitationId),
+       hazardExposure = Value(hazardExposure),
+       vulnerabilityIndex = Value(vulnerabilityIndex),
+       riskScore = Value(riskScore),
+       riskClass = Value(riskClass),
+       modelVersion = Value(modelVersion),
+       assessedAt = Value(assessedAt);
+  static Insertable<LocalRiskAssessment> custom({
+    Expression<String>? habitationId,
+    Expression<double>? hazardExposure,
+    Expression<double>? vulnerabilityIndex,
+    Expression<double>? riskScore,
+    Expression<String>? riskClass,
+    Expression<String>? modelVersion,
+    Expression<String>? contributingHazardZoneIdsJson,
+    Expression<DateTime>? assessedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (hazardExposure != null) 'hazard_exposure': hazardExposure,
+      if (vulnerabilityIndex != null) 'vulnerability_index': vulnerabilityIndex,
+      if (riskScore != null) 'risk_score': riskScore,
+      if (riskClass != null) 'risk_class': riskClass,
+      if (modelVersion != null) 'model_version': modelVersion,
+      if (contributingHazardZoneIdsJson != null)
+        'contributing_hazard_zone_ids_json': contributingHazardZoneIdsJson,
+      if (assessedAt != null) 'assessed_at': assessedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalRiskAssessmentsCompanion copyWith({
+    Value<String>? habitationId,
+    Value<double>? hazardExposure,
+    Value<double>? vulnerabilityIndex,
+    Value<double>? riskScore,
+    Value<String>? riskClass,
+    Value<String>? modelVersion,
+    Value<String>? contributingHazardZoneIdsJson,
+    Value<DateTime>? assessedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalRiskAssessmentsCompanion(
+      habitationId: habitationId ?? this.habitationId,
+      hazardExposure: hazardExposure ?? this.hazardExposure,
+      vulnerabilityIndex: vulnerabilityIndex ?? this.vulnerabilityIndex,
+      riskScore: riskScore ?? this.riskScore,
+      riskClass: riskClass ?? this.riskClass,
+      modelVersion: modelVersion ?? this.modelVersion,
+      contributingHazardZoneIdsJson:
+          contributingHazardZoneIdsJson ?? this.contributingHazardZoneIdsJson,
+      assessedAt: assessedAt ?? this.assessedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (hazardExposure.present) {
+      map['hazard_exposure'] = Variable<double>(hazardExposure.value);
+    }
+    if (vulnerabilityIndex.present) {
+      map['vulnerability_index'] = Variable<double>(vulnerabilityIndex.value);
+    }
+    if (riskScore.present) {
+      map['risk_score'] = Variable<double>(riskScore.value);
+    }
+    if (riskClass.present) {
+      map['risk_class'] = Variable<String>(riskClass.value);
+    }
+    if (modelVersion.present) {
+      map['model_version'] = Variable<String>(modelVersion.value);
+    }
+    if (contributingHazardZoneIdsJson.present) {
+      map['contributing_hazard_zone_ids_json'] = Variable<String>(
+        contributingHazardZoneIdsJson.value,
+      );
+    }
+    if (assessedAt.present) {
+      map['assessed_at'] = Variable<DateTime>(assessedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalRiskAssessmentsCompanion(')
+          ..write('habitationId: $habitationId, ')
+          ..write('hazardExposure: $hazardExposure, ')
+          ..write('vulnerabilityIndex: $vulnerabilityIndex, ')
+          ..write('riskScore: $riskScore, ')
+          ..write('riskClass: $riskClass, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write(
+            'contributingHazardZoneIdsJson: $contributingHazardZoneIdsJson, ',
+          )
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -4039,6 +5174,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalIncidentReportsTable(this);
   late final $LocalSheltersTable localShelters = $LocalSheltersTable(this);
   late final $LocalRoutesTable localRoutes = $LocalRoutesTable(this);
+  late final $LocalHabitationsTable localHabitations = $LocalHabitationsTable(
+    this,
+  );
+  late final $LocalRiskAssessmentsTable localRiskAssessments =
+      $LocalRiskAssessmentsTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -4053,6 +5193,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localIncidentReports,
     localShelters,
     localRoutes,
+    localHabitations,
+    localRiskAssessments,
     syncQueueEntries,
   ];
 }
@@ -5798,6 +6940,581 @@ typedef $$LocalRoutesTableProcessedTableManager =
       LocalRoute,
       PrefetchHooks Function()
     >;
+typedef $$LocalHabitationsTableCreateCompanionBuilder =
+    LocalHabitationsCompanion Function({
+      required String id,
+      required String name,
+      required double latitude,
+      required double longitude,
+      Value<int> population,
+      Value<String?> administrativeRegionName,
+      required DateTime updatedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalHabitationsTableUpdateCompanionBuilder =
+    LocalHabitationsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<int> population,
+      Value<String?> administrativeRegionName,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalHabitationsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalHabitationsTable> {
+  $$LocalHabitationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get population => $composableBuilder(
+    column: $table.population,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get administrativeRegionName => $composableBuilder(
+    column: $table.administrativeRegionName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalHabitationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalHabitationsTable> {
+  $$LocalHabitationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get population => $composableBuilder(
+    column: $table.population,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get administrativeRegionName => $composableBuilder(
+    column: $table.administrativeRegionName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalHabitationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalHabitationsTable> {
+  $$LocalHabitationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<int> get population => $composableBuilder(
+    column: $table.population,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get administrativeRegionName => $composableBuilder(
+    column: $table.administrativeRegionName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalHabitationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalHabitationsTable,
+          LocalHabitation,
+          $$LocalHabitationsTableFilterComposer,
+          $$LocalHabitationsTableOrderingComposer,
+          $$LocalHabitationsTableAnnotationComposer,
+          $$LocalHabitationsTableCreateCompanionBuilder,
+          $$LocalHabitationsTableUpdateCompanionBuilder,
+          (
+            LocalHabitation,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalHabitationsTable,
+              LocalHabitation
+            >,
+          ),
+          LocalHabitation,
+          PrefetchHooks Function()
+        > {
+  $$LocalHabitationsTableTableManager(
+    _$AppDatabase db,
+    $LocalHabitationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalHabitationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalHabitationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalHabitationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<int> population = const Value.absent(),
+                Value<String?> administrativeRegionName = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalHabitationsCompanion(
+                id: id,
+                name: name,
+                latitude: latitude,
+                longitude: longitude,
+                population: population,
+                administrativeRegionName: administrativeRegionName,
+                updatedAt: updatedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required double latitude,
+                required double longitude,
+                Value<int> population = const Value.absent(),
+                Value<String?> administrativeRegionName = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalHabitationsCompanion.insert(
+                id: id,
+                name: name,
+                latitude: latitude,
+                longitude: longitude,
+                population: population,
+                administrativeRegionName: administrativeRegionName,
+                updatedAt: updatedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalHabitationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalHabitationsTable,
+      LocalHabitation,
+      $$LocalHabitationsTableFilterComposer,
+      $$LocalHabitationsTableOrderingComposer,
+      $$LocalHabitationsTableAnnotationComposer,
+      $$LocalHabitationsTableCreateCompanionBuilder,
+      $$LocalHabitationsTableUpdateCompanionBuilder,
+      (
+        LocalHabitation,
+        BaseReferences<_$AppDatabase, $LocalHabitationsTable, LocalHabitation>,
+      ),
+      LocalHabitation,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalRiskAssessmentsTableCreateCompanionBuilder =
+    LocalRiskAssessmentsCompanion Function({
+      required String habitationId,
+      required double hazardExposure,
+      required double vulnerabilityIndex,
+      required double riskScore,
+      required String riskClass,
+      required String modelVersion,
+      Value<String> contributingHazardZoneIdsJson,
+      required DateTime assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalRiskAssessmentsTableUpdateCompanionBuilder =
+    LocalRiskAssessmentsCompanion Function({
+      Value<String> habitationId,
+      Value<double> hazardExposure,
+      Value<double> vulnerabilityIndex,
+      Value<double> riskScore,
+      Value<String> riskClass,
+      Value<String> modelVersion,
+      Value<String> contributingHazardZoneIdsJson,
+      Value<DateTime> assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalRiskAssessmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalRiskAssessmentsTable> {
+  $$LocalRiskAssessmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hazardExposure => $composableBuilder(
+    column: $table.hazardExposure,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get riskScore => $composableBuilder(
+    column: $table.riskScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get riskClass => $composableBuilder(
+    column: $table.riskClass,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contributingHazardZoneIdsJson => $composableBuilder(
+    column: $table.contributingHazardZoneIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalRiskAssessmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalRiskAssessmentsTable> {
+  $$LocalRiskAssessmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get hazardExposure => $composableBuilder(
+    column: $table.hazardExposure,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get riskScore => $composableBuilder(
+    column: $table.riskScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get riskClass => $composableBuilder(
+    column: $table.riskClass,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contributingHazardZoneIdsJson =>
+      $composableBuilder(
+        column: $table.contributingHazardZoneIdsJson,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalRiskAssessmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalRiskAssessmentsTable> {
+  $$LocalRiskAssessmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get hazardExposure => $composableBuilder(
+    column: $table.hazardExposure,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get vulnerabilityIndex => $composableBuilder(
+    column: $table.vulnerabilityIndex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get riskScore =>
+      $composableBuilder(column: $table.riskScore, builder: (column) => column);
+
+  GeneratedColumn<String> get riskClass =>
+      $composableBuilder(column: $table.riskClass, builder: (column) => column);
+
+  GeneratedColumn<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contributingHazardZoneIdsJson =>
+      $composableBuilder(
+        column: $table.contributingHazardZoneIdsJson,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalRiskAssessmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalRiskAssessmentsTable,
+          LocalRiskAssessment,
+          $$LocalRiskAssessmentsTableFilterComposer,
+          $$LocalRiskAssessmentsTableOrderingComposer,
+          $$LocalRiskAssessmentsTableAnnotationComposer,
+          $$LocalRiskAssessmentsTableCreateCompanionBuilder,
+          $$LocalRiskAssessmentsTableUpdateCompanionBuilder,
+          (
+            LocalRiskAssessment,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalRiskAssessmentsTable,
+              LocalRiskAssessment
+            >,
+          ),
+          LocalRiskAssessment,
+          PrefetchHooks Function()
+        > {
+  $$LocalRiskAssessmentsTableTableManager(
+    _$AppDatabase db,
+    $LocalRiskAssessmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalRiskAssessmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalRiskAssessmentsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalRiskAssessmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> habitationId = const Value.absent(),
+                Value<double> hazardExposure = const Value.absent(),
+                Value<double> vulnerabilityIndex = const Value.absent(),
+                Value<double> riskScore = const Value.absent(),
+                Value<String> riskClass = const Value.absent(),
+                Value<String> modelVersion = const Value.absent(),
+                Value<String> contributingHazardZoneIdsJson =
+                    const Value.absent(),
+                Value<DateTime> assessedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalRiskAssessmentsCompanion(
+                habitationId: habitationId,
+                hazardExposure: hazardExposure,
+                vulnerabilityIndex: vulnerabilityIndex,
+                riskScore: riskScore,
+                riskClass: riskClass,
+                modelVersion: modelVersion,
+                contributingHazardZoneIdsJson: contributingHazardZoneIdsJson,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String habitationId,
+                required double hazardExposure,
+                required double vulnerabilityIndex,
+                required double riskScore,
+                required String riskClass,
+                required String modelVersion,
+                Value<String> contributingHazardZoneIdsJson =
+                    const Value.absent(),
+                required DateTime assessedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalRiskAssessmentsCompanion.insert(
+                habitationId: habitationId,
+                hazardExposure: hazardExposure,
+                vulnerabilityIndex: vulnerabilityIndex,
+                riskScore: riskScore,
+                riskClass: riskClass,
+                modelVersion: modelVersion,
+                contributingHazardZoneIdsJson: contributingHazardZoneIdsJson,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalRiskAssessmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalRiskAssessmentsTable,
+      LocalRiskAssessment,
+      $$LocalRiskAssessmentsTableFilterComposer,
+      $$LocalRiskAssessmentsTableOrderingComposer,
+      $$LocalRiskAssessmentsTableAnnotationComposer,
+      $$LocalRiskAssessmentsTableCreateCompanionBuilder,
+      $$LocalRiskAssessmentsTableUpdateCompanionBuilder,
+      (
+        LocalRiskAssessment,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalRiskAssessmentsTable,
+          LocalRiskAssessment
+        >,
+      ),
+      LocalRiskAssessment,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -6098,6 +7815,10 @@ class $AppDatabaseManager {
       $$LocalSheltersTableTableManager(_db, _db.localShelters);
   $$LocalRoutesTableTableManager get localRoutes =>
       $$LocalRoutesTableTableManager(_db, _db.localRoutes);
+  $$LocalHabitationsTableTableManager get localHabitations =>
+      $$LocalHabitationsTableTableManager(_db, _db.localHabitations);
+  $$LocalRiskAssessmentsTableTableManager get localRiskAssessments =>
+      $$LocalRiskAssessmentsTableTableManager(_db, _db.localRiskAssessments);
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }

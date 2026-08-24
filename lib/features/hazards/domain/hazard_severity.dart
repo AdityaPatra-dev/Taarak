@@ -9,4 +9,22 @@ enum HazardSeverity {
   critical;
 
   String get storageValue => name;
+
+  /// Numeric weight used by M07's risk engine to combine severity with
+  /// hazard-zone confidence into a single exposure figure. Midpoints of
+  /// the normalizer's own bucket thresholds, so a zone right at a bucket
+  /// boundary doesn't get an outsized intensity jump.
+  double get intensity => switch (this) {
+    HazardSeverity.low => 0.25,
+    HazardSeverity.medium => 0.5,
+    HazardSeverity.high => 0.75,
+    HazardSeverity.critical => 1.0,
+  };
+
+  static HazardSeverity? fromStorageValue(String value) {
+    for (final severity in HazardSeverity.values) {
+      if (severity.storageValue == value) return severity;
+    }
+    return null;
+  }
 }

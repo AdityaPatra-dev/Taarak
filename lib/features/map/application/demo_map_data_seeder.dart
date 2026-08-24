@@ -6,11 +6,13 @@ import 'package:taarak/features/hazards/domain/raw_hazard_observation.dart';
 import 'package:taarak/features/map/domain/road_blockage.dart';
 
 /// Dev-only convenience: before M12 (citizen reporting) exists to populate
-/// the local cache for real, this seeds a handful of sample shelters and
-/// incidents, and pushes a couple of sample hazard observations through
-/// M06's real ingestion pipeline, so the map screen has something to
-/// render. Gated behind [AppConfig.isDevMode] at the call site — never
-/// runs in a real build.
+/// the local cache for real, this seeds a handful of sample shelters,
+/// incidents and habitations, and pushes a couple of sample hazard
+/// observations through M06's real ingestion pipeline, so the map screen
+/// has something to render. Gated behind [AppConfig.isDevMode] at the
+/// call site — never runs in a real build. Doesn't run M07's risk engine
+/// itself — that's a separate call once habitations exist (see
+/// RiskAssessmentService.assessAllHabitations).
 class DemoMapDataSeeder {
   static const LatLng demoCenter = LatLng(12.9716, 77.5946);
 
@@ -102,6 +104,28 @@ class DemoMapDataSeeder {
           description: const Value('Road blocked by fallen debris'),
           severity: const Value('medium'),
           createdAt: now,
+          updatedAt: now,
+        ),
+      ]);
+
+      batch.insertAll(_db.localHabitations, [
+        // Sits inside the landslide hazard zone above — M07 should score
+        // this one high/red once assessed.
+        LocalHabitationsCompanion.insert(
+          id: 'demo-habitation-ridge-colony',
+          name: 'Ridge Colony',
+          latitude: c.latitude + 0.007,
+          longitude: c.longitude + 0.0025,
+          population: const Value(850),
+          updatedAt: now,
+        ),
+        // Outside every seeded hazard zone — should score low.
+        LocalHabitationsCompanion.insert(
+          id: 'demo-habitation-valley-town',
+          name: 'Valley Town',
+          latitude: c.latitude + 0.03,
+          longitude: c.longitude - 0.03,
+          population: const Value(1200),
           updatedAt: now,
         ),
       ]);

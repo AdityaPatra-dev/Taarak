@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:taarak/core/database/tables/local_habitations_table.dart';
 import 'package:taarak/core/database/tables/local_hazard_zones_table.dart';
 import 'package:taarak/core/database/tables/local_incident_reports_table.dart';
 import 'package:taarak/core/database/tables/local_incidents_table.dart';
+import 'package:taarak/core/database/tables/local_risk_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_routes_table.dart';
 import 'package:taarak/core/database/tables/local_shelters_table.dart';
 import 'package:taarak/core/database/tables/local_users_table.dart';
@@ -21,6 +23,8 @@ part 'app_database.g.dart';
     LocalIncidentReports,
     LocalShelters,
     LocalRoutes,
+    LocalHabitations,
+    LocalRiskAssessments,
     SyncQueueEntries,
   ],
 )

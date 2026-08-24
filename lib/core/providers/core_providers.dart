@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/config/app_config.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
+import 'package:taarak/core/database/repositories/local_risk_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_route_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
 import 'package:taarak/core/database/repositories/local_user_repository.dart';
@@ -63,6 +65,15 @@ final localShelterRepositoryProvider = Provider<LocalShelterRepository>(
 final localRouteRepositoryProvider = Provider<LocalRouteRepository>(
   (ref) => LocalRouteRepository(ref.watch(appDatabaseProvider)),
 );
+
+final localHabitationRepositoryProvider = Provider<LocalHabitationRepository>(
+  (ref) => LocalHabitationRepository(ref.watch(appDatabaseProvider)),
+);
+
+final localRiskAssessmentRepositoryProvider =
+    Provider<LocalRiskAssessmentRepository>(
+      (ref) => LocalRiskAssessmentRepository(ref.watch(appDatabaseProvider)),
+    );
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(
   (ref) => SyncQueueDao(ref.watch(appDatabaseProvider)),
