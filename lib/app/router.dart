@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:taarak/app/route_guard.dart';
 import 'package:taarak/features/alerts/presentation/alerts_screen.dart';
 import 'package:taarak/features/alerts/presentation/broadcast_alert_screen.dart';
+import 'package:taarak/features/audit/presentation/audit_log_screen.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/dashboard/presentation/command_dashboard_screen.dart';
 import 'package:taarak/features/dashboard/presentation/incident_detail_screen.dart';
@@ -90,6 +91,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           incidentId: state.pathParameters['incidentId']!,
         ),
       ),
+      GoRoute(path: '/audit', builder: (context, state) => const AuditLogScreen()),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),

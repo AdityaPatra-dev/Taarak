@@ -83,7 +83,8 @@ class HomeScreen extends ConsumerWidget {
               user.role.can(Permission.manageSheltersResources) ||
               user.role.can(Permission.viewAlerts) ||
               user.role.can(Permission.sendBroadcast) ||
-              user.role.can(Permission.monitorZones)) ...[
+              user.role.can(Permission.monitorZones) ||
+              user.role.can(Permission.reviewAudit)) ...[
             const SizedBox(height: 24),
             Text(
               'Quick actions',
@@ -144,6 +145,12 @@ class HomeScreen extends ConsumerWidget {
                     onPressed: () => context.go('/dashboard'),
                     icon: const Icon(Icons.dashboard_outlined),
                     label: const Text('Command Dashboard'),
+                  ),
+                if (user.role.can(Permission.reviewAudit))
+                  OutlinedButton.icon(
+                    onPressed: () => context.go('/audit'),
+                    icon: const Icon(Icons.history_outlined),
+                    label: const Text('Audit Log'),
                   ),
               ],
             ),

@@ -18,6 +18,7 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/alerts': Permission.viewAlerts,
   '/alerts/broadcast': Permission.sendBroadcast,
   '/dashboard': Permission.monitorZones,
+  '/audit': Permission.reviewAudit,
 };
 
 /// [defaultRoutePermissions] only matches exact locations; a route with a

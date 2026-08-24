@@ -1,0 +1,138 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/features/audit/application/audit_log_filter.dart';
+import 'package:taarak/features/audit/application/audit_providers.dart';
+
+/// M19: a System Admin's ([Permission.reviewAudit]) view into every
+/// critical change recorded by [AuditLogDao] — actor, action, object,
+/// time, old/new value and reason, exactly the fields the spec names,
+/// shown per row rather than requiring a tap to reveal them. Every write
+/// this app makes to it (M13 incident lifecycle, M15 shelter management,
+/// M16 alert broadcasts, and whatever future module adds its own) shows
+/// up here without this screen needing to know about that module.
+class AuditLogScreen extends ConsumerStatefulWidget {
+  const AuditLogScreen({super.key});
+
+  @override
+  ConsumerState<AuditLogScreen> createState() => _AuditLogScreenState();
+}
+
+class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
+  String? _objectTypeFilter;
+  final _queryController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _queryController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final eventsAsync = ref.watch(auditEventsProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Audit Log'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: () => ref.invalidate(auditEventsProvider),
+          ),
+        ],
+      ),
+      body: eventsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Could not load the audit log: $error')),
+        data: (events) {
+          final objectTypes = events.map((e) => e.objectType).toSet().toList()..sort();
+          final filtered = filterAuditEvents(
+            events,
+            objectType: _objectTypeFilter,
+            query: _query,
+          );
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _queryController,
+                      decoration: const InputDecoration(
+                        labelText: 'Search actor, action, object, reason',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) => setState(() => _query = value),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('All'),
+                          selected: _objectTypeFilter == null,
+                          onSelected: (_) => setState(() => _objectTypeFilter = null),
+                        ),
+                        for (final type in objectTypes)
+                          ChoiceChip(
+                            label: Text(type),
+                            selected: _objectTypeFilter == type,
+                            onSelected: (_) =>
+                                setState(() => _objectTypeFilter = type),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: filtered.isEmpty
+                    ? const Center(child: Text('No matching audit events.'))
+                    : ListView(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        children: [
+                          for (final event in filtered) _AuditEventCard(event: event),
+                        ],
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AuditEventCard extends StatelessWidget {
+  final LocalAuditEvent event;
+
+  const _AuditEventCard({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(event.action, style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Text('Actor: ${event.actorId}'),
+            Text('Object: ${event.objectType} · ${event.objectId}'),
+            Text('Time: ${event.occurredAt.toLocal()}'),
+            if (event.reason != null) Text('Reason: ${event.reason}'),
+            if (event.oldValue != null) Text('Before: ${event.oldValue}'),
+            if (event.newValue != null) Text('After: ${event.newValue}'),
+          ],
+        ),
+      ),
+    );
+  }
+}

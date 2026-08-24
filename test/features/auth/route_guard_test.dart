@@ -108,6 +108,19 @@ void main() {
       );
     });
 
+    test('the real /audit route (M19) admits a system admin', () {
+      final session = _sessionFor(UserRole.systemAdmin);
+      expect(computeRedirect(session: session, location: '/audit'), isNull);
+    });
+
+    test('the real /audit route (M19) turns away a district/command user', () {
+      final session = _sessionFor(UserRole.districtCommand);
+      expect(
+        computeRedirect(session: session, location: '/audit'),
+        '/unauthorized',
+      );
+    });
+
     test(
       'an incident drill-down (M18) is gated the same as /dashboard, despite the varying path',
       () {
