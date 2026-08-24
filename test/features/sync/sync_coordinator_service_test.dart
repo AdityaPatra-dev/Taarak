@@ -8,6 +8,7 @@ import 'package:taarak/core/error/failure.dart';
 import 'package:taarak/core/network/network_info.dart';
 import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/sync/application/sync_coordinator_service.dart';
+import 'package:taarak/features/sync/application/sync_engine.dart';
 import 'package:taarak/features/sync/application/sync_transport.dart';
 import 'package:taarak/features/sync/domain/sync_push_outcome.dart';
 
@@ -264,4 +265,54 @@ void main() {
       expect(transport.pushedEntityIds.first, 'sos');
     });
   });
+
+  group(
+    'CRITICAL TEXT/GPS CAN SYNC EVEN IF MEDIA FAILS — the M21 acceptance criterion',
+    () {
+      test(
+        "a report's own entry still syncs even though its media attachment's push fails",
+        () async {
+          final reportId = await enqueue(
+            entityId: 'report-1',
+            payload: {'reportType': 'landslide', 'severity': 'high'},
+          );
+          final mediaResult = await syncQueueDao.enqueue(
+            entityTable: SyncEngine.mediaAttachmentsTable,
+            entityId: 'report-1-media',
+            operation: 'create',
+            payloadJson: jsonEncode({'reportId': 'report-1'}),
+          );
+          final mediaId = mediaResult.dataOrNull!;
+
+          final transport = _ScriptedTransport({
+            'report-1-media': () => const Result.failure(NetworkFailure()),
+          });
+          final service = SyncCoordinatorService(
+            syncQueueDao: syncQueueDao,
+            networkInfo: _FakeNetworkInfo(),
+            transport: transport,
+          );
+
+          final summary = await service.syncPendingEntries(now: now);
+
+          // The report — critical text/GPS — synced despite the media failure.
+          expect(summary.syncedCount, 1);
+          expect(summary.failedCount, 1);
+          final reportRow = await (db.select(
+            db.syncQueueEntries,
+          )..where((t) => t.id.equals(reportId))).getSingle();
+          expect(reportRow.status, 'synced');
+
+          // The media attachment is independently retryable, not lost.
+          final mediaRow = await (db.select(
+            db.syncQueueEntries,
+          )..where((t) => t.id.equals(mediaId))).getSingle();
+          expect(mediaRow.status, 'failed');
+
+          // And it was pushed after the report, per priority.
+          expect(transport.pushedEntityIds, ['report-1', 'report-1-media']);
+        },
+      );
+    },
+  );
 }

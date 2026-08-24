@@ -98,6 +98,47 @@ void main() {
       expect(ordered.map((e) => e.id), [3, 2, 1]);
     });
 
+    test(
+      'CRITICAL TEXT/GPS CAN SYNC EVEN IF MEDIA FAILS — the priority half: a media '
+      'attachment queued long before a report still pushes after it',
+      () {
+        final oldMedia = entry(
+          id: 1,
+          entityTable: SyncEngine.mediaAttachmentsTable,
+          entityId: 'report-1-media',
+          createdAt: now,
+        );
+        final newerReport = entry(
+          id: 2,
+          entityTable: 'local_incident_reports',
+          entityId: 'report-2',
+          payload: {'reportType': 'flood', 'severity': 'low'},
+          createdAt: now.add(const Duration(minutes: 10)),
+        );
+
+        final ordered = engine.prioritize([oldMedia, newerReport]);
+
+        expect(ordered.map((e) => e.entityId), ['report-2', 'report-1-media']);
+      },
+    );
+
+    test('a media attachment ranks below even a routine report, not just SOS/critical ones', () {
+      final routineReport = entry(
+        id: 1,
+        payload: {'reportType': 'flood', 'severity': 'low'},
+        createdAt: now,
+      );
+      final media = entry(
+        id: 2,
+        entityTable: SyncEngine.mediaAttachmentsTable,
+        createdAt: now,
+      );
+
+      final ordered = engine.prioritize([media, routineReport]);
+
+      expect(ordered.map((e) => e.id), [1, 2]);
+    });
+
     test('within the same priority, oldest-first is preserved', () {
       final first = entry(id: 1, createdAt: now);
       final second = entry(id: 2, createdAt: now.add(const Duration(minutes: 1)));

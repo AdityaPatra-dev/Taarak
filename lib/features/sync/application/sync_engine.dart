@@ -37,8 +37,10 @@ class SyncEngine {
   }
 
   /// Highest priority first — an SOS or critical-severity report jumps
-  /// the queue ahead of routine reports — then oldest-first within the
-  /// same priority, so the queue is still a FIFO except for emergencies.
+  /// the queue ahead of routine reports, and every report (M21's "critical
+  /// text/GPS") is pushed before any media attachment regardless of how
+  /// long the media has been queued — then oldest-first within the same
+  /// priority, so the queue is still a FIFO except for those two rules.
   List<SyncQueueEntry> prioritize(List<SyncQueueEntry> entries) {
     final sorted = [...entries];
     sorted.sort((a, b) {
@@ -49,7 +51,10 @@ class SyncEngine {
     return sorted;
   }
 
+  static const String mediaAttachmentsTable = 'media_attachments';
+
   int _priorityOf(SyncQueueEntry entry) {
+    if (entry.entityTable == mediaAttachmentsTable) return 3;
     final payload = _decodePayload(entry);
     if (payload['reportType'] == 'sos') return 0;
     if (payload['severity'] == 'critical') return 1;

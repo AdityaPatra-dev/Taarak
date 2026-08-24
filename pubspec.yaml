@@ -62,6 +62,9 @@ dependencies:
   uuid: ^4.5.1
   # Optional photo attachment on citizen reports (M12).
   image_picker: ^1.1.2
+  # Client-side resize/re-encode before a photo is queued for upload (M21).
+  image: ^4.3.0
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:
