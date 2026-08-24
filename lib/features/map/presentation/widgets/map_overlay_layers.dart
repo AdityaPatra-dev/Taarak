@@ -143,6 +143,9 @@ String _habitationTooltip(HabitationOverview item) {
 /// M11's recommended routes, each colored green when every segment cleared
 /// the hazard/blockage checks and orange when it's a detour (or the best
 /// still-imperfect option) around a blocked/hazard-exposed direct path.
+/// Solid means the geometry came from a real road-network provider; dashed
+/// means it's the offline/no-provider straight-line estimate — a route is
+/// never shown in a way that could be mistaken for the other kind.
 PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
   return PolylineLayer(
     polylines: [
@@ -151,6 +154,9 @@ PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
           points: decodePolygonPoints(route.polylineJson),
           strokeWidth: 4,
           color: route.isSafe ? Colors.green.shade700 : Colors.orange.shade900,
+          pattern: route.isRoadSnapped
+              ? const StrokePattern.solid()
+              : StrokePattern.dashed(segments: const [10, 6]),
         ),
     ],
   );

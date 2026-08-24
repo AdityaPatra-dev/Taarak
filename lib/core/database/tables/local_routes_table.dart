@@ -17,6 +17,12 @@ class LocalRoutes extends Table {
   /// the full per-segment breakdown just to render it.
   BoolColumn get isSafe => boolean().withDefault(const Constant(true))();
 
+  /// Whether [polylineJson] came from a real [RoadNetworkProvider] (true
+  /// road geometry) or the engine's own straight-line/detour fallback —
+  /// the map renders these differently so a route is never mistaken for
+  /// the other kind.
+  BoolColumn get isRoadSnapped => boolean().withDefault(const Constant(false))();
+
   DateTimeColumn get cachedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();
 

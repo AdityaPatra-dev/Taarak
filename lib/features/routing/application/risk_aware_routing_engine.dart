@@ -30,6 +30,13 @@ class RiskAwareRoutingEngine {
   static const double detourOffsetFraction = 0.35;
   static const int segmentSampleCount = 20;
 
+  /// Consecutive points on a real road route (from a
+  /// [RoadNetworkProvider]) are already close together — unlike the
+  /// straight-line/detour case, where a single segment can span
+  /// kilometers — so far fewer interpolated samples are needed per
+  /// segment to catch a hazard/blockage crossing.
+  static const int roadRouteSamplesPerSegment = 2;
+
   RoutePlan planRoute({
     required LatLng origin,
     required LatLng destination,
@@ -78,6 +85,31 @@ class RiskAwareRoutingEngine {
     );
   }
 
+  /// Assesses a real, road-following polyline (typically from
+  /// [RoadNetworkProvider]) against the same hazard/blockage rules the
+  /// straight-line/detour path above already uses — same engine, a
+  /// different geometry source. [etaSecondsOverride] lets the caller pass
+  /// a routing provider's own (road-speed-aware) ETA instead of this
+  /// engine's flat-speed estimate, since a real road route's distance
+  /// already reflects actual travel distance, not a straight line.
+  RouteCandidate assessRoadRoute({
+    required List<LatLng> roadPoints,
+    required List<LocalHazardZone> hazardZones,
+    required List<LocalIncident> blockedRoadIncidents,
+    int? etaSecondsOverride,
+  }) {
+    if (roadPoints.length < 2) {
+      throw ArgumentError.value(roadPoints, 'roadPoints', 'must contain at least two points');
+    }
+    return _buildCandidate(
+      roadPoints,
+      hazardZones,
+      blockedRoadIncidents,
+      samplesPerSegment: roadRouteSamplesPerSegment,
+      etaSecondsOverride: etaSecondsOverride,
+    );
+  }
+
   List<LatLng> _detourWaypoints(LatLng origin, LatLng destination, {required int side}) {
     final midLat = (origin.latitude + destination.latitude) / 2;
     final midLng = (origin.longitude + destination.longitude) / 2;
@@ -96,8 +128,10 @@ class RiskAwareRoutingEngine {
   RouteCandidate _buildCandidate(
     List<LatLng> points,
     List<LocalHazardZone> hazardZones,
-    List<LocalIncident> blockedRoadIncidents,
-  ) {
+    List<LocalIncident> blockedRoadIncidents, {
+    int samplesPerSegment = segmentSampleCount,
+    int? etaSecondsOverride,
+  }) {
     final segments = <RouteSegmentAssessment>[];
     var totalDistanceMeters = 0.0;
 
@@ -105,14 +139,17 @@ class RiskAwareRoutingEngine {
       final start = points[i];
       final end = points[i + 1];
       totalDistanceMeters += _distance.as(LengthUnit.Meter, start, end);
-      segments.add(_assessSegment(start, end, hazardZones, blockedRoadIncidents));
+      segments.add(
+        _assessSegment(start, end, hazardZones, blockedRoadIncidents, samplesPerSegment),
+      );
     }
 
     return RouteCandidate(
       points: points,
       segments: segments,
       distanceMeters: totalDistanceMeters,
-      etaSeconds: (totalDistanceMeters / defaultSpeedMetersPerSecond).round(),
+      etaSeconds:
+          etaSecondsOverride ?? (totalDistanceMeters / defaultSpeedMetersPerSecond).round(),
     );
   }
 
@@ -121,8 +158,9 @@ class RiskAwareRoutingEngine {
     LatLng end,
     List<LocalHazardZone> hazardZones,
     List<LocalIncident> blockedRoadIncidents,
+    int samplesPerSegment,
   ) {
-    final samplePoints = _samplePoints(start, end, segmentSampleCount);
+    final samplePoints = _samplePoints(start, end, samplesPerSegment);
     final reasons = <String>[];
 
     var isHazardExposed = false;

@@ -187,4 +187,95 @@ void main() {
     expect(plan.primaryRoute.points.length, 2);
     expect(plan.primaryRoute.isSafe, isTrue);
   });
+
+  group('assessRoadRoute', () {
+    test(
+      'FIX ROUTING SO ROUTES REPRESENT ACTUAL ROADS — the acceptance criterion: a '
+      'real road polyline is assessed with the same hazard/blockage rules, not replaced',
+      () {
+        final zone = squareZoneAround(0.5, 0.5, halfSize: 0.1);
+        final roadPoints = [
+          const LatLng(0, 0),
+          const LatLng(0.2, 0.15),
+          const LatLng(0.5, 0.5), // passes straight through the zone
+          const LatLng(0.8, 0.85),
+          const LatLng(1, 1),
+        ];
+
+        final candidate = engine.assessRoadRoute(
+          roadPoints: roadPoints,
+          hazardZones: [zone],
+          blockedRoadIncidents: const [],
+        );
+
+        expect(candidate.points, roadPoints);
+        expect(candidate.isSafe, isFalse);
+      },
+    );
+
+    test('a road route that avoids every hazard/blockage is safe', () {
+      final roadPoints = [
+        const LatLng(0, 0),
+        const LatLng(0.1, 0.1),
+        const LatLng(0.2, 0.2),
+      ];
+
+      final candidate = engine.assessRoadRoute(
+        roadPoints: roadPoints,
+        hazardZones: const [],
+        blockedRoadIncidents: const [],
+      );
+
+      expect(candidate.isSafe, isTrue);
+    });
+
+    test('an ETA override (a real provider\'s own road-speed-aware duration) is honored', () {
+      final candidate = engine.assessRoadRoute(
+        roadPoints: [const LatLng(0, 0), const LatLng(0, 1)],
+        hazardZones: const [],
+        blockedRoadIncidents: const [],
+        etaSecondsOverride: 4242,
+      );
+
+      expect(candidate.etaSeconds, 4242);
+    });
+
+    test('without an override, ETA falls back to the engine\'s own flat-speed estimate', () {
+      final candidate = engine.assessRoadRoute(
+        roadPoints: [const LatLng(0, 0), const LatLng(0, 1)],
+        hazardZones: const [],
+        blockedRoadIncidents: const [],
+      );
+
+      expect(candidate.etaSeconds, greaterThan(0));
+    });
+
+    test('a blocked-road incident right on a real road route is detected', () {
+      final blockage = blockedRoadAt(0.5, 0.5);
+      final roadPoints = [
+        const LatLng(0, 0),
+        const LatLng(0.5, 0.5),
+        const LatLng(1, 1),
+      ];
+
+      final candidate = engine.assessRoadRoute(
+        roadPoints: roadPoints,
+        hazardZones: const [],
+        blockedRoadIncidents: [blockage],
+      );
+
+      expect(candidate.isSafe, isFalse);
+    });
+
+    test('fewer than two points is a programming error, not a silent no-op', () {
+      expect(
+        () => engine.assessRoadRoute(
+          roadPoints: [const LatLng(0, 0)],
+          hazardZones: const [],
+          blockedRoadIncidents: const [],
+        ),
+        throwsArgumentError,
+      );
+    });
+  });
 }

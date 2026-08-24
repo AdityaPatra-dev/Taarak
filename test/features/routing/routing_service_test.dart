@@ -9,9 +9,29 @@ import 'package:taarak/core/database/repositories/local_incident_repository.dart
 import 'package:taarak/core/database/repositories/local_relocation_plan_repository.dart';
 import 'package:taarak/core/database/repositories/local_route_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
+import 'package:taarak/core/error/failure.dart';
+import 'package:taarak/core/gis/geometry_codec.dart';
+import 'package:taarak/core/repository/result.dart';
+import 'package:taarak/core/routing/road_network_provider.dart';
+import 'package:taarak/core/routing/road_route.dart';
 import 'package:taarak/features/routing/application/routing_service.dart';
 
 import '../../support/sqlite3_test_setup.dart';
+
+class _ScriptedRoadNetworkProvider implements RoadNetworkProvider {
+  final Result<RoadRoute> Function() _script;
+  int callCount = 0;
+  _ScriptedRoadNetworkProvider(this._script);
+
+  @override
+  Future<Result<RoadRoute>> fetchRoute({
+    required LatLng origin,
+    required LatLng destination,
+  }) async {
+    callCount++;
+    return _script();
+  }
+}
 
 void main() {
   configureSqlite3ForLocalTests();
@@ -74,6 +94,137 @@ void main() {
         destination: const LatLng(20, 20),
       );
       expect(result.isFailure, isTrue);
+    });
+  });
+
+  group('planRoute with a RoadNetworkProvider', () {
+    RoutingService serviceWithProvider(RoadNetworkProvider provider) => RoutingService(
+      hazardZoneRepository: LocalHazardZoneRepository(db),
+      incidentRepository: LocalIncidentRepository(db),
+      routeRepository: LocalRouteRepository(db),
+      habitationRepository: LocalHabitationRepository(db),
+      relocationPlanRepository: LocalRelocationPlanRepository(db),
+      shelterRepository: LocalShelterRepository(db),
+      roadNetworkProvider: provider,
+    );
+
+    test(
+      'a successful road route is cached as road-snapped with the real geometry',
+      () async {
+        const origin = LatLng(0, 0);
+        const destination = LatLng(0, 1);
+        final roadPoints = [
+          origin,
+          const LatLng(0.02, 0.3),
+          const LatLng(-0.01, 0.6),
+          destination,
+        ];
+        final provider = _ScriptedRoadNetworkProvider(
+          () => Result.success(
+            RoadRoute(points: roadPoints, distanceMeters: 12000, etaSeconds: 900),
+          ),
+        );
+
+        final result = await serviceWithProvider(
+          provider,
+        ).planRoute(origin: origin, destination: destination, now: now);
+
+        expect(result.isSuccess, isTrue);
+        expect(provider.callCount, 1);
+
+        final cached = await (db.select(
+          db.localRoutes,
+        )..where((t) => t.id.equals(routeCacheKey(origin, destination)))).getSingle();
+        expect(cached.isRoadSnapped, isTrue);
+        expect(decodePolygonPoints(cached.polylineJson), roadPoints);
+        expect(cached.etaSeconds, 900);
+      },
+    );
+
+    test(
+      'when the provider fails, the route falls back to the straight-line engine',
+      () async {
+        const origin = LatLng(0, 0);
+        const destination = LatLng(0, 1);
+        final provider = _ScriptedRoadNetworkProvider(
+          () => const Result.failure(NetworkFailure('offline')),
+        );
+
+        final result = await serviceWithProvider(
+          provider,
+        ).planRoute(origin: origin, destination: destination, now: now);
+
+        expect(result.isSuccess, isTrue);
+        // The straight-line fallback for a clear path is just the two endpoints.
+        expect(result.dataOrNull?.primaryRoute.points, [origin, destination]);
+
+        final cached = await (db.select(
+          db.localRoutes,
+        )..where((t) => t.id.equals(routeCacheKey(origin, destination)))).getSingle();
+        expect(cached.isRoadSnapped, isFalse);
+      },
+    );
+
+    test(
+      'an unsafe road route still surfaces the straight-line detour as an alternative',
+      () async {
+        const origin = LatLng(0, 0);
+        const destination = LatLng(0, 1);
+
+        // A hazard zone that the road route (but not necessarily the
+        // straight line) passes directly through.
+        await db
+            .into(db.localHazardZones)
+            .insert(
+              LocalHazardZonesCompanion.insert(
+                id: 'zone-1',
+                hazardType: 'landslide',
+                severity: 'high',
+                geometryJson: encodePolygonPoints(const [
+                  LatLng(0.01, 0.29),
+                  LatLng(0.01, 0.31),
+                  LatLng(0.03, 0.31),
+                  LatLng(0.03, 0.29),
+                ]),
+                source: 'test',
+                observedAt: now,
+                updatedAt: now,
+              ),
+            );
+
+        final roadPoints = [origin, const LatLng(0.02, 0.3), destination];
+        final provider = _ScriptedRoadNetworkProvider(
+          () => Result.success(
+            RoadRoute(points: roadPoints, distanceMeters: 12000, etaSeconds: 900),
+          ),
+        );
+
+        final result = await serviceWithProvider(
+          provider,
+        ).planRoute(origin: origin, destination: destination, now: now);
+
+        expect(result.isSuccess, isTrue);
+        final plan = result.dataOrNull!;
+        expect(plan.primaryRoute.isSafe, isFalse);
+        expect(plan.alternativeRoutes, isNotEmpty);
+        expect(plan.alternativeRoutes.any((route) => route.isSafe), isTrue);
+      },
+    );
+
+    test('a road route of fewer than two points falls back to the straight-line engine', () async {
+      const origin = LatLng(0, 0);
+      const destination = LatLng(0, 1);
+      final provider = _ScriptedRoadNetworkProvider(
+        () => Result.success(
+          RoadRoute(points: [origin], distanceMeters: 0, etaSeconds: 0),
+        ),
+      );
+
+      final result = await serviceWithProvider(
+        provider,
+      ).planRoute(origin: origin, destination: destination, now: now);
+
+      expect(result.dataOrNull?.primaryRoute.points, [origin, destination]);
     });
   });
 

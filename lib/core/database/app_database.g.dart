@@ -3292,6 +3292,21 @@ class $LocalRoutesTable extends LocalRoutes
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _isRoadSnappedMeta = const VerificationMeta(
+    'isRoadSnapped',
+  );
+  @override
+  late final GeneratedColumn<bool> isRoadSnapped = GeneratedColumn<bool>(
+    'is_road_snapped',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_road_snapped" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _cachedAtMeta = const VerificationMeta(
     'cachedAt',
   );
@@ -3326,6 +3341,7 @@ class $LocalRoutesTable extends LocalRoutes
     distanceMeters,
     etaSeconds,
     isSafe,
+    isRoadSnapped,
     cachedAt,
     version,
   ];
@@ -3410,6 +3426,15 @@ class $LocalRoutesTable extends LocalRoutes
         isSafe.isAcceptableOrUnknown(data['is_safe']!, _isSafeMeta),
       );
     }
+    if (data.containsKey('is_road_snapped')) {
+      context.handle(
+        _isRoadSnappedMeta,
+        isRoadSnapped.isAcceptableOrUnknown(
+          data['is_road_snapped']!,
+          _isRoadSnappedMeta,
+        ),
+      );
+    }
     if (data.containsKey('cached_at')) {
       context.handle(
         _cachedAtMeta,
@@ -3469,6 +3494,10 @@ class $LocalRoutesTable extends LocalRoutes
         DriftSqlType.bool,
         data['${effectivePrefix}is_safe'],
       )!,
+      isRoadSnapped: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_road_snapped'],
+      )!,
       cachedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}cached_at'],
@@ -3500,6 +3529,12 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
   /// hazard/blockage checks — lets the map color a route without needing
   /// the full per-segment breakdown just to render it.
   final bool isSafe;
+
+  /// Whether [polylineJson] came from a real [RoadNetworkProvider] (true
+  /// road geometry) or the engine's own straight-line/detour fallback —
+  /// the map renders these differently so a route is never mistaken for
+  /// the other kind.
+  final bool isRoadSnapped;
   final DateTime cachedAt;
   final int version;
   const LocalRoute({
@@ -3512,6 +3547,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     required this.distanceMeters,
     required this.etaSeconds,
     required this.isSafe,
+    required this.isRoadSnapped,
     required this.cachedAt,
     required this.version,
   });
@@ -3527,6 +3563,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     map['distance_meters'] = Variable<double>(distanceMeters);
     map['eta_seconds'] = Variable<int>(etaSeconds);
     map['is_safe'] = Variable<bool>(isSafe);
+    map['is_road_snapped'] = Variable<bool>(isRoadSnapped);
     map['cached_at'] = Variable<DateTime>(cachedAt);
     map['version'] = Variable<int>(version);
     return map;
@@ -3543,6 +3580,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       distanceMeters: Value(distanceMeters),
       etaSeconds: Value(etaSeconds),
       isSafe: Value(isSafe),
+      isRoadSnapped: Value(isRoadSnapped),
       cachedAt: Value(cachedAt),
       version: Value(version),
     );
@@ -3563,6 +3601,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       distanceMeters: serializer.fromJson<double>(json['distanceMeters']),
       etaSeconds: serializer.fromJson<int>(json['etaSeconds']),
       isSafe: serializer.fromJson<bool>(json['isSafe']),
+      isRoadSnapped: serializer.fromJson<bool>(json['isRoadSnapped']),
       cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
       version: serializer.fromJson<int>(json['version']),
     );
@@ -3580,6 +3619,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
       'distanceMeters': serializer.toJson<double>(distanceMeters),
       'etaSeconds': serializer.toJson<int>(etaSeconds),
       'isSafe': serializer.toJson<bool>(isSafe),
+      'isRoadSnapped': serializer.toJson<bool>(isRoadSnapped),
       'cachedAt': serializer.toJson<DateTime>(cachedAt),
       'version': serializer.toJson<int>(version),
     };
@@ -3595,6 +3635,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     double? distanceMeters,
     int? etaSeconds,
     bool? isSafe,
+    bool? isRoadSnapped,
     DateTime? cachedAt,
     int? version,
   }) => LocalRoute(
@@ -3607,6 +3648,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     distanceMeters: distanceMeters ?? this.distanceMeters,
     etaSeconds: etaSeconds ?? this.etaSeconds,
     isSafe: isSafe ?? this.isSafe,
+    isRoadSnapped: isRoadSnapped ?? this.isRoadSnapped,
     cachedAt: cachedAt ?? this.cachedAt,
     version: version ?? this.version,
   );
@@ -3627,6 +3669,9 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
           ? data.etaSeconds.value
           : this.etaSeconds,
       isSafe: data.isSafe.present ? data.isSafe.value : this.isSafe,
+      isRoadSnapped: data.isRoadSnapped.present
+          ? data.isRoadSnapped.value
+          : this.isRoadSnapped,
       cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
       version: data.version.present ? data.version.value : this.version,
     );
@@ -3644,6 +3689,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
           ..write('distanceMeters: $distanceMeters, ')
           ..write('etaSeconds: $etaSeconds, ')
           ..write('isSafe: $isSafe, ')
+          ..write('isRoadSnapped: $isRoadSnapped, ')
           ..write('cachedAt: $cachedAt, ')
           ..write('version: $version')
           ..write(')'))
@@ -3661,6 +3707,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
     distanceMeters,
     etaSeconds,
     isSafe,
+    isRoadSnapped,
     cachedAt,
     version,
   );
@@ -3677,6 +3724,7 @@ class LocalRoute extends DataClass implements Insertable<LocalRoute> {
           other.distanceMeters == this.distanceMeters &&
           other.etaSeconds == this.etaSeconds &&
           other.isSafe == this.isSafe &&
+          other.isRoadSnapped == this.isRoadSnapped &&
           other.cachedAt == this.cachedAt &&
           other.version == this.version);
 }
@@ -3691,6 +3739,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
   final Value<double> distanceMeters;
   final Value<int> etaSeconds;
   final Value<bool> isSafe;
+  final Value<bool> isRoadSnapped;
   final Value<DateTime> cachedAt;
   final Value<int> version;
   final Value<int> rowid;
@@ -3704,6 +3753,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     this.distanceMeters = const Value.absent(),
     this.etaSeconds = const Value.absent(),
     this.isSafe = const Value.absent(),
+    this.isRoadSnapped = const Value.absent(),
     this.cachedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3718,6 +3768,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     this.distanceMeters = const Value.absent(),
     this.etaSeconds = const Value.absent(),
     this.isSafe = const Value.absent(),
+    this.isRoadSnapped = const Value.absent(),
     required DateTime cachedAt,
     this.version = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -3738,6 +3789,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     Expression<double>? distanceMeters,
     Expression<int>? etaSeconds,
     Expression<bool>? isSafe,
+    Expression<bool>? isRoadSnapped,
     Expression<DateTime>? cachedAt,
     Expression<int>? version,
     Expression<int>? rowid,
@@ -3752,6 +3804,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
       if (distanceMeters != null) 'distance_meters': distanceMeters,
       if (etaSeconds != null) 'eta_seconds': etaSeconds,
       if (isSafe != null) 'is_safe': isSafe,
+      if (isRoadSnapped != null) 'is_road_snapped': isRoadSnapped,
       if (cachedAt != null) 'cached_at': cachedAt,
       if (version != null) 'version': version,
       if (rowid != null) 'rowid': rowid,
@@ -3768,6 +3821,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     Value<double>? distanceMeters,
     Value<int>? etaSeconds,
     Value<bool>? isSafe,
+    Value<bool>? isRoadSnapped,
     Value<DateTime>? cachedAt,
     Value<int>? version,
     Value<int>? rowid,
@@ -3782,6 +3836,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
       distanceMeters: distanceMeters ?? this.distanceMeters,
       etaSeconds: etaSeconds ?? this.etaSeconds,
       isSafe: isSafe ?? this.isSafe,
+      isRoadSnapped: isRoadSnapped ?? this.isRoadSnapped,
       cachedAt: cachedAt ?? this.cachedAt,
       version: version ?? this.version,
       rowid: rowid ?? this.rowid,
@@ -3818,6 +3873,9 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
     if (isSafe.present) {
       map['is_safe'] = Variable<bool>(isSafe.value);
     }
+    if (isRoadSnapped.present) {
+      map['is_road_snapped'] = Variable<bool>(isRoadSnapped.value);
+    }
     if (cachedAt.present) {
       map['cached_at'] = Variable<DateTime>(cachedAt.value);
     }
@@ -3842,6 +3900,7 @@ class LocalRoutesCompanion extends UpdateCompanion<LocalRoute> {
           ..write('distanceMeters: $distanceMeters, ')
           ..write('etaSeconds: $etaSeconds, ')
           ..write('isSafe: $isSafe, ')
+          ..write('isRoadSnapped: $isRoadSnapped, ')
           ..write('cachedAt: $cachedAt, ')
           ..write('version: $version, ')
           ..write('rowid: $rowid')
@@ -11236,6 +11295,7 @@ typedef $$LocalRoutesTableCreateCompanionBuilder =
       Value<double> distanceMeters,
       Value<int> etaSeconds,
       Value<bool> isSafe,
+      Value<bool> isRoadSnapped,
       required DateTime cachedAt,
       Value<int> version,
       Value<int> rowid,
@@ -11251,6 +11311,7 @@ typedef $$LocalRoutesTableUpdateCompanionBuilder =
       Value<double> distanceMeters,
       Value<int> etaSeconds,
       Value<bool> isSafe,
+      Value<bool> isRoadSnapped,
       Value<DateTime> cachedAt,
       Value<int> version,
       Value<int> rowid,
@@ -11307,6 +11368,11 @@ class $$LocalRoutesTableFilterComposer
 
   ColumnFilters<bool> get isSafe => $composableBuilder(
     column: $table.isSafe,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isRoadSnapped => $composableBuilder(
+    column: $table.isRoadSnapped,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11375,6 +11441,11 @@ class $$LocalRoutesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isRoadSnapped => $composableBuilder(
+    column: $table.isRoadSnapped,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get cachedAt => $composableBuilder(
     column: $table.cachedAt,
     builder: (column) => ColumnOrderings(column),
@@ -11428,6 +11499,11 @@ class $$LocalRoutesTableAnnotationComposer
   GeneratedColumn<bool> get isSafe =>
       $composableBuilder(column: $table.isSafe, builder: (column) => column);
 
+  GeneratedColumn<bool> get isRoadSnapped => $composableBuilder(
+    column: $table.isRoadSnapped,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get cachedAt =>
       $composableBuilder(column: $table.cachedAt, builder: (column) => column);
 
@@ -11475,6 +11551,7 @@ class $$LocalRoutesTableTableManager
                 Value<double> distanceMeters = const Value.absent(),
                 Value<int> etaSeconds = const Value.absent(),
                 Value<bool> isSafe = const Value.absent(),
+                Value<bool> isRoadSnapped = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -11488,6 +11565,7 @@ class $$LocalRoutesTableTableManager
                 distanceMeters: distanceMeters,
                 etaSeconds: etaSeconds,
                 isSafe: isSafe,
+                isRoadSnapped: isRoadSnapped,
                 cachedAt: cachedAt,
                 version: version,
                 rowid: rowid,
@@ -11503,6 +11581,7 @@ class $$LocalRoutesTableTableManager
                 Value<double> distanceMeters = const Value.absent(),
                 Value<int> etaSeconds = const Value.absent(),
                 Value<bool> isSafe = const Value.absent(),
+                Value<bool> isRoadSnapped = const Value.absent(),
                 required DateTime cachedAt,
                 Value<int> version = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -11516,6 +11595,7 @@ class $$LocalRoutesTableTableManager
                 distanceMeters: distanceMeters,
                 etaSeconds: etaSeconds,
                 isSafe: isSafe,
+                isRoadSnapped: isRoadSnapped,
                 cachedAt: cachedAt,
                 version: version,
                 rowid: rowid,
