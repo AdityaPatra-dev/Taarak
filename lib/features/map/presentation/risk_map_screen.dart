@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/capacity/application/capacity_providers.dart';
 import 'package:taarak/features/hazards/application/hazard_providers.dart';
 import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
@@ -34,10 +35,11 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
       ref.read(hazardIngestionServiceProvider),
     ).seedIfEmpty();
     await ref.read(riskAssessmentServiceProvider).assessAllHabitations();
+    await ref.read(capacityAssessmentServiceProvider).assessAllHabitations();
     ref.invalidate(hazardZonesProvider);
     ref.invalidate(sheltersProvider);
     ref.invalidate(incidentsProvider);
-    ref.invalidate(habitationsWithRiskProvider);
+    ref.invalidate(habitationsOverviewProvider);
     if (mounted) setState(() => _isSeeding = false);
   }
 
@@ -47,7 +49,7 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     final shelters = ref.watch(sheltersProvider).valueOrNull ?? const [];
     final incidents = ref.watch(incidentsProvider).valueOrNull ?? const [];
     final habitations =
-        ref.watch(habitationsWithRiskProvider).valueOrNull ?? const [];
+        ref.watch(habitationsOverviewProvider).valueOrNull ?? const [];
     final isDevMode = ref.watch(appConfigProvider).isDevMode;
 
     final searchIndex = buildSearchIndex(

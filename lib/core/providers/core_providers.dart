@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/config/app_config.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/repositories/local_capacity_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
@@ -80,6 +81,11 @@ final localVulnerabilityAssessmentRepositoryProvider =
     Provider<LocalVulnerabilityAssessmentRepository>(
       (ref) =>
           LocalVulnerabilityAssessmentRepository(ref.watch(appDatabaseProvider)),
+    );
+
+final localCapacityAssessmentRepositoryProvider =
+    Provider<LocalCapacityAssessmentRepository>(
+      (ref) => LocalCapacityAssessmentRepository(ref.watch(appDatabaseProvider)),
     );
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(

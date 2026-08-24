@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/geometry_codec.dart';
 import 'package:taarak/core/gis/severity_palette.dart';
-import 'package:taarak/features/map/domain/habitation_with_risk.dart';
+import 'package:taarak/features/map/domain/habitation_overview.dart';
 import 'package:taarak/features/map/domain/road_blockage.dart';
 import 'package:taarak/features/risk/domain/risk_class.dart';
 import 'package:taarak/features/risk/presentation/risk_class_color.dart';
@@ -43,9 +43,9 @@ MarkerLayer buildShelterLayer(List<LocalShelter> shelters) {
 
 /// M07's risk assessment made visible: each habitation renders in its risk
 /// class color, with the tooltip spelling out the factor breakdown the
-/// engine produced (hazard exposure, vulnerability, weights) — not just
-/// the score.
-MarkerLayer buildHabitationLayer(List<HabitationWithRisk> habitations) {
+/// engine produced (hazard exposure, vulnerability, weights) plus M09's
+/// capacity gap — not just the score.
+MarkerLayer buildHabitationLayer(List<HabitationOverview> habitations) {
   return MarkerLayer(
     markers: [
       for (final item in habitations)
@@ -57,10 +57,10 @@ MarkerLayer buildHabitationLayer(List<HabitationWithRisk> habitations) {
             message: _habitationTooltip(item),
             child: Icon(
               Icons.location_city,
-              color: item.assessment == null
+              color: item.riskAssessment == null
                   ? Colors.grey
                   : riskClassColor(
-                      RiskClass.values.byName(item.assessment!.riskClass),
+                      RiskClass.values.byName(item.riskAssessment!.riskClass),
                     ),
             ),
           ),
@@ -69,15 +69,33 @@ MarkerLayer buildHabitationLayer(List<HabitationWithRisk> habitations) {
   );
 }
 
-String _habitationTooltip(HabitationWithRisk item) {
-  final assessment = item.assessment;
-  if (assessment == null) {
-    return '${item.habitation.name} — not yet assessed';
+String _habitationTooltip(HabitationOverview item) {
+  final risk = item.riskAssessment;
+  final capacity = item.capacityAssessment;
+
+  final buffer = StringBuffer(item.habitation.name);
+
+  if (risk == null) {
+    buffer.write(' — not yet assessed');
+  } else {
+    buffer.write(
+      ' — ${riskClassLabel(RiskClass.values.byName(risk.riskClass))} '
+      '(score ${risk.riskScore.toStringAsFixed(2)})\n'
+      'hazard ${risk.hazardExposure.toStringAsFixed(2)}, '
+      'vulnerability ${risk.vulnerabilityIndex.toStringAsFixed(2)}',
+    );
   }
-  return '${item.habitation.name} — ${riskClassLabel(RiskClass.values.byName(assessment.riskClass))} '
-      '(score ${assessment.riskScore.toStringAsFixed(2)})\n'
-      'hazard ${assessment.hazardExposure.toStringAsFixed(2)}, '
-      'vulnerability ${assessment.vulnerabilityIndex.toStringAsFixed(2)}';
+
+  if (capacity != null && capacity.exposedPopulation > 0) {
+    buffer.write(
+      capacity.hasSufficientCapacity
+          ? '\nCapacity: sufficient (${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})'
+          : '\nCapacity gap: short by ${capacity.capacityGap} '
+                '(${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})',
+    );
+  }
+
+  return buffer.toString();
 }
 
 MarkerLayer buildIncidentLayer(List<LocalIncident> incidents) {

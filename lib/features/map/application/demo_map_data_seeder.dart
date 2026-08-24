@@ -67,11 +67,16 @@ class DemoMapDataSeeder {
 
     await _db.batch((batch) {
       batch.insertAll(_db.localShelters, [
+        // Both sit outside the seeded hazard zones, so M09 counts them as
+        // safe capacity for Ridge Colony's 850 people — 630 available
+        // between them, a deliberate shortfall to demonstrate the gap.
         LocalSheltersCompanion.insert(
           id: 'demo-shelter-1',
           name: 'Community Hall',
           latitude: c.latitude - 0.006,
           longitude: c.longitude + 0.006,
+          capacityTotal: const Value(400),
+          occupancy: const Value(50),
           updatedAt: now,
         ),
         LocalSheltersCompanion.insert(
@@ -79,6 +84,8 @@ class DemoMapDataSeeder {
           name: 'Government School',
           latitude: c.latitude + 0.012,
           longitude: c.longitude - 0.016,
+          capacityTotal: const Value(300),
+          occupancy: const Value(20),
           updatedAt: now,
         ),
       ]);

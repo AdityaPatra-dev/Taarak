@@ -5178,6 +5178,705 @@ class LocalVulnerabilityAssessmentsCompanion
   }
 }
 
+class $LocalCapacityAssessmentsTable extends LocalCapacityAssessments
+    with TableInfo<$LocalCapacityAssessmentsTable, LocalCapacityAssessment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalCapacityAssessmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _exposedPopulationMeta = const VerificationMeta(
+    'exposedPopulation',
+  );
+  @override
+  late final GeneratedColumn<int> exposedPopulation = GeneratedColumn<int>(
+    'exposed_population',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _availableSafeCapacityMeta =
+      const VerificationMeta('availableSafeCapacity');
+  @override
+  late final GeneratedColumn<int> availableSafeCapacity = GeneratedColumn<int>(
+    'available_safe_capacity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _capacityGapMeta = const VerificationMeta(
+    'capacityGap',
+  );
+  @override
+  late final GeneratedColumn<int> capacityGap = GeneratedColumn<int>(
+    'capacity_gap',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hasSufficientCapacityMeta =
+      const VerificationMeta('hasSufficientCapacity');
+  @override
+  late final GeneratedColumn<bool> hasSufficientCapacity =
+      GeneratedColumn<bool>(
+        'has_sufficient_capacity',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("has_sufficient_capacity" IN (0, 1))',
+        ),
+      );
+  static const VerificationMeta _contributingSheltersJsonMeta =
+      const VerificationMeta('contributingSheltersJson');
+  @override
+  late final GeneratedColumn<String> contributingSheltersJson =
+      GeneratedColumn<String>(
+        'contributing_shelters_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _accessibleRadiusMetersMeta =
+      const VerificationMeta('accessibleRadiusMeters');
+  @override
+  late final GeneratedColumn<double> accessibleRadiusMeters =
+      GeneratedColumn<double>(
+        'accessible_radius_meters',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _modelVersionMeta = const VerificationMeta(
+    'modelVersion',
+  );
+  @override
+  late final GeneratedColumn<String> modelVersion = GeneratedColumn<String>(
+    'model_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assessedAtMeta = const VerificationMeta(
+    'assessedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> assessedAt = GeneratedColumn<DateTime>(
+    'assessed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    habitationId,
+    exposedPopulation,
+    availableSafeCapacity,
+    capacityGap,
+    hasSufficientCapacity,
+    contributingSheltersJson,
+    accessibleRadiusMeters,
+    modelVersion,
+    assessedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_capacity_assessments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalCapacityAssessment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('exposed_population')) {
+      context.handle(
+        _exposedPopulationMeta,
+        exposedPopulation.isAcceptableOrUnknown(
+          data['exposed_population']!,
+          _exposedPopulationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_exposedPopulationMeta);
+    }
+    if (data.containsKey('available_safe_capacity')) {
+      context.handle(
+        _availableSafeCapacityMeta,
+        availableSafeCapacity.isAcceptableOrUnknown(
+          data['available_safe_capacity']!,
+          _availableSafeCapacityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_availableSafeCapacityMeta);
+    }
+    if (data.containsKey('capacity_gap')) {
+      context.handle(
+        _capacityGapMeta,
+        capacityGap.isAcceptableOrUnknown(
+          data['capacity_gap']!,
+          _capacityGapMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_capacityGapMeta);
+    }
+    if (data.containsKey('has_sufficient_capacity')) {
+      context.handle(
+        _hasSufficientCapacityMeta,
+        hasSufficientCapacity.isAcceptableOrUnknown(
+          data['has_sufficient_capacity']!,
+          _hasSufficientCapacityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_hasSufficientCapacityMeta);
+    }
+    if (data.containsKey('contributing_shelters_json')) {
+      context.handle(
+        _contributingSheltersJsonMeta,
+        contributingSheltersJson.isAcceptableOrUnknown(
+          data['contributing_shelters_json']!,
+          _contributingSheltersJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contributingSheltersJsonMeta);
+    }
+    if (data.containsKey('accessible_radius_meters')) {
+      context.handle(
+        _accessibleRadiusMetersMeta,
+        accessibleRadiusMeters.isAcceptableOrUnknown(
+          data['accessible_radius_meters']!,
+          _accessibleRadiusMetersMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_accessibleRadiusMetersMeta);
+    }
+    if (data.containsKey('model_version')) {
+      context.handle(
+        _modelVersionMeta,
+        modelVersion.isAcceptableOrUnknown(
+          data['model_version']!,
+          _modelVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_modelVersionMeta);
+    }
+    if (data.containsKey('assessed_at')) {
+      context.handle(
+        _assessedAtMeta,
+        assessedAt.isAcceptableOrUnknown(data['assessed_at']!, _assessedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assessedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {habitationId};
+  @override
+  LocalCapacityAssessment map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalCapacityAssessment(
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      exposedPopulation: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}exposed_population'],
+      )!,
+      availableSafeCapacity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}available_safe_capacity'],
+      )!,
+      capacityGap: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}capacity_gap'],
+      )!,
+      hasSufficientCapacity: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}has_sufficient_capacity'],
+      )!,
+      contributingSheltersJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contributing_shelters_json'],
+      )!,
+      accessibleRadiusMeters: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}accessible_radius_meters'],
+      )!,
+      modelVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}model_version'],
+      )!,
+      assessedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}assessed_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalCapacityAssessmentsTable createAlias(String alias) {
+    return $LocalCapacityAssessmentsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalCapacityAssessment extends DataClass
+    implements Insertable<LocalCapacityAssessment> {
+  final String habitationId;
+  final int exposedPopulation;
+  final int availableSafeCapacity;
+
+  /// exposedPopulation - availableSafeCapacity. Positive means a shortfall.
+  final int capacityGap;
+  final bool hasSufficientCapacity;
+
+  /// JSON list of {shelterId, shelterName, availableCapacity,
+  /// distanceMeters} for the safe, in-range shelters this figure counted.
+  final String contributingSheltersJson;
+  final double accessibleRadiusMeters;
+  final String modelVersion;
+  final DateTime assessedAt;
+  final int version;
+  const LocalCapacityAssessment({
+    required this.habitationId,
+    required this.exposedPopulation,
+    required this.availableSafeCapacity,
+    required this.capacityGap,
+    required this.hasSufficientCapacity,
+    required this.contributingSheltersJson,
+    required this.accessibleRadiusMeters,
+    required this.modelVersion,
+    required this.assessedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['exposed_population'] = Variable<int>(exposedPopulation);
+    map['available_safe_capacity'] = Variable<int>(availableSafeCapacity);
+    map['capacity_gap'] = Variable<int>(capacityGap);
+    map['has_sufficient_capacity'] = Variable<bool>(hasSufficientCapacity);
+    map['contributing_shelters_json'] = Variable<String>(
+      contributingSheltersJson,
+    );
+    map['accessible_radius_meters'] = Variable<double>(accessibleRadiusMeters);
+    map['model_version'] = Variable<String>(modelVersion);
+    map['assessed_at'] = Variable<DateTime>(assessedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalCapacityAssessmentsCompanion toCompanion(bool nullToAbsent) {
+    return LocalCapacityAssessmentsCompanion(
+      habitationId: Value(habitationId),
+      exposedPopulation: Value(exposedPopulation),
+      availableSafeCapacity: Value(availableSafeCapacity),
+      capacityGap: Value(capacityGap),
+      hasSufficientCapacity: Value(hasSufficientCapacity),
+      contributingSheltersJson: Value(contributingSheltersJson),
+      accessibleRadiusMeters: Value(accessibleRadiusMeters),
+      modelVersion: Value(modelVersion),
+      assessedAt: Value(assessedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalCapacityAssessment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalCapacityAssessment(
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      exposedPopulation: serializer.fromJson<int>(json['exposedPopulation']),
+      availableSafeCapacity: serializer.fromJson<int>(
+        json['availableSafeCapacity'],
+      ),
+      capacityGap: serializer.fromJson<int>(json['capacityGap']),
+      hasSufficientCapacity: serializer.fromJson<bool>(
+        json['hasSufficientCapacity'],
+      ),
+      contributingSheltersJson: serializer.fromJson<String>(
+        json['contributingSheltersJson'],
+      ),
+      accessibleRadiusMeters: serializer.fromJson<double>(
+        json['accessibleRadiusMeters'],
+      ),
+      modelVersion: serializer.fromJson<String>(json['modelVersion']),
+      assessedAt: serializer.fromJson<DateTime>(json['assessedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'habitationId': serializer.toJson<String>(habitationId),
+      'exposedPopulation': serializer.toJson<int>(exposedPopulation),
+      'availableSafeCapacity': serializer.toJson<int>(availableSafeCapacity),
+      'capacityGap': serializer.toJson<int>(capacityGap),
+      'hasSufficientCapacity': serializer.toJson<bool>(hasSufficientCapacity),
+      'contributingSheltersJson': serializer.toJson<String>(
+        contributingSheltersJson,
+      ),
+      'accessibleRadiusMeters': serializer.toJson<double>(
+        accessibleRadiusMeters,
+      ),
+      'modelVersion': serializer.toJson<String>(modelVersion),
+      'assessedAt': serializer.toJson<DateTime>(assessedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalCapacityAssessment copyWith({
+    String? habitationId,
+    int? exposedPopulation,
+    int? availableSafeCapacity,
+    int? capacityGap,
+    bool? hasSufficientCapacity,
+    String? contributingSheltersJson,
+    double? accessibleRadiusMeters,
+    String? modelVersion,
+    DateTime? assessedAt,
+    int? version,
+  }) => LocalCapacityAssessment(
+    habitationId: habitationId ?? this.habitationId,
+    exposedPopulation: exposedPopulation ?? this.exposedPopulation,
+    availableSafeCapacity: availableSafeCapacity ?? this.availableSafeCapacity,
+    capacityGap: capacityGap ?? this.capacityGap,
+    hasSufficientCapacity: hasSufficientCapacity ?? this.hasSufficientCapacity,
+    contributingSheltersJson:
+        contributingSheltersJson ?? this.contributingSheltersJson,
+    accessibleRadiusMeters:
+        accessibleRadiusMeters ?? this.accessibleRadiusMeters,
+    modelVersion: modelVersion ?? this.modelVersion,
+    assessedAt: assessedAt ?? this.assessedAt,
+    version: version ?? this.version,
+  );
+  LocalCapacityAssessment copyWithCompanion(
+    LocalCapacityAssessmentsCompanion data,
+  ) {
+    return LocalCapacityAssessment(
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      exposedPopulation: data.exposedPopulation.present
+          ? data.exposedPopulation.value
+          : this.exposedPopulation,
+      availableSafeCapacity: data.availableSafeCapacity.present
+          ? data.availableSafeCapacity.value
+          : this.availableSafeCapacity,
+      capacityGap: data.capacityGap.present
+          ? data.capacityGap.value
+          : this.capacityGap,
+      hasSufficientCapacity: data.hasSufficientCapacity.present
+          ? data.hasSufficientCapacity.value
+          : this.hasSufficientCapacity,
+      contributingSheltersJson: data.contributingSheltersJson.present
+          ? data.contributingSheltersJson.value
+          : this.contributingSheltersJson,
+      accessibleRadiusMeters: data.accessibleRadiusMeters.present
+          ? data.accessibleRadiusMeters.value
+          : this.accessibleRadiusMeters,
+      modelVersion: data.modelVersion.present
+          ? data.modelVersion.value
+          : this.modelVersion,
+      assessedAt: data.assessedAt.present
+          ? data.assessedAt.value
+          : this.assessedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCapacityAssessment(')
+          ..write('habitationId: $habitationId, ')
+          ..write('exposedPopulation: $exposedPopulation, ')
+          ..write('availableSafeCapacity: $availableSafeCapacity, ')
+          ..write('capacityGap: $capacityGap, ')
+          ..write('hasSufficientCapacity: $hasSufficientCapacity, ')
+          ..write('contributingSheltersJson: $contributingSheltersJson, ')
+          ..write('accessibleRadiusMeters: $accessibleRadiusMeters, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    habitationId,
+    exposedPopulation,
+    availableSafeCapacity,
+    capacityGap,
+    hasSufficientCapacity,
+    contributingSheltersJson,
+    accessibleRadiusMeters,
+    modelVersion,
+    assessedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalCapacityAssessment &&
+          other.habitationId == this.habitationId &&
+          other.exposedPopulation == this.exposedPopulation &&
+          other.availableSafeCapacity == this.availableSafeCapacity &&
+          other.capacityGap == this.capacityGap &&
+          other.hasSufficientCapacity == this.hasSufficientCapacity &&
+          other.contributingSheltersJson == this.contributingSheltersJson &&
+          other.accessibleRadiusMeters == this.accessibleRadiusMeters &&
+          other.modelVersion == this.modelVersion &&
+          other.assessedAt == this.assessedAt &&
+          other.version == this.version);
+}
+
+class LocalCapacityAssessmentsCompanion
+    extends UpdateCompanion<LocalCapacityAssessment> {
+  final Value<String> habitationId;
+  final Value<int> exposedPopulation;
+  final Value<int> availableSafeCapacity;
+  final Value<int> capacityGap;
+  final Value<bool> hasSufficientCapacity;
+  final Value<String> contributingSheltersJson;
+  final Value<double> accessibleRadiusMeters;
+  final Value<String> modelVersion;
+  final Value<DateTime> assessedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalCapacityAssessmentsCompanion({
+    this.habitationId = const Value.absent(),
+    this.exposedPopulation = const Value.absent(),
+    this.availableSafeCapacity = const Value.absent(),
+    this.capacityGap = const Value.absent(),
+    this.hasSufficientCapacity = const Value.absent(),
+    this.contributingSheltersJson = const Value.absent(),
+    this.accessibleRadiusMeters = const Value.absent(),
+    this.modelVersion = const Value.absent(),
+    this.assessedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalCapacityAssessmentsCompanion.insert({
+    required String habitationId,
+    required int exposedPopulation,
+    required int availableSafeCapacity,
+    required int capacityGap,
+    required bool hasSufficientCapacity,
+    required String contributingSheltersJson,
+    required double accessibleRadiusMeters,
+    required String modelVersion,
+    required DateTime assessedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : habitationId = Value(habitationId),
+       exposedPopulation = Value(exposedPopulation),
+       availableSafeCapacity = Value(availableSafeCapacity),
+       capacityGap = Value(capacityGap),
+       hasSufficientCapacity = Value(hasSufficientCapacity),
+       contributingSheltersJson = Value(contributingSheltersJson),
+       accessibleRadiusMeters = Value(accessibleRadiusMeters),
+       modelVersion = Value(modelVersion),
+       assessedAt = Value(assessedAt);
+  static Insertable<LocalCapacityAssessment> custom({
+    Expression<String>? habitationId,
+    Expression<int>? exposedPopulation,
+    Expression<int>? availableSafeCapacity,
+    Expression<int>? capacityGap,
+    Expression<bool>? hasSufficientCapacity,
+    Expression<String>? contributingSheltersJson,
+    Expression<double>? accessibleRadiusMeters,
+    Expression<String>? modelVersion,
+    Expression<DateTime>? assessedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (exposedPopulation != null) 'exposed_population': exposedPopulation,
+      if (availableSafeCapacity != null)
+        'available_safe_capacity': availableSafeCapacity,
+      if (capacityGap != null) 'capacity_gap': capacityGap,
+      if (hasSufficientCapacity != null)
+        'has_sufficient_capacity': hasSufficientCapacity,
+      if (contributingSheltersJson != null)
+        'contributing_shelters_json': contributingSheltersJson,
+      if (accessibleRadiusMeters != null)
+        'accessible_radius_meters': accessibleRadiusMeters,
+      if (modelVersion != null) 'model_version': modelVersion,
+      if (assessedAt != null) 'assessed_at': assessedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalCapacityAssessmentsCompanion copyWith({
+    Value<String>? habitationId,
+    Value<int>? exposedPopulation,
+    Value<int>? availableSafeCapacity,
+    Value<int>? capacityGap,
+    Value<bool>? hasSufficientCapacity,
+    Value<String>? contributingSheltersJson,
+    Value<double>? accessibleRadiusMeters,
+    Value<String>? modelVersion,
+    Value<DateTime>? assessedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalCapacityAssessmentsCompanion(
+      habitationId: habitationId ?? this.habitationId,
+      exposedPopulation: exposedPopulation ?? this.exposedPopulation,
+      availableSafeCapacity:
+          availableSafeCapacity ?? this.availableSafeCapacity,
+      capacityGap: capacityGap ?? this.capacityGap,
+      hasSufficientCapacity:
+          hasSufficientCapacity ?? this.hasSufficientCapacity,
+      contributingSheltersJson:
+          contributingSheltersJson ?? this.contributingSheltersJson,
+      accessibleRadiusMeters:
+          accessibleRadiusMeters ?? this.accessibleRadiusMeters,
+      modelVersion: modelVersion ?? this.modelVersion,
+      assessedAt: assessedAt ?? this.assessedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (exposedPopulation.present) {
+      map['exposed_population'] = Variable<int>(exposedPopulation.value);
+    }
+    if (availableSafeCapacity.present) {
+      map['available_safe_capacity'] = Variable<int>(
+        availableSafeCapacity.value,
+      );
+    }
+    if (capacityGap.present) {
+      map['capacity_gap'] = Variable<int>(capacityGap.value);
+    }
+    if (hasSufficientCapacity.present) {
+      map['has_sufficient_capacity'] = Variable<bool>(
+        hasSufficientCapacity.value,
+      );
+    }
+    if (contributingSheltersJson.present) {
+      map['contributing_shelters_json'] = Variable<String>(
+        contributingSheltersJson.value,
+      );
+    }
+    if (accessibleRadiusMeters.present) {
+      map['accessible_radius_meters'] = Variable<double>(
+        accessibleRadiusMeters.value,
+      );
+    }
+    if (modelVersion.present) {
+      map['model_version'] = Variable<String>(modelVersion.value);
+    }
+    if (assessedAt.present) {
+      map['assessed_at'] = Variable<DateTime>(assessedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalCapacityAssessmentsCompanion(')
+          ..write('habitationId: $habitationId, ')
+          ..write('exposedPopulation: $exposedPopulation, ')
+          ..write('availableSafeCapacity: $availableSafeCapacity, ')
+          ..write('capacityGap: $capacityGap, ')
+          ..write('hasSufficientCapacity: $hasSufficientCapacity, ')
+          ..write('contributingSheltersJson: $contributingSheltersJson, ')
+          ..write('accessibleRadiusMeters: $accessibleRadiusMeters, ')
+          ..write('modelVersion: $modelVersion, ')
+          ..write('assessedAt: $assessedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -5765,6 +6464,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalRiskAssessmentsTable(this);
   late final $LocalVulnerabilityAssessmentsTable localVulnerabilityAssessments =
       $LocalVulnerabilityAssessmentsTable(this);
+  late final $LocalCapacityAssessmentsTable localCapacityAssessments =
+      $LocalCapacityAssessmentsTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -5782,6 +6483,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localHabitations,
     localRiskAssessments,
     localVulnerabilityAssessments,
+    localCapacityAssessments,
     syncQueueEntries,
   ];
 }
@@ -8392,6 +9094,338 @@ typedef $$LocalVulnerabilityAssessmentsTableProcessedTableManager =
       LocalVulnerabilityAssessment,
       PrefetchHooks Function()
     >;
+typedef $$LocalCapacityAssessmentsTableCreateCompanionBuilder =
+    LocalCapacityAssessmentsCompanion Function({
+      required String habitationId,
+      required int exposedPopulation,
+      required int availableSafeCapacity,
+      required int capacityGap,
+      required bool hasSufficientCapacity,
+      required String contributingSheltersJson,
+      required double accessibleRadiusMeters,
+      required String modelVersion,
+      required DateTime assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalCapacityAssessmentsTableUpdateCompanionBuilder =
+    LocalCapacityAssessmentsCompanion Function({
+      Value<String> habitationId,
+      Value<int> exposedPopulation,
+      Value<int> availableSafeCapacity,
+      Value<int> capacityGap,
+      Value<bool> hasSufficientCapacity,
+      Value<String> contributingSheltersJson,
+      Value<double> accessibleRadiusMeters,
+      Value<String> modelVersion,
+      Value<DateTime> assessedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalCapacityAssessmentsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalCapacityAssessmentsTable> {
+  $$LocalCapacityAssessmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get exposedPopulation => $composableBuilder(
+    column: $table.exposedPopulation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get availableSafeCapacity => $composableBuilder(
+    column: $table.availableSafeCapacity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get capacityGap => $composableBuilder(
+    column: $table.capacityGap,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hasSufficientCapacity => $composableBuilder(
+    column: $table.hasSufficientCapacity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contributingSheltersJson => $composableBuilder(
+    column: $table.contributingSheltersJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get accessibleRadiusMeters => $composableBuilder(
+    column: $table.accessibleRadiusMeters,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalCapacityAssessmentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalCapacityAssessmentsTable> {
+  $$LocalCapacityAssessmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get exposedPopulation => $composableBuilder(
+    column: $table.exposedPopulation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get availableSafeCapacity => $composableBuilder(
+    column: $table.availableSafeCapacity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get capacityGap => $composableBuilder(
+    column: $table.capacityGap,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hasSufficientCapacity => $composableBuilder(
+    column: $table.hasSufficientCapacity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contributingSheltersJson => $composableBuilder(
+    column: $table.contributingSheltersJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get accessibleRadiusMeters => $composableBuilder(
+    column: $table.accessibleRadiusMeters,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalCapacityAssessmentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalCapacityAssessmentsTable> {
+  $$LocalCapacityAssessmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get exposedPopulation => $composableBuilder(
+    column: $table.exposedPopulation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get availableSafeCapacity => $composableBuilder(
+    column: $table.availableSafeCapacity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get capacityGap => $composableBuilder(
+    column: $table.capacityGap,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get hasSufficientCapacity => $composableBuilder(
+    column: $table.hasSufficientCapacity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contributingSheltersJson => $composableBuilder(
+    column: $table.contributingSheltersJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get accessibleRadiusMeters => $composableBuilder(
+    column: $table.accessibleRadiusMeters,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get modelVersion => $composableBuilder(
+    column: $table.modelVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get assessedAt => $composableBuilder(
+    column: $table.assessedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalCapacityAssessmentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalCapacityAssessmentsTable,
+          LocalCapacityAssessment,
+          $$LocalCapacityAssessmentsTableFilterComposer,
+          $$LocalCapacityAssessmentsTableOrderingComposer,
+          $$LocalCapacityAssessmentsTableAnnotationComposer,
+          $$LocalCapacityAssessmentsTableCreateCompanionBuilder,
+          $$LocalCapacityAssessmentsTableUpdateCompanionBuilder,
+          (
+            LocalCapacityAssessment,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalCapacityAssessmentsTable,
+              LocalCapacityAssessment
+            >,
+          ),
+          LocalCapacityAssessment,
+          PrefetchHooks Function()
+        > {
+  $$LocalCapacityAssessmentsTableTableManager(
+    _$AppDatabase db,
+    $LocalCapacityAssessmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalCapacityAssessmentsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalCapacityAssessmentsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalCapacityAssessmentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> habitationId = const Value.absent(),
+                Value<int> exposedPopulation = const Value.absent(),
+                Value<int> availableSafeCapacity = const Value.absent(),
+                Value<int> capacityGap = const Value.absent(),
+                Value<bool> hasSufficientCapacity = const Value.absent(),
+                Value<String> contributingSheltersJson = const Value.absent(),
+                Value<double> accessibleRadiusMeters = const Value.absent(),
+                Value<String> modelVersion = const Value.absent(),
+                Value<DateTime> assessedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCapacityAssessmentsCompanion(
+                habitationId: habitationId,
+                exposedPopulation: exposedPopulation,
+                availableSafeCapacity: availableSafeCapacity,
+                capacityGap: capacityGap,
+                hasSufficientCapacity: hasSufficientCapacity,
+                contributingSheltersJson: contributingSheltersJson,
+                accessibleRadiusMeters: accessibleRadiusMeters,
+                modelVersion: modelVersion,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String habitationId,
+                required int exposedPopulation,
+                required int availableSafeCapacity,
+                required int capacityGap,
+                required bool hasSufficientCapacity,
+                required String contributingSheltersJson,
+                required double accessibleRadiusMeters,
+                required String modelVersion,
+                required DateTime assessedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalCapacityAssessmentsCompanion.insert(
+                habitationId: habitationId,
+                exposedPopulation: exposedPopulation,
+                availableSafeCapacity: availableSafeCapacity,
+                capacityGap: capacityGap,
+                hasSufficientCapacity: hasSufficientCapacity,
+                contributingSheltersJson: contributingSheltersJson,
+                accessibleRadiusMeters: accessibleRadiusMeters,
+                modelVersion: modelVersion,
+                assessedAt: assessedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalCapacityAssessmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalCapacityAssessmentsTable,
+      LocalCapacityAssessment,
+      $$LocalCapacityAssessmentsTableFilterComposer,
+      $$LocalCapacityAssessmentsTableOrderingComposer,
+      $$LocalCapacityAssessmentsTableAnnotationComposer,
+      $$LocalCapacityAssessmentsTableCreateCompanionBuilder,
+      $$LocalCapacityAssessmentsTableUpdateCompanionBuilder,
+      (
+        LocalCapacityAssessment,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalCapacityAssessmentsTable,
+          LocalCapacityAssessment
+        >,
+      ),
+      LocalCapacityAssessment,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -8701,6 +9735,11 @@ class $AppDatabaseManager {
       $$LocalVulnerabilityAssessmentsTableTableManager(
         _db,
         _db.localVulnerabilityAssessments,
+      );
+  $$LocalCapacityAssessmentsTableTableManager get localCapacityAssessments =>
+      $$LocalCapacityAssessmentsTableTableManager(
+        _db,
+        _db.localCapacityAssessments,
       );
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);

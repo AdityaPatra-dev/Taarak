@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:taarak/core/database/tables/local_capacity_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_habitations_table.dart';
 import 'package:taarak/core/database/tables/local_hazard_zones_table.dart';
 import 'package:taarak/core/database/tables/local_incident_reports_table.dart';
@@ -27,6 +28,7 @@ part 'app_database.g.dart';
     LocalHabitations,
     LocalRiskAssessments,
     LocalVulnerabilityAssessments,
+    LocalCapacityAssessments,
     SyncQueueEntries,
   ],
 )
