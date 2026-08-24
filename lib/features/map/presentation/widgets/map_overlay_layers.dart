@@ -128,6 +128,16 @@ PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
   );
 }
 
+/// M14 made visible: once a second independent source corroborates an
+/// incident, the tooltip says so — a citizen shouldn't have to guess
+/// whether a marker represents one report or several agreeing accounts.
+String _incidentTooltip(LocalIncident incident) {
+  final label = incident.description.isEmpty ? incident.type : incident.description;
+  if (incident.independentSourceCount <= 1) return label;
+  return '$label\nConfirmed by ${incident.independentSourceCount} independent sources '
+      '(${(incident.confidence * 100).round()}% confidence)';
+}
+
 MarkerLayer buildIncidentLayer(List<LocalIncident> incidents) {
   return MarkerLayer(
     markers: [
@@ -137,9 +147,7 @@ MarkerLayer buildIncidentLayer(List<LocalIncident> incidents) {
           width: 36,
           height: 36,
           child: Tooltip(
-            message: incident.description.isEmpty
-                ? incident.type
-                : incident.description,
+            message: _incidentTooltip(incident),
             child: Icon(
               incident.type == roadBlockageIncidentType
                   ? Icons.block

@@ -42,6 +42,8 @@ void main() {
         longitude: 56.78,
         description: 'Blocked road near Habitation 12',
         severity: 'high',
+        independentSourceCount: 1,
+        confidence: 0.5,
         createdAt: DateTime.utc(2026, 1, 1),
         updatedAt: DateTime.utc(2026, 1, 1),
         version: 1,

@@ -1048,6 +1048,29 @@ class $LocalIncidentsTable extends LocalIncidents
     requiredDuringInsert: false,
     defaultValue: const Constant('unknown'),
   );
+  static const VerificationMeta _independentSourceCountMeta =
+      const VerificationMeta('independentSourceCount');
+  @override
+  late final GeneratedColumn<int> independentSourceCount = GeneratedColumn<int>(
+    'independent_source_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.5),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1106,6 +1129,8 @@ class $LocalIncidentsTable extends LocalIncidents
     longitude,
     description,
     severity,
+    independentSourceCount,
+    confidence,
     createdAt,
     updatedAt,
     version,
@@ -1175,6 +1200,21 @@ class $LocalIncidentsTable extends LocalIncidents
         severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
       );
     }
+    if (data.containsKey('independent_source_count')) {
+      context.handle(
+        _independentSourceCountMeta,
+        independentSourceCount.isAcceptableOrUnknown(
+          data['independent_source_count']!,
+          _independentSourceCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1240,6 +1280,14 @@ class $LocalIncidentsTable extends LocalIncidents
         DriftSqlType.string,
         data['${effectivePrefix}severity'],
       )!,
+      independentSourceCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}independent_source_count'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1273,6 +1321,13 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
   final double longitude;
   final String description;
   final String severity;
+
+  /// M14's ground-truth fusion output: how many *independent* reporters
+  /// (deduplicated by reporter id) have corroborated this incident, and
+  /// the resulting confidence — both start at a single-source baseline
+  /// and are recomputed each time another report is fused in.
+  final int independentSourceCount;
+  final double confidence;
   final DateTime createdAt;
   final DateTime updatedAt;
   final int version;
@@ -1285,6 +1340,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     required this.longitude,
     required this.description,
     required this.severity,
+    required this.independentSourceCount,
+    required this.confidence,
     required this.createdAt,
     required this.updatedAt,
     required this.version,
@@ -1300,6 +1357,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     map['longitude'] = Variable<double>(longitude);
     map['description'] = Variable<String>(description);
     map['severity'] = Variable<String>(severity);
+    map['independent_source_count'] = Variable<int>(independentSourceCount);
+    map['confidence'] = Variable<double>(confidence);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
@@ -1316,6 +1375,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       longitude: Value(longitude),
       description: Value(description),
       severity: Value(severity),
+      independentSourceCount: Value(independentSourceCount),
+      confidence: Value(confidence),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       version: Value(version),
@@ -1336,6 +1397,10 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       longitude: serializer.fromJson<double>(json['longitude']),
       description: serializer.fromJson<String>(json['description']),
       severity: serializer.fromJson<String>(json['severity']),
+      independentSourceCount: serializer.fromJson<int>(
+        json['independentSourceCount'],
+      ),
+      confidence: serializer.fromJson<double>(json['confidence']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
@@ -1353,6 +1418,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       'longitude': serializer.toJson<double>(longitude),
       'description': serializer.toJson<String>(description),
       'severity': serializer.toJson<String>(severity),
+      'independentSourceCount': serializer.toJson<int>(independentSourceCount),
+      'confidence': serializer.toJson<double>(confidence),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
@@ -1368,6 +1435,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     double? longitude,
     String? description,
     String? severity,
+    int? independentSourceCount,
+    double? confidence,
     DateTime? createdAt,
     DateTime? updatedAt,
     int? version,
@@ -1380,6 +1449,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     longitude: longitude ?? this.longitude,
     description: description ?? this.description,
     severity: severity ?? this.severity,
+    independentSourceCount:
+        independentSourceCount ?? this.independentSourceCount,
+    confidence: confidence ?? this.confidence,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
@@ -1396,6 +1468,12 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
           ? data.description.value
           : this.description,
       severity: data.severity.present ? data.severity.value : this.severity,
+      independentSourceCount: data.independentSourceCount.present
+          ? data.independentSourceCount.value
+          : this.independentSourceCount,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
@@ -1413,6 +1491,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
           ..write('longitude: $longitude, ')
           ..write('description: $description, ')
           ..write('severity: $severity, ')
+          ..write('independentSourceCount: $independentSourceCount, ')
+          ..write('confidence: $confidence, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
@@ -1430,6 +1510,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     longitude,
     description,
     severity,
+    independentSourceCount,
+    confidence,
     createdAt,
     updatedAt,
     version,
@@ -1446,6 +1528,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
           other.longitude == this.longitude &&
           other.description == this.description &&
           other.severity == this.severity &&
+          other.independentSourceCount == this.independentSourceCount &&
+          other.confidence == this.confidence &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version &&
@@ -1460,6 +1544,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
   final Value<double> longitude;
   final Value<String> description;
   final Value<String> severity;
+  final Value<int> independentSourceCount;
+  final Value<double> confidence;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> version;
@@ -1473,6 +1559,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     this.longitude = const Value.absent(),
     this.description = const Value.absent(),
     this.severity = const Value.absent(),
+    this.independentSourceCount = const Value.absent(),
+    this.confidence = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
@@ -1487,6 +1575,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     required double longitude,
     this.description = const Value.absent(),
     this.severity = const Value.absent(),
+    this.independentSourceCount = const Value.absent(),
+    this.confidence = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.version = const Value.absent(),
@@ -1507,6 +1597,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     Expression<double>? longitude,
     Expression<String>? description,
     Expression<String>? severity,
+    Expression<int>? independentSourceCount,
+    Expression<double>? confidence,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
@@ -1521,6 +1613,9 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
       if (longitude != null) 'longitude': longitude,
       if (description != null) 'description': description,
       if (severity != null) 'severity': severity,
+      if (independentSourceCount != null)
+        'independent_source_count': independentSourceCount,
+      if (confidence != null) 'confidence': confidence,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
@@ -1537,6 +1632,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     Value<double>? longitude,
     Value<String>? description,
     Value<String>? severity,
+    Value<int>? independentSourceCount,
+    Value<double>? confidence,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? version,
@@ -1551,6 +1648,9 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
       longitude: longitude ?? this.longitude,
       description: description ?? this.description,
       severity: severity ?? this.severity,
+      independentSourceCount:
+          independentSourceCount ?? this.independentSourceCount,
+      confidence: confidence ?? this.confidence,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
@@ -1583,6 +1683,14 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     if (severity.present) {
       map['severity'] = Variable<String>(severity.value);
     }
+    if (independentSourceCount.present) {
+      map['independent_source_count'] = Variable<int>(
+        independentSourceCount.value,
+      );
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1611,6 +1719,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
           ..write('longitude: $longitude, ')
           ..write('description: $description, ')
           ..write('severity: $severity, ')
+          ..write('independentSourceCount: $independentSourceCount, ')
+          ..write('confidence: $confidence, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
@@ -8296,6 +8406,8 @@ typedef $$LocalIncidentsTableCreateCompanionBuilder =
       required double longitude,
       Value<String> description,
       Value<String> severity,
+      Value<int> independentSourceCount,
+      Value<double> confidence,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<int> version,
@@ -8311,6 +8423,8 @@ typedef $$LocalIncidentsTableUpdateCompanionBuilder =
       Value<double> longitude,
       Value<String> description,
       Value<String> severity,
+      Value<int> independentSourceCount,
+      Value<double> confidence,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> version,
@@ -8359,6 +8473,16 @@ class $$LocalIncidentsTableFilterComposer
 
   ColumnFilters<String> get severity => $composableBuilder(
     column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get independentSourceCount => $composableBuilder(
+    column: $table.independentSourceCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+    column: $table.confidence,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8427,6 +8551,16 @@ class $$LocalIncidentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get independentSourceCount => $composableBuilder(
+    column: $table.independentSourceCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -8479,6 +8613,16 @@ class $$LocalIncidentsTableAnnotationComposer
 
   GeneratedColumn<String> get severity =>
       $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<int> get independentSourceCount => $composableBuilder(
+    column: $table.independentSourceCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -8533,6 +8677,8 @@ class $$LocalIncidentsTableTableManager
                 Value<double> longitude = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<String> severity = const Value.absent(),
+                Value<int> independentSourceCount = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
@@ -8546,6 +8692,8 @@ class $$LocalIncidentsTableTableManager
                 longitude: longitude,
                 description: description,
                 severity: severity,
+                independentSourceCount: independentSourceCount,
+                confidence: confidence,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 version: version,
@@ -8561,6 +8709,8 @@ class $$LocalIncidentsTableTableManager
                 required double longitude,
                 Value<String> description = const Value.absent(),
                 Value<String> severity = const Value.absent(),
+                Value<int> independentSourceCount = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<int> version = const Value.absent(),
@@ -8574,6 +8724,8 @@ class $$LocalIncidentsTableTableManager
                 longitude: longitude,
                 description: description,
                 severity: severity,
+                independentSourceCount: independentSourceCount,
+                confidence: confidence,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 version: version,

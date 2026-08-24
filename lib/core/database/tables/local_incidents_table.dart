@@ -11,6 +11,15 @@ class LocalIncidents extends Table {
   RealColumn get longitude => real()();
   TextColumn get description => text().withDefault(const Constant(''))();
   TextColumn get severity => text().withDefault(const Constant('unknown'))();
+
+  /// M14's ground-truth fusion output: how many *independent* reporters
+  /// (deduplicated by reporter id) have corroborated this incident, and
+  /// the resulting confidence — both start at a single-source baseline
+  /// and are recomputed each time another report is fused in.
+  IntColumn get independentSourceCount =>
+      integer().withDefault(const Constant(1))();
+  RealColumn get confidence => real().withDefault(const Constant(0.5))();
+
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   IntColumn get version => integer().withDefault(const Constant(1))();

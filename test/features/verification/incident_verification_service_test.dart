@@ -39,6 +39,7 @@ void main() {
             reportType: 'landslide',
             description: const Value('Debris on the road'),
             severity: const Value('high'),
+            reporterId: const Value('reporter-1'),
             createdAt: now,
             updatedAt: now,
           ),
@@ -176,6 +177,106 @@ void main() {
         now: now,
       );
       expect(result.isFailure, isTrue);
+    });
+  });
+
+  group('ground-truth fusion (M14) via acknowledgeReport', () {
+    setUp(() async {
+      await db
+          .into(db.localIncidentReports)
+          .insert(
+            LocalIncidentReportsCompanion.insert(
+              id: 'report-2',
+              latitude: 10.001,
+              longitude: 10.001,
+              reportType: 'landslide',
+              description: const Value('Same slide, seen from further down'),
+              severity: const Value('critical'),
+              reporterId: const Value('reporter-2'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+    });
+
+    test(
+      'a second nearby report of the same type merges into the first incident',
+      () async {
+        final first = await service.acknowledgeReport(
+          reportId: 'report-1',
+          officialId: 'official-1',
+          now: now,
+        );
+        final incidentId = first.dataOrNull!.id;
+
+        final second = await service.acknowledgeReport(
+          reportId: 'report-2',
+          officialId: 'official-2',
+          now: now,
+        );
+
+        expect(second.isSuccess, isTrue);
+        expect(second.dataOrNull?.id, incidentId);
+        expect(second.dataOrNull?.independentSourceCount, 2);
+        // Severity escalates to the worse of 'high' and 'critical'.
+        expect(second.dataOrNull?.severity, 'critical');
+
+        final secondReport = await reportRepository.getById('report-2');
+        expect(secondReport.dataOrNull?.incidentId, incidentId);
+      },
+    );
+
+    test('the merge is recorded as incident.report_merged in the audit trail', () async {
+      final first = await service.acknowledgeReport(
+        reportId: 'report-1',
+        officialId: 'official-1',
+        now: now,
+      );
+      final incidentId = first.dataOrNull!.id;
+
+      await service.acknowledgeReport(
+        reportId: 'report-2',
+        officialId: 'official-2',
+        now: now,
+      );
+
+      final auditTrail = await service.auditTrailFor(incidentId);
+      expect(auditTrail.dataOrNull, hasLength(2));
+      expect(auditTrail.dataOrNull!.first.action, 'incident.report_merged');
+      expect(
+        jsonDecode(auditTrail.dataOrNull!.first.newValue!)['independentSourceCount'],
+        2,
+      );
+    });
+
+    test('a report far away starts its own incident instead of merging', () async {
+      await db
+          .into(db.localIncidentReports)
+          .insert(
+            LocalIncidentReportsCompanion.insert(
+              id: 'report-far',
+              latitude: 40,
+              longitude: 40,
+              reportType: 'landslide',
+              reporterId: const Value('reporter-3'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      final first = await service.acknowledgeReport(
+        reportId: 'report-1',
+        officialId: 'official-1',
+        now: now,
+      );
+      final farAway = await service.acknowledgeReport(
+        reportId: 'report-far',
+        officialId: 'official-1',
+        now: now,
+      );
+
+      expect(farAway.dataOrNull?.id, isNot(first.dataOrNull?.id));
+      expect(farAway.dataOrNull?.independentSourceCount, 1);
     });
   });
 }

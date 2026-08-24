@@ -39,6 +39,8 @@ void main() {
         longitude: lng,
         description: 'Blocked',
         severity: 'medium',
+        independentSourceCount: 1,
+        confidence: 0.5,
         createdAt: now,
         updatedAt: now,
         version: 1,

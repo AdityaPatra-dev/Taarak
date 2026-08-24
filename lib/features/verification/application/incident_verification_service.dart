@@ -7,34 +7,40 @@ import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
 import 'package:taarak/core/repository/result.dart';
+import 'package:taarak/features/fusion/application/ground_truth_fusion_engine.dart';
 import 'package:taarak/features/verification/application/incident_verification_engine.dart';
 import 'package:taarak/features/verification/domain/incident_verification_status.dart';
 
 const _uuid = Uuid();
 
 /// Orchestrates M13: turns an unlinked citizen report into a tracked
-/// incident, and moves incidents through the verification lifecycle —
-/// writing a real audit entry to [[AuditLogDao]] for every state change,
-/// which is the acceptance criterion itself, not an afterthought.
+/// incident — via M14's fusion engine, so a report that matches an
+/// already-tracked incident joins it instead of spawning a duplicate —
+/// and moves incidents through the verification lifecycle, writing a real
+/// audit entry to [[AuditLogDao]] for every state change, which is the
+/// acceptance criterion itself, not an afterthought.
 class IncidentVerificationService {
   final LocalIncidentReportRepository _reportRepository;
   final LocalIncidentRepository _incidentRepository;
   final AuditLogDao _auditLogDao;
   final IncidentVerificationEngine _engine;
+  final GroundTruthFusionEngine _fusionEngine;
 
   IncidentVerificationService({
     required LocalIncidentReportRepository reportRepository,
     required LocalIncidentRepository incidentRepository,
     required AuditLogDao auditLogDao,
     IncidentVerificationEngine? engine,
+    GroundTruthFusionEngine? fusionEngine,
   }) : _reportRepository = reportRepository,
        _incidentRepository = incidentRepository,
        _auditLogDao = auditLogDao,
-       _engine = engine ?? IncidentVerificationEngine();
+       _engine = engine ?? IncidentVerificationEngine(),
+       _fusionEngine = fusionEngine ?? GroundTruthFusionEngine();
 
-  /// Creates a tracked incident from an unlinked report, in the
-  /// "acknowledged" state — the report has been seen by an official, even
-  /// if not yet confirmed true.
+  /// Either merges the report into a matching existing incident (M14) or
+  /// creates a new one in the "acknowledged" state — the report has been
+  /// seen by an official either way, even if not yet confirmed true.
   Future<Result<LocalIncident>> acknowledgeReport({
     required String reportId,
     required String officialId,
@@ -47,20 +53,59 @@ class IncidentVerificationService {
     }
     final report = reportResult.dataOrNull!;
 
-    final occurredAt = now ?? DateTime.now();
-    final incident = LocalIncident(
-      id: _uuid.v4(),
-      type: report.reportType,
-      status: IncidentVerificationStatus.acknowledged.storageValue,
-      latitude: report.latitude,
-      longitude: report.longitude,
-      description: report.description,
-      severity: report.severity,
-      createdAt: occurredAt,
-      updatedAt: occurredAt,
-      version: 1,
-      isSynced: false,
+    final incidentsResult = await _incidentRepository.getAll();
+    final existingIncidents = incidentsResult.dataOrNull ?? const [];
+
+    final allReportsResult = await _reportRepository.getAll();
+    final reportsByIncidentId = <String, List<LocalIncidentReport>>{};
+    for (final existingReport in allReportsResult.dataOrNull ?? const []) {
+      final incidentId = existingReport.incidentId;
+      if (incidentId != null) {
+        reportsByIncidentId.putIfAbsent(incidentId, () => []).add(existingReport);
+      }
+    }
+
+    final match = _fusionEngine.evaluate(
+      newReport: report,
+      existingIncidents: existingIncidents,
+      reportsByIncidentId: reportsByIncidentId,
     );
+
+    final occurredAt = now ?? DateTime.now();
+    final LocalIncident incident;
+
+    if (match.isNewIncident) {
+      incident = LocalIncident(
+        id: _uuid.v4(),
+        type: report.reportType,
+        status: IncidentVerificationStatus.acknowledged.storageValue,
+        latitude: report.latitude,
+        longitude: report.longitude,
+        description: report.description,
+        severity: match.severity,
+        independentSourceCount: match.independentSourceCount,
+        confidence: match.confidence,
+        createdAt: occurredAt,
+        updatedAt: occurredAt,
+        version: 1,
+        isSynced: false,
+      );
+    } else {
+      final existingResult = await _incidentRepository.getById(
+        match.matchedIncidentId!,
+      );
+      if (existingResult case Failed<LocalIncident>(:final failure)) {
+        return Result.failure(failure);
+      }
+      final existing = existingResult.dataOrNull!;
+      incident = existing.copyWith(
+        severity: match.severity,
+        independentSourceCount: match.independentSourceCount,
+        confidence: match.confidence,
+        updatedAt: occurredAt,
+        version: existing.version + 1,
+      );
+    }
 
     final saveResult = await _incidentRepository.save(incident);
     if (saveResult case Failed<LocalIncident>(:final failure)) {
@@ -73,12 +118,14 @@ class IncidentVerificationService {
 
     await _auditLogDao.record(
       actorId: officialId,
-      action: 'incident.acknowledged',
+      action: match.isNewIncident ? 'incident.acknowledged' : 'incident.report_merged',
       objectType: 'incident',
       objectId: incident.id,
       newValue: jsonEncode({
         'status': incident.status,
         'fromReportId': reportId,
+        'independentSourceCount': match.independentSourceCount,
+        'confidence': match.confidence,
       }),
       reason: reason,
       now: occurredAt,

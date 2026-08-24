@@ -42,6 +42,8 @@ void main() {
       longitude: 3,
       description: 'Road blocked by debris',
       severity: 'medium',
+      independentSourceCount: 1,
+      confidence: 0.5,
       createdAt: now,
       updatedAt: now,
       version: 1,

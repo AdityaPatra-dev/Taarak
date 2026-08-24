@@ -103,6 +103,17 @@ class _IncidentCard extends ConsumerWidget {
           children: [
             Text('${incident.type} — ${status.label}', style: Theme.of(context).textTheme.titleSmall),
             if (incident.description.isNotEmpty) Text(incident.description),
+            if (incident.independentSourceCount > 1)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Confirmed by ${incident.independentSourceCount} independent sources '
+                  '(${(incident.confidence * 100).round()}% confidence)',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
