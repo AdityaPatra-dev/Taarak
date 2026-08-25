@@ -11,11 +11,16 @@ class SyncRunSummary {
 
   final bool skippedOffline;
 
+  /// Records pulled in from other devices this run — the count that
+  /// answers "did I just get anything new from someone else".
+  final int pulledCount;
+
   const SyncRunSummary({
     this.syncedCount = 0,
     this.conflictCount = 0,
     this.failedCount = 0,
     this.abandonedCount = 0,
     this.skippedOffline = false,
+    this.pulledCount = 0,
   });
 }

@@ -134,10 +134,8 @@ class HomeScreen extends ConsumerWidget {
                   scheme: scheme,
                   textTheme: textTheme,
                 ),
-                if (!syncSummary.isEmpty) ...[
-                  const SizedBox(height: Spacing.sm),
-                  _SyncBanner(summary: syncSummary, ref: ref),
-                ],
+                const SizedBox(height: Spacing.sm),
+                _SyncBanner(summary: syncSummary, ref: ref),
                 if (hasSos) ...[
                   const SizedBox(height: Spacing.md),
                   _SosCard(onTap: () => context.go('/sos')),
@@ -342,9 +340,13 @@ class _SyncBanner extends ConsumerWidget {
     final isRetrying = summary.retryingCount > 0;
     final background = isStalled
         ? scheme.errorContainer
+        : summary.isEmpty
+        ? scheme.surfaceContainerLow
         : scheme.secondaryContainer;
     final foreground = isStalled
         ? scheme.onErrorContainer
+        : summary.isEmpty
+        ? scheme.onSurfaceVariant
         : scheme.onSecondaryContainer;
 
     return Container(
@@ -364,6 +366,8 @@ class _SyncBanner extends ConsumerWidget {
                 ? Icons.sync_problem
                 : isRetrying
                 ? Icons.sync_problem_outlined
+                : summary.isEmpty
+                ? Icons.cloud_done_outlined
                 : Icons.schedule,
             size: 18,
             color: foreground,

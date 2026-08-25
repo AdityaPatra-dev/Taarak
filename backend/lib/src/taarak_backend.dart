@@ -27,7 +27,8 @@ class TaarakBackend {
   final Map<String, _SyncedEntity> _synced = {};
 
   /// Read-only views for tests.
-  Map<String, Account> get accountsByEmail => Map.unmodifiable(_accountsByEmail);
+  Map<String, Account> get accountsByEmail =>
+      Map.unmodifiable(_accountsByEmail);
   Map<String, int> get syncedVersions => {
     for (final entry in _synced.entries) entry.key: entry.value.version,
   };
@@ -37,6 +38,7 @@ class TaarakBackend {
     router.post('/api/auth/login', _login);
     router.post('/api/auth/register', _register);
     router.post('/api/sync/<table>', _sync);
+    router.get('/api/sync/<table>', _pull);
     return router.call;
   }
 
@@ -56,7 +58,10 @@ class TaarakBackend {
       );
     }
 
-    return Response.ok(jsonEncode(_sessionJson(account)), headers: _jsonHeaders);
+    return Response.ok(
+      jsonEncode(_sessionJson(account)),
+      headers: _jsonHeaders,
+    );
   }
 
   Future<Response> _register(Request request) async {
@@ -71,7 +76,9 @@ class TaarakBackend {
     if (_accountsByEmail.containsKey(email)) {
       return Response(
         422,
-        body: jsonEncode({'message': 'An account with this email already exists'}),
+        body: jsonEncode({
+          'message': 'An account with this email already exists',
+        }),
         headers: _jsonHeaders,
       );
     }
@@ -87,7 +94,10 @@ class TaarakBackend {
     );
     _accountsByEmail[email] = account;
 
-    return Response.ok(jsonEncode(_sessionJson(account)), headers: _jsonHeaders);
+    return Response.ok(
+      jsonEncode(_sessionJson(account)),
+      headers: _jsonHeaders,
+    );
   }
 
   Map<String, dynamic> _sessionJson(Account account) {
@@ -122,6 +132,25 @@ class TaarakBackend {
 
     _synced[key] = _SyncedEntity(incomingVersion, payloadJson);
     return Response.ok(jsonEncode({'conflict': false}), headers: _jsonHeaders);
+  }
+
+  /// The pull side of sync: every entity pushed for [table] by any
+  /// device, so a second device (a different login, or a different role)
+  /// can actually see what the first one created. Without this, `_sync`
+  /// above only ever receives data — nothing a client pushes would ever
+  /// be visible anywhere else.
+  Future<Response> _pull(Request request, String table) async {
+    final prefix = '$table:';
+    final records = [
+      for (final entry in _synced.entries)
+        if (entry.key.startsWith(prefix))
+          {
+            'entityId': entry.key.substring(prefix.length),
+            'payload': entry.value.payloadJson,
+            'version': entry.value.version,
+          },
+    ];
+    return Response.ok(jsonEncode(records), headers: _jsonHeaders);
   }
 
   int _versionOf(String payloadJson) {

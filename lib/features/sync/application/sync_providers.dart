@@ -17,6 +17,7 @@ final syncCoordinatorServiceProvider = Provider<SyncCoordinatorService>(
     networkInfo: ref.watch(networkInfoProvider),
     transport: ref.watch(syncTransportProvider),
     engine: ref.watch(syncEngineProvider),
+    incidentReportRepository: ref.watch(localIncidentReportRepositoryProvider),
   ),
 );
 

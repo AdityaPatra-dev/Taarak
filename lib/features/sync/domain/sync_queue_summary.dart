@@ -32,6 +32,7 @@ class SyncQueueSummary {
 /// stalled (needs attention) > retrying (a real but ongoing problem) >
 /// pending (nothing has gone wrong yet).
 String syncQueueSummaryMessage(SyncQueueSummary summary) {
+  if (summary.isEmpty) return 'Up to date';
   if (summary.stalledCount > 0) {
     final n = summary.stalledCount;
     return "$n item${n == 1 ? '' : 's'} couldn't be sent after repeated attempts";

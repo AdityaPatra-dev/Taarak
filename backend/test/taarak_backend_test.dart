@@ -11,6 +11,8 @@ Request _post(String path, Map<String, dynamic> body) => Request(
   headers: const {'content-type': 'application/json'},
 );
 
+Request _get(String path) => Request('GET', Uri.parse('http://localhost$path'));
+
 Future<Map<String, dynamic>> _bodyOf(Response response) async {
   final raw = await response.readAsString();
   return jsonDecode(raw) as Map<String, dynamic>;
@@ -27,7 +29,10 @@ void main() {
       'demo account logs in and gets a session matching AuthSession.fromJson',
       () async {
         final response = await backend.handler(
-          _post('/api/auth/login', {'email': 'citizen@taarak.dev', 'password': 'citizen123'}),
+          _post('/api/auth/login', {
+            'email': 'citizen@taarak.dev',
+            'password': 'citizen123',
+          }),
         );
 
         expect(response.statusCode, 200);
@@ -42,34 +47,53 @@ void main() {
 
     test('a wrong password is rejected with 401', () async {
       final response = await backend.handler(
-        _post('/api/auth/login', {'email': 'citizen@taarak.dev', 'password': 'wrong'}),
+        _post('/api/auth/login', {
+          'email': 'citizen@taarak.dev',
+          'password': 'wrong',
+        }),
       );
       expect(response.statusCode, 401);
     });
 
-    test('an unknown email is rejected with 401, not a different error', () async {
-      final response = await backend.handler(
-        _post('/api/auth/login', {'email': 'nobody@taarak.dev', 'password': 'anything'}),
-      );
-      expect(response.statusCode, 401);
-    });
-
-    test('every seeded role can log in with its documented credentials', () async {
-      final roleCredentials = {
-        'citizen@taarak.dev': 'citizen123',
-        'responder@taarak.dev': 'responder123',
-        'official@taarak.dev': 'official123',
-        'command@taarak.dev': 'command123',
-        'stateadmin@taarak.dev': 'stateadmin123',
-        'sysadmin@taarak.dev': 'sysadmin123',
-      };
-      for (final entry in roleCredentials.entries) {
+    test(
+      'an unknown email is rejected with 401, not a different error',
+      () async {
         final response = await backend.handler(
-          _post('/api/auth/login', {'email': entry.key, 'password': entry.value}),
+          _post('/api/auth/login', {
+            'email': 'nobody@taarak.dev',
+            'password': 'anything',
+          }),
         );
-        expect(response.statusCode, 200, reason: '${entry.key} should log in');
-      }
-    });
+        expect(response.statusCode, 401);
+      },
+    );
+
+    test(
+      'every seeded role can log in with its documented credentials',
+      () async {
+        final roleCredentials = {
+          'citizen@taarak.dev': 'citizen123',
+          'responder@taarak.dev': 'responder123',
+          'official@taarak.dev': 'official123',
+          'command@taarak.dev': 'command123',
+          'stateadmin@taarak.dev': 'stateadmin123',
+          'sysadmin@taarak.dev': 'sysadmin123',
+        };
+        for (final entry in roleCredentials.entries) {
+          final response = await backend.handler(
+            _post('/api/auth/login', {
+              'email': entry.key,
+              'password': entry.value,
+            }),
+          );
+          expect(
+            response.statusCode,
+            200,
+            reason: '${entry.key} should log in',
+          );
+        }
+      },
+    );
   });
 
   group('POST /api/auth/register', () {
@@ -86,7 +110,10 @@ void main() {
       expect(body['user']['role'], 'citizen');
 
       final loginResponse = await backend.handler(
-        _post('/api/auth/login', {'email': 'new@taarak.dev', 'password': 'password123'}),
+        _post('/api/auth/login', {
+          'email': 'new@taarak.dev',
+          'password': 'password123',
+        }),
       );
       expect(loginResponse.statusCode, 200);
     });
@@ -166,7 +193,10 @@ void main() {
         final body = await _bodyOf(response);
         expect(body['conflict'], true);
         expect(body['serverVersion'], 3);
-        expect(backend.syncedVersions['local_incident_reports:report-1'], 3); // unchanged
+        expect(
+          backend.syncedVersions['local_incident_reports:report-1'],
+          3,
+        ); // unchanged
       },
     );
 
@@ -183,24 +213,87 @@ void main() {
       expect(backend.syncedVersions['local_shelters:shelter-1'], 1);
     });
 
-    test('different tables with the same entityId are tracked independently', () async {
+    test(
+      'different tables with the same entityId are tracked independently',
+      () async {
+        await backend.handler(
+          _post('/api/sync/local_incidents', {
+            'entityId': 'x1',
+            'operation': 'create',
+            'payload': jsonEncode({'version': 5}),
+          }),
+        );
+        await backend.handler(
+          _post('/api/sync/local_alerts', {
+            'entityId': 'x1',
+            'operation': 'create',
+            'payload': jsonEncode({'version': 1}),
+          }),
+        );
+
+        expect(backend.syncedVersions['local_incidents:x1'], 5);
+        expect(backend.syncedVersions['local_alerts:x1'], 1);
+      },
+    );
+  });
+
+  group('GET /api/sync/<table>', () {
+    test(
+      'A DEVICE THAT PULLS SEES WHAT ANOTHER DEVICE PUSHED — the multi-device '
+      'acceptance criterion',
+      () async {
+        await backend.handler(
+          _post('/api/sync/local_incident_reports', {
+            'entityId': 'report-from-device-a',
+            'operation': 'create',
+            'payload': jsonEncode({'id': 'report-from-device-a', 'version': 1}),
+          }),
+        );
+
+        final response = await backend.handler(
+          _get('/api/sync/local_incident_reports'),
+        );
+
+        expect(response.statusCode, 200);
+        final body = jsonDecode(await response.readAsString()) as List<dynamic>;
+        expect(body, hasLength(1));
+        expect(body.single['entityId'], 'report-from-device-a');
+        expect(body.single['version'], 1);
+        expect(
+          jsonDecode(body.single['payload'] as String)['id'],
+          'report-from-device-a',
+        );
+      },
+    );
+
+    test('an empty table pulls back an empty list, not an error', () async {
+      final response = await backend.handler(_get('/api/sync/local_alerts'));
+
+      expect(response.statusCode, 200);
+      expect(jsonDecode(await response.readAsString()), isEmpty);
+    });
+
+    test('pulling one table never returns another table\'s entities', () async {
       await backend.handler(
-        _post('/api/sync/local_incidents', {
-          'entityId': 'x1',
+        _post('/api/sync/local_incident_reports', {
+          'entityId': 'report-1',
           'operation': 'create',
-          'payload': jsonEncode({'version': 5}),
+          'payload': jsonEncode({'version': 1}),
         }),
       );
       await backend.handler(
-        _post('/api/sync/local_alerts', {
-          'entityId': 'x1',
+        _post('/api/sync/local_shelters', {
+          'entityId': 'shelter-1',
           'operation': 'create',
           'payload': jsonEncode({'version': 1}),
         }),
       );
 
-      expect(backend.syncedVersions['local_incidents:x1'], 5);
-      expect(backend.syncedVersions['local_alerts:x1'], 1);
+      final response = await backend.handler(_get('/api/sync/local_shelters'));
+      final body = jsonDecode(await response.readAsString()) as List<dynamic>;
+
+      expect(body, hasLength(1));
+      expect(body.single['entityId'], 'shelter-1');
     });
   });
 }

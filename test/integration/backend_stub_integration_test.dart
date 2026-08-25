@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:taarak/core/config/app_config.dart';
 import 'package:taarak/core/config/environment.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/network/api_client.dart';
 import 'package:taarak/core/network/network_info.dart';
@@ -86,7 +87,9 @@ void main() {
       'INTRODUCE GENUINE BACKEND CONNECTIVITY — the acceptance criterion: a seeded '
       'account logs in for real over HTTP',
       () async {
-        final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(apiClient);
+        final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(
+          apiClient,
+        );
 
         final result = await dataSource.login(
           email: 'citizen@taarak.dev',
@@ -99,58 +102,79 @@ void main() {
       },
     );
 
-    test('wrong credentials fail with a real 401 from the real server', () async {
-      final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(apiClient);
+    test(
+      'wrong credentials fail with a real 401 from the real server',
+      () async {
+        final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(
+          apiClient,
+        );
 
-      final result = await dataSource.login(email: 'citizen@taarak.dev', password: 'nope');
+        final result = await dataSource.login(
+          email: 'citizen@taarak.dev',
+          password: 'nope',
+        );
 
-      expect(result.isFailure, isTrue);
-    });
+        expect(result.isFailure, isTrue);
+      },
+    );
 
-    test('registering a fresh account works end to end, then logging in with it', () async {
-      final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(apiClient);
-      final uniqueEmail = 'integration-${DateTime.now().microsecondsSinceEpoch}@taarak.dev';
+    test(
+      'registering a fresh account works end to end, then logging in with it',
+      () async {
+        final AuthRemoteDataSource dataSource = ApiAuthRemoteDataSource(
+          apiClient,
+        );
+        final uniqueEmail =
+            'integration-${DateTime.now().microsecondsSinceEpoch}@taarak.dev';
 
-      final registerResult = await dataSource.register(
-        name: 'Integration Test',
-        email: uniqueEmail,
-        password: 'password123',
-      );
-      expect(registerResult.isSuccess, isTrue);
+        final registerResult = await dataSource.register(
+          name: 'Integration Test',
+          email: uniqueEmail,
+          password: 'password123',
+        );
+        expect(registerResult.isSuccess, isTrue);
 
-      final loginResult = await dataSource.login(email: uniqueEmail, password: 'password123');
-      expect(loginResult.isSuccess, isTrue);
-    });
+        final loginResult = await dataSource.login(
+          email: uniqueEmail,
+          password: 'password123',
+        );
+        expect(loginResult.isSuccess, isTrue);
+      },
+    );
   });
 
   group('real sync against the backend stub', () {
     configureSqlite3ForLocalTests();
 
-    test('a queued entry actually syncs over real HTTP and is marked synced', () async {
-      final db = AppDatabase(NativeDatabase.memory());
-      final syncQueueDao = SyncQueueDao(db);
-      final coordinator = SyncCoordinatorService(
-        syncQueueDao: syncQueueDao,
-        networkInfo: _AlwaysOnlineNetworkInfo(),
-        transport: ApiSyncTransport(apiClient),
-      );
+    test(
+      'a queued entry actually syncs over real HTTP and is marked synced',
+      () async {
+        final db = AppDatabase(NativeDatabase.memory());
+        final syncQueueDao = SyncQueueDao(db);
+        final coordinator = SyncCoordinatorService(
+          syncQueueDao: syncQueueDao,
+          networkInfo: _AlwaysOnlineNetworkInfo(),
+          transport: ApiSyncTransport(apiClient),
+        );
 
-      final entityId = 'integration-report-${DateTime.now().microsecondsSinceEpoch}';
-      await syncQueueDao.enqueue(
-        entityTable: 'local_incident_reports',
-        entityId: entityId,
-        operation: 'create',
-        payloadJson: jsonEncode({'id': entityId, 'version': 1}),
-      );
+        final entityId =
+            'integration-report-${DateTime.now().microsecondsSinceEpoch}';
+        await syncQueueDao.enqueue(
+          entityTable: 'local_incident_reports',
+          entityId: entityId,
+          operation: 'create',
+          payloadJson: jsonEncode({'id': entityId, 'version': 1}),
+        );
 
-      final summary = await coordinator.syncPendingEntries();
+        final summary = await coordinator.syncPendingEntries();
 
-      expect(summary.syncedCount, 1);
-      final pending = await syncQueueDao.listPending();
-      expect(pending.dataOrNull, isEmpty);
+        expect(summary.syncedCount, 1);
+        final pending = await syncQueueDao.listPending();
+        expect(pending.dataOrNull, isEmpty);
 
-      await db.close();
-    });
+        await db.close();
+      },
+    );
 
     test(
       'INTRODUCE GENUINE BACKEND CONNECTIVITY — the acceptance criterion: a stale '
@@ -159,12 +183,17 @@ void main() {
         final db = AppDatabase(NativeDatabase.memory());
         final syncQueueDao = SyncQueueDao(db);
         final transport = ApiSyncTransport(apiClient);
-        final entityId = 'integration-conflict-${DateTime.now().microsecondsSinceEpoch}';
+        final entityId =
+            'integration-conflict-${DateTime.now().microsecondsSinceEpoch}';
 
         // Push version 3 directly first, so the server already has something
         // newer than what the queued entry (version 2) will offer.
         await transport.push(
-          _rawEntry(entityTable: 'local_incidents', entityId: entityId, version: 3),
+          _rawEntry(
+            entityTable: 'local_incidents',
+            entityId: entityId,
+            version: 3,
+          ),
         );
 
         final coordinator = SyncCoordinatorService(
@@ -189,6 +218,58 @@ void main() {
         await db.close();
       },
     );
+
+    test('A CITIZEN REPORT PUSHED FROM ONE DEVICE IS VISIBLE ON ANOTHER — the '
+        'multi-device acceptance criterion, proven against the real server: two '
+        'independent local databases, one shared backend, no direct link between '
+        'the two devices at all', () async {
+      // Device A: a citizen creates a report and syncs it up.
+      final deviceA = AppDatabase(NativeDatabase.memory());
+      final entityId =
+          'integration-multidevice-${DateTime.now().microsecondsSinceEpoch}';
+      final coordinatorA = SyncCoordinatorService(
+        syncQueueDao: SyncQueueDao(deviceA),
+        networkInfo: _AlwaysOnlineNetworkInfo(),
+        transport: ApiSyncTransport(apiClient),
+      );
+      await SyncQueueDao(deviceA).enqueue(
+        entityTable: 'local_incident_reports',
+        entityId: entityId,
+        operation: 'create',
+        payloadJson: jsonEncode({
+          'reporterId': 'citizen-on-device-a',
+          'latitude': 12.9,
+          'longitude': 77.6,
+          'reportType': 'flood',
+          'description': 'pushed from device A',
+          'severity': 'high',
+          'createdAt': DateTime.now().toIso8601String(),
+          'version': 1,
+        }),
+      );
+      final pushSummary = await coordinatorA.syncPendingEntries();
+      expect(pushSummary.syncedCount, 1);
+      await deviceA.close();
+
+      // Device B: an official, who has never heard of device A, pulls.
+      final deviceB = AppDatabase(NativeDatabase.memory());
+      final reportRepositoryB = LocalIncidentReportRepository(deviceB);
+      final coordinatorB = SyncCoordinatorService(
+        syncQueueDao: SyncQueueDao(deviceB),
+        networkInfo: _AlwaysOnlineNetworkInfo(),
+        transport: ApiSyncTransport(apiClient),
+        incidentReportRepository: reportRepositoryB,
+      );
+
+      final pullSummary = await coordinatorB.syncPendingEntries();
+
+      expect(pullSummary.pulledCount, greaterThanOrEqualTo(1));
+      final onDeviceB = await reportRepositoryB.getById(entityId);
+      expect(onDeviceB.dataOrNull?.reporterId, 'citizen-on-device-a');
+      expect(onDeviceB.dataOrNull?.description, 'pushed from device A');
+
+      await deviceB.close();
+    });
   });
 }
 
