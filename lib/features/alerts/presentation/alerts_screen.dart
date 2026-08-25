@@ -8,6 +8,7 @@ import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/severity_chip.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M16, citizen-facing ([Permission.viewAlerts]): active alerts for the
 /// citizen's current location up top, full broadcast history below —
@@ -22,7 +23,7 @@ class AlertsScreen extends ConsumerWidget {
     final history = ref.watch(alertHistoryProvider).valueOrNull ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Alerts')),
+      appBar: const TaarakAppBar(title: 'Alerts'),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(activeAlertsForCurrentLocationProvider);

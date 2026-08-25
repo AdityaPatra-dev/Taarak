@@ -7,6 +7,7 @@ import 'package:taarak/features/auth/domain/user_role.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -41,7 +42,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: const TaarakAppBar(title: 'Profile'),
       body: ListView(
         children: [
           ContentWidth(

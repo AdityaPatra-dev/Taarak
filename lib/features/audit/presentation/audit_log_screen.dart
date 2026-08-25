@@ -6,6 +6,7 @@ import 'package:taarak/features/audit/application/audit_log_filter.dart';
 import 'package:taarak/features/audit/application/audit_providers.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M19: a System Admin's ([Permission.reviewAudit]) view into every
 /// critical change recorded by [AuditLogDao] — actor, action, object,
@@ -37,8 +38,8 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
     final eventsAsync = ref.watch(auditEventsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Audit Log'),
+      appBar: TaarakAppBar(
+        title: 'Audit Log',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

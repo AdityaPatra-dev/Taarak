@@ -8,6 +8,7 @@ import 'package:taarak/features/sms_prototype/application/emergency_packet_codec
 import 'package:taarak/features/sms_prototype/application/sms_prototype_providers.dart';
 import 'package:taarak/features/sms_prototype/domain/emergency_packet_priority.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 final _demoCodec = EmergencyPacketCodec();
 
@@ -90,7 +91,7 @@ class _DeviceRelayScreenState extends ConsumerState<DeviceRelayScreen> {
     final sentLog = ref.watch(relayTransportProvider).broadcastLog;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Nearby Device Relay (Prototype)')),
+      appBar: const TaarakAppBar(title: 'Nearby Device Relay (Prototype)'),
       body: ListView(
         children: [
           ContentWidth(

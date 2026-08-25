@@ -33,6 +33,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  void _goBackToLogin(BuildContext context) {
+    if (Navigator.of(context).canPop()) {
+      context.pop();
+    } else {
+      // Reached directly (e.g. a bookmarked/typed URL on web) — nothing to
+      // pop back to, so fall back to a real navigation instead of a dead
+      // button.
+      context.go('/login');
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() {
@@ -64,18 +75,33 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       backgroundColor: scheme.primary,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const AuthBrandHeader(tagline: 'Create a citizen account'),
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420),
-                  child: AuthCard(child: _buildFormFields(scheme, textTheme)),
-                ),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  const AuthBrandHeader(tagline: 'Create a citizen account'),
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: AuthCard(
+                        child: _buildFormFields(scheme, textTheme),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            Positioned(
+              top: Spacing.sm,
+              left: Spacing.sm,
+              child: IconButton(
+                icon: Icon(Icons.arrow_back, color: scheme.onPrimary),
+                tooltip: 'Back',
+                onPressed: () => _goBackToLogin(context),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -194,7 +220,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           const SizedBox(height: Spacing.xs),
           TextButton(
-            onPressed: () => context.go('/login'),
+            onPressed: () => _goBackToLogin(context),
             child: const Text('Already have an account? Sign in'),
           ),
           const SizedBox(height: Spacing.sm),

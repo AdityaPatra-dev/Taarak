@@ -10,6 +10,7 @@ import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart
 import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
 /// composition of [TaarakMapView] + overlay layers that the official
@@ -66,7 +67,7 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Risk Map')),
+      appBar: const TaarakAppBar(title: 'Risk Map'),
       body: Stack(
         children: [
           TaarakMapView(

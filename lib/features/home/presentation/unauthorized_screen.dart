@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taarak/app/spacing.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 class UnauthorizedScreen extends StatelessWidget {
   const UnauthorizedScreen({super.key});
@@ -9,7 +10,7 @@ class UnauthorizedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Not authorized')),
+      appBar: const TaarakAppBar(title: 'Not authorized'),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(Spacing.xl),

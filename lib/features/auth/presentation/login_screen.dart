@@ -171,7 +171,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           const SizedBox(height: Spacing.xs),
           TextButton(
-            onPressed: () => context.go('/register'),
+            onPressed: () => context.push('/register'),
             child: const Text("Don't have an account? Register"),
           ),
           if (useMockAuth) ...[

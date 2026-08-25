@@ -18,6 +18,7 @@ import 'package:taarak/features/risk/domain/risk_class.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M18: the single pane a Command user reads the current situation from —
 /// KPIs, a read-only situational map, and the red zones/vulnerable
@@ -48,8 +49,8 @@ class CommandDashboardScreen extends ConsumerWidget {
     final mapZoom = geoTag == null ? defaultMapZoom : 13.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Command Dashboard'),
+      appBar: TaarakAppBar(
+        title: 'Command Dashboard',
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -217,7 +218,7 @@ class CommandDashboardScreen extends ConsumerWidget {
                 ? Text('${incident.independentSourceCount} independent sources')
                 : null,
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.go('/dashboard/incidents/${incident.id}'),
+            onTap: () => context.push('/dashboard/incidents/${incident.id}'),
           ),
       ],
     ),

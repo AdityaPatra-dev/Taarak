@@ -10,6 +10,7 @@ import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/severity_chip.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// Official Verification (M13): unlinked citizen reports (M12) waiting to
 /// be acknowledged into a tracked incident, and tracked incidents an
@@ -27,7 +28,7 @@ class VerificationScreen extends ConsumerWidget {
     final incidents = ref.watch(incidentsProvider).valueOrNull ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Official Verification')),
+      appBar: const TaarakAppBar(title: 'Official Verification'),
       body: ListView(
         children: [
           ContentWidth(

@@ -8,6 +8,7 @@ import 'package:taarak/features/sms_prototype/application/sms_prototype_provider
 import 'package:taarak/features/sms_prototype/domain/emergency_packet.dart';
 import 'package:taarak/features/sms_prototype/domain/emergency_packet_priority.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M22: a controlled prototype, not a real SMS integration — see
 /// [[SmsTransport]]'s doc comment for why. This screen exists to
@@ -85,7 +86,7 @@ class _SmsPrototypeScreenState extends ConsumerState<SmsPrototypeScreen> {
     final receivedPackets = ref.watch(receivedPacketsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('SMS Fallback (Prototype)')),
+      appBar: const TaarakAppBar(title: 'SMS Fallback (Prototype)'),
       body: ListView(
         children: [
           ContentWidth(

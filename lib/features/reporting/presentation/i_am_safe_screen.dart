@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/reporting/application/reporting_providers.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// "I Am Safe → update status" (blueprint section 9) — a status ping, not
 /// a hazard report, so no severity/type picker at all.
@@ -46,7 +47,7 @@ class _IAmSafeScreenState extends ConsumerState<IAmSafeScreen> {
     final safeGreen = Colors.green.shade600;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('I Am Safe')),
+      appBar: const TaarakAppBar(title: 'I Am Safe'),
       body: Center(
         child: SingleChildScrollView(
           child: ConstrainedBox(

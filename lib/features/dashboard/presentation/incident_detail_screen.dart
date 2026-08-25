@@ -7,6 +7,7 @@ import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/severity_chip.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// The "drills into incidents" half of M18's acceptance criterion: a
 /// read-oriented detail view for a Command user — full record plus the
@@ -24,7 +25,7 @@ class IncidentDetailScreen extends ConsumerWidget {
     final auditTrailAsync = ref.watch(_auditTrailProvider(incidentId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Incident Detail')),
+      appBar: const TaarakAppBar(title: 'Incident Detail'),
       body: incidentAsync.when(
         loading: () => const LoadingView(),
         error: (error, _) => ErrorView(

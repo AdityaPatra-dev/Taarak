@@ -9,6 +9,7 @@ import 'package:taarak/features/auth/domain/user_role.dart';
 import 'package:taarak/features/sync/application/sync_providers.dart';
 import 'package:taarak/features/sync/domain/sync_queue_summary.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// Temporary shared landing screen. Its job right now is to prove RBAC
 /// works — each role sees only the capability list the blueprint's role
@@ -41,83 +42,90 @@ class HomeScreen extends ConsumerWidget {
         _QuickAction(
           icon: Icons.report_outlined,
           label: 'Report Incident',
-          onTap: () => context.go('/report'),
+          onTap: () => context.push('/report'),
         ),
       if (user.role.can(Permission.updateSafeStatus))
         _QuickAction(
           icon: Icons.health_and_safety_outlined,
           label: 'I Am Safe',
-          onTap: () => context.go('/safe-status'),
+          onTap: () => context.push('/safe-status'),
         ),
       if (user.role.can(Permission.verifyReports))
         _QuickAction(
           icon: Icons.fact_check_outlined,
           label: 'Verify Reports',
-          onTap: () => context.go('/verification'),
+          onTap: () => context.push('/verification'),
         ),
       if (user.role.can(Permission.manageSheltersResources))
         _QuickAction(
           icon: Icons.home_work_outlined,
           label: 'Shelters & Resources',
-          onTap: () => context.go('/shelters/manage'),
+          onTap: () => context.push('/shelters/manage'),
         ),
       if (user.role.can(Permission.viewAlerts))
         _QuickAction(
           icon: Icons.campaign_outlined,
           label: 'Alerts',
-          onTap: () => context.go('/alerts'),
+          onTap: () => context.push('/alerts'),
         ),
       if (user.role.can(Permission.sendBroadcast))
         _QuickAction(
           icon: Icons.campaign,
           label: 'Broadcast Alert',
-          onTap: () => context.go('/alerts/broadcast'),
+          onTap: () => context.push('/alerts/broadcast'),
         ),
       if (user.role.can(Permission.monitorZones))
         _QuickAction(
           icon: Icons.dashboard_outlined,
           label: 'Command Dashboard',
-          onTap: () => context.go('/dashboard'),
+          onTap: () => context.push('/dashboard'),
         ),
       if (user.role.can(Permission.reviewAudit))
         _QuickAction(
           icon: Icons.history_outlined,
           label: 'Audit Log',
-          onTap: () => context.go('/audit'),
+          onTap: () => context.push('/audit'),
         ),
       if (isDevMode && hasSos)
         _QuickAction(
           icon: Icons.sms_outlined,
           label: 'SMS Fallback',
-          onTap: () => context.go('/sms-prototype'),
+          onTap: () => context.push('/sms-prototype'),
         ),
       if (isDevMode && hasSos)
         _QuickAction(
           icon: Icons.wifi_tethering,
           label: 'Device Relay',
-          onTap: () => context.go('/device-relay'),
+          onTap: () => context.push('/device-relay'),
         ),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TAARAK'),
+      appBar: TaarakAppBar(
+        title: 'TAARAK',
         actions: [
           if (user.role.can(Permission.viewRiskMap))
             IconButton(
               icon: const Icon(Icons.map_outlined),
               tooltip: 'Risk Map',
-              onPressed: () => context.go('/map'),
+              onPressed: () => context.push('/map'),
             ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',
-            onPressed: () => context.go('/profile'),
+            onPressed: () => context.push('/profile'),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Log out',
-            onPressed: () => ref.read(authControllerProvider.notifier).logout(),
+            onPressed: () async {
+              await ref.read(authControllerProvider.notifier).logout();
+              // Explicit, not just reactive: with push-based navigation
+              // there may be a deep stack of authenticated screens under
+              // this one. go() replaces the whole location list, so none
+              // of them stay reachable by pressing back after logout.
+              if (context.mounted) context.go('/login');
+            },
           ),
         ],
       ),
@@ -138,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
                 _SyncBanner(summary: syncSummary, ref: ref),
                 if (hasSos) ...[
                   const SizedBox(height: Spacing.md),
-                  _SosCard(onTap: () => context.go('/sos')),
+                  _SosCard(onTap: () => context.push('/sos')),
                 ],
                 if (actions.isNotEmpty) ...[
                   const SizedBox(height: Spacing.lg),

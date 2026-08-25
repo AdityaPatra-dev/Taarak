@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/reporting/application/reporting_providers.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// "SOS/Need Help → high-priority location-linked request" (blueprint
 /// section 9) — deliberately minimal friction: one button, an optional
@@ -54,8 +55,8 @@ class _SosScreenState extends ConsumerState<SosScreen> {
 
     return Scaffold(
       backgroundColor: _wasSent ? null : scheme.errorContainer,
-      appBar: AppBar(
-        title: const Text('SOS / Need Help'),
+      appBar: TaarakAppBar(
+        title: 'SOS / Need Help',
         backgroundColor: _wasSent ? null : scheme.errorContainer,
         foregroundColor: _wasSent ? null : scheme.onErrorContainer,
       ),

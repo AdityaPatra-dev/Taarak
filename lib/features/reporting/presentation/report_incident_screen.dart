@@ -8,6 +8,7 @@ import 'package:taarak/features/reporting/domain/citizen_report_draft.dart';
 import 'package:taarak/features/reporting/domain/citizen_report_type.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 const _hazardIssueTypes = [
   CitizenReportType.landslide,
@@ -96,7 +97,7 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Incident')),
+      appBar: const TaarakAppBar(title: 'Report Incident'),
       body: ListView(
         children: [
           ContentWidth(

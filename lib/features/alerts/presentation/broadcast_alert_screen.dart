@@ -9,6 +9,7 @@ import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/severity_chip.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 const _severities = ['low', 'medium', 'high', 'critical'];
 const _validityOptions = {
@@ -48,7 +49,7 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
     final history = ref.watch(alertHistoryProvider).valueOrNull ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Broadcast Alert')),
+      appBar: const TaarakAppBar(title: 'Broadcast Alert'),
       body: ListView(
         children: [
           ContentWidth(

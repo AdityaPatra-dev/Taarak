@@ -8,6 +8,7 @@ import 'package:taarak/features/shelters/application/shelter_management_provider
 import 'package:taarak/features/shelters/domain/shelter_facility_type.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M15: lets a Local Official ([Permission.manageSheltersResources]) keep
 /// shelter capacity, occupancy and facilities current. This is the write
@@ -22,7 +23,7 @@ class ShelterManagementScreen extends ConsumerWidget {
     final shelters = ref.watch(sheltersProvider).valueOrNull ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Shelters & Resources')),
+      appBar: const TaarakAppBar(title: 'Shelters & Resources'),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showEditDialog(context, ref, existing: null),
         icon: const Icon(Icons.add),
