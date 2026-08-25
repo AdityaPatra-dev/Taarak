@@ -7,6 +7,7 @@ import 'package:taarak/features/reporting/application/reporting_providers.dart';
 import 'package:taarak/features/reporting/domain/citizen_report_draft.dart';
 import 'package:taarak/features/reporting/domain/citizen_report_type.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
 
 const _hazardIssueTypes = [
   CitizenReportType.landslide,
@@ -16,6 +17,13 @@ const _hazardIssueTypes = [
 ];
 
 const _severities = ['low', 'medium', 'high', 'critical'];
+
+const _typeIcons = {
+  CitizenReportType.landslide: Icons.terrain,
+  CitizenReportType.flood: Icons.water,
+  CitizenReportType.roadBlockage: Icons.block,
+  CitizenReportType.other: Icons.report_problem_outlined,
+};
 
 class ReportIncidentScreen extends ConsumerStatefulWidget {
   const ReportIncidentScreen({super.key});
@@ -84,6 +92,9 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Report Incident')),
       body: ListView(
@@ -93,105 +104,136 @@ class _ReportIncidentScreenState extends ConsumerState<ReportIncidentScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'What are you reporting?',
-                  style: Theme.of(context).textTheme.titleMedium,
+                const SectionHeader(
+                  title: 'What are you reporting?',
+                  icon: Icons.report_outlined,
                 ),
-                const SizedBox(height: Spacing.sm),
                 Wrap(
                   spacing: Spacing.sm,
+                  runSpacing: Spacing.sm,
                   children: [
                     for (final type in _hazardIssueTypes)
                       ChoiceChip(
                         label: Text(type.label),
+                        avatar: Icon(_typeIcons[type], size: 18),
                         selected: _type == type,
                         onSelected: (_) => setState(() => _type = type),
                       ),
                   ],
                 ),
                 const SizedBox(height: Spacing.lg),
-                TextField(
-                  controller: _descriptionController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'What did you see? (optional)',
-                  ),
-                ),
-                const SizedBox(height: Spacing.md),
-                Text(
-                  'Severity',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: Spacing.sm),
-                Wrap(
-                  spacing: Spacing.sm,
-                  children: [
-                    for (final severity in _severities)
-                      ChoiceChip(
-                        label: Text(severity),
-                        selected: _severity == severity,
-                        onSelected: (_) => setState(() => _severity = severity),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: Spacing.md),
-                TextField(
-                  controller: _affectedPeopleController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Roughly how many people affected? (optional)',
-                  ),
-                ),
-                const SizedBox(height: Spacing.md),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () => _attachPhoto(MediaPickerSource.camera),
-                      icon: const Icon(Icons.camera_alt_outlined),
-                      label: const Text('Camera'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _descriptionController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'What did you see? (optional)',
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        Text('Severity', style: textTheme.titleSmall),
+                        const SizedBox(height: Spacing.sm),
+                        Wrap(
+                          spacing: Spacing.sm,
+                          children: [
+                            for (final severity in _severities)
+                              ChoiceChip(
+                                label: Text(severity),
+                                selected: _severity == severity,
+                                onSelected: (_) =>
+                                    setState(() => _severity = severity),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        TextField(
+                          controller: _affectedPeopleController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText:
+                                'Roughly how many people affected? (optional)',
+                            prefixIcon: Icon(Icons.groups_outlined),
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    _attachPhoto(MediaPickerSource.camera),
+                                icon: const Icon(Icons.camera_alt_outlined),
+                                label: const Text('Camera'),
+                              ),
+                            ),
+                            const SizedBox(width: Spacing.sm),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    _attachPhoto(MediaPickerSource.gallery),
+                                icon: const Icon(Icons.photo_library_outlined),
+                                label: const Text('Gallery'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_mediaPath != null) ...[
+                          const SizedBox(height: Spacing.sm),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: Colors.green.shade600,
+                              ),
+                              const SizedBox(width: Spacing.xs),
+                              Text(
+                                'Photo attached',
+                                style: textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(width: Spacing.sm),
-                    OutlinedButton.icon(
-                      onPressed: () => _attachPhoto(MediaPickerSource.gallery),
-                      icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('Gallery'),
-                    ),
-                  ],
-                ),
-                if (_mediaPath != null) ...[
-                  const SizedBox(height: Spacing.sm),
-                  Text(
-                    'Photo attached',
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ],
+                ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: Spacing.md),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
+                  Text(_errorMessage!, style: TextStyle(color: scheme.error)),
                 ],
                 const SizedBox(height: Spacing.lg),
-                FilledButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Submit report'),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Submit report'),
+                  ),
                 ),
                 const SizedBox(height: Spacing.sm),
                 Text(
                   'Your GPS location is attached automatically. If you\'re offline, '
                   'this is saved on your device and sent once you\'re back online.',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: Spacing.lg),
               ],
             ),
           ),

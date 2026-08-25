@@ -16,21 +16,37 @@ class UnauthorizedScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.lock_outline,
-                size: 44,
-                color: scheme.onSurfaceVariant,
+              Container(
+                width: 88,
+                height: 88,
+                decoration: BoxDecoration(
+                  color: scheme.errorContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lock_outline,
+                  size: 40,
+                  color: scheme.onErrorContainer,
+                ),
               ),
               const SizedBox(height: Spacing.md),
               Text(
+                'Not authorized',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: Spacing.xs),
+              Text(
                 'Your role does not have access to this page.',
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: Spacing.lg),
-              FilledButton(
+              FilledButton.icon(
                 onPressed: () => context.go('/'),
-                child: const Text('Back to Home'),
+                icon: const Icon(Icons.home_outlined),
+                label: const Text('Back to Home'),
               ),
             ],
           ),

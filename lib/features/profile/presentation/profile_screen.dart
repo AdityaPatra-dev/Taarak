@@ -6,6 +6,7 @@ import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -36,6 +37,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final locationStatus = ref.watch(locationStatusProvider);
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -45,46 +48,113 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (user != null) ...[
-                  Text(
-                    user.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Text(user.email),
-                  Text(user.role.label),
-                  const SizedBox(height: Spacing.lg),
-                ],
-                Text(
-                  'Location',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: Spacing.sm),
-                locationStatus.when(
-                  data: (status) => _LocationStatusView(status: status),
-                  loading: () => const CircularProgressIndicator(),
-                  error: (error, _) => Text('$error'),
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: Spacing.sm),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+                if (user != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(Spacing.md),
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundColor: scheme.primary,
+                          child: Text(
+                            user.name.isNotEmpty
+                                ? user.name[0].toUpperCase()
+                                : '?',
+                            style: textTheme.headlineSmall?.copyWith(
+                              color: scheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: Spacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.name,
+                                style: textTheme.titleLarge?.copyWith(
+                                  color: scheme.onPrimaryContainer,
+                                ),
+                              ),
+                              Text(
+                                user.email,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: scheme.onPrimaryContainer,
+                                ),
+                              ),
+                              const SizedBox(height: Spacing.xs),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: Spacing.sm,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  user.role.label,
+                                  style: textTheme.labelMedium?.copyWith(
+                                    color: scheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-                const SizedBox(height: Spacing.md),
-                FilledButton.icon(
-                  onPressed: _isRefreshing ? null : _refreshLocation,
-                  icon: _isRefreshing
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.my_location),
-                  label: const Text('Refresh location'),
+                const SizedBox(height: Spacing.lg),
+                const SectionHeader(
+                  title: 'Location',
+                  icon: Icons.my_location_outlined,
                 ),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        locationStatus.when(
+                          data: (status) => _LocationStatusView(status: status),
+                          loading: () => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: Spacing.sm),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (error, _) => Text('$error'),
+                        ),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: Spacing.sm),
+                          Text(
+                            _errorMessage!,
+                            style: TextStyle(color: scheme.error),
+                          ),
+                        ],
+                        const SizedBox(height: Spacing.md),
+                        FilledButton.icon(
+                          onPressed: _isRefreshing ? null : _refreshLocation,
+                          icon: _isRefreshing
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.my_location),
+                          label: const Text('Refresh location'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Spacing.lg),
               ],
             ),
           ),
@@ -108,23 +178,46 @@ class _LocationStatusView extends StatelessWidget {
       'Location services are turned off on this device',
   };
 
+  IconData get _permissionIcon => switch (status.permission) {
+    LocationPermissionStatus.granted => Icons.check_circle,
+    _ => Icons.error_outline,
+  };
+
   @override
   Widget build(BuildContext context) {
     final geoTag = status.geoTag;
+    final scheme = Theme.of(context).colorScheme;
+    final granted = status.permission == LocationPermissionStatus.granted;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Permission: $_permissionLabel'),
-        const SizedBox(height: 8),
-        if (geoTag == null)
-          const Text('No location captured yet.')
-        else ...[
+        Row(
+          children: [
+            Icon(
+              _permissionIcon,
+              size: 18,
+              color: granted ? Colors.green.shade600 : scheme.error,
+            ),
+            const SizedBox(width: Spacing.xs),
+            Expanded(child: Text(_permissionLabel)),
+          ],
+        ),
+        if (geoTag == null) ...[
+          const SizedBox(height: Spacing.xs),
+          Text(
+            'No location captured yet.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ] else ...[
+          const Divider(height: Spacing.lg),
           Text(
             'Lat ${geoTag.fix.latitude.toStringAsFixed(5)}, '
             'Lng ${geoTag.fix.longitude.toStringAsFixed(5)} '
             '(±${geoTag.fix.accuracyMeters.toStringAsFixed(0)}m)',
           ),
+          const SizedBox(height: 4),
           Text('Captured ${geoTag.fix.ageAsOf(DateTime.now()).inSeconds}s ago'),
+          const SizedBox(height: 4),
           Text(
             geoTag.administrativeContext == null
                 ? 'Administrative region: not available yet (needs GIS boundary data)'

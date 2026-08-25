@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
-import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/core/providers/core_providers.dart';
 import 'package:taarak/features/verification/application/verification_providers.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/severity_chip.dart';
 
 /// The "drills into incidents" half of M18's acceptance criterion: a
 /// read-oriented detail view for a Command user — full record plus the
@@ -43,47 +44,72 @@ class IncidentDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.circle,
-                          size: 12,
-                          color: severityColor(incident.severity),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(Spacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    incident.type,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineSmall,
+                                  ),
+                                ),
+                                const SizedBox(width: Spacing.sm),
+                                SeverityChip(severity: incident.severity),
+                              ],
+                            ),
+                            const SizedBox(height: Spacing.xs),
+                            StatusPill(
+                              label: incident.status,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            if (incident.description.isNotEmpty) ...[
+                              const SizedBox(height: Spacing.sm),
+                              Text(incident.description),
+                            ],
+                            const SizedBox(height: Spacing.sm),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${incident.latitude.toStringAsFixed(4)}, '
+                                  '${incident.longitude.toStringAsFixed(4)}',
+                                ),
+                              ],
+                            ),
+                            if (incident.independentSourceCount > 1) ...[
+                              const SizedBox(height: Spacing.sm),
+                              Text(
+                                'Confirmed by ${incident.independentSourceCount} independent sources '
+                                '(${(incident.confidence * 100).round()}% confidence)',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(width: Spacing.sm),
-                        Expanded(
-                          child: Text(
-                            incident.type,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: Spacing.xs),
-                    Text(
-                      'Status: ${incident.status} · Severity: ${incident.severity}',
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    if (incident.description.isNotEmpty)
-                      Text(incident.description),
-                    const SizedBox(height: Spacing.sm),
-                    Text(
-                      'Location: ${incident.latitude.toStringAsFixed(4)}, '
-                      '${incident.longitude.toStringAsFixed(4)}',
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    if (incident.independentSourceCount > 1)
-                      Text(
-                        'Confirmed by ${incident.independentSourceCount} independent sources '
-                        '(${(incident.confidence * 100).round()}% confidence)',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    const SizedBox(height: Spacing.lg),
-                    Text(
-                      'Audit trail',
-                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: Spacing.sm),
+                    const SizedBox(height: Spacing.lg),
+                    const SectionHeader(
+                      title: 'Audit trail',
+                      icon: Icons.history,
+                    ),
                     auditTrailAsync.when(
                       loading: () => const LoadingView(),
                       error: (error, _) => ErrorView(

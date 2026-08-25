@@ -44,7 +44,19 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
-    : super(executor ?? driftDatabase(name: 'taarak_local'));
+    : super(
+        executor ??
+            driftDatabase(
+              name: 'taarak_local',
+              // Required for the database to open at all on web — sqlite3
+              // has to run as WebAssembly there, loaded from these two
+              // files served out of web/ (see README in that folder).
+              web: DriftWebOptions(
+                sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+                driftWorker: Uri.parse('drift_worker.js'),
+              ),
+            ),
+      );
 
   @override
   int get schemaVersion => 8;

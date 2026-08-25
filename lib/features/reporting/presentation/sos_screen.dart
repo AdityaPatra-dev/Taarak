@@ -49,70 +49,147 @@ class _SosScreenState extends ConsumerState<SosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('SOS / Need Help')),
+      backgroundColor: _wasSent ? null : scheme.errorContainer,
+      appBar: AppBar(
+        title: const Text('SOS / Need Help'),
+        backgroundColor: _wasSent ? null : scheme.errorContainer,
+        foregroundColor: _wasSent ? null : scheme.onErrorContainer,
+      ),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_wasSent) ...[
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.green.shade700,
-                    size: 64,
-                  ),
-                  const SizedBox(height: Spacing.md),
-                  const Text(
-                    'Your SOS has been recorded with your location and queued '
-                    'to send as soon as you\'re online.',
-                    textAlign: TextAlign.center,
-                  ),
-                ] else ...[
-                  const Text(
-                    'This sends your current location as a high-priority '
-                    'request for help.',
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: Spacing.md),
-                  TextField(
-                    controller: _noteController,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Add a short note (optional)',
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(Spacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_wasSent) ...[
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.green.shade700,
+                        size: 56,
+                      ),
                     ),
-                  ),
-                  if (_errorMessage != null) ...[
+                    const SizedBox(height: Spacing.lg),
+                    Text(
+                      'SOS sent',
+                      style: textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: Spacing.sm),
                     Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                      'Your location has been recorded and queued to send as '
+                      'soon as you\'re online. Responders will see this as '
+                      'high priority.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium,
+                    ),
+                  ] else ...[
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: BoxDecoration(
+                        color: scheme.onErrorContainer.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.emergency_outlined,
+                        color: scheme.onErrorContainer,
+                        size: 52,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.md),
+                    Text(
+                      'This sends your current location as a high-priority '
+                      'request for help.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: scheme.onErrorContainer,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.lg),
+                    Container(
+                      padding: const EdgeInsets.all(Spacing.sm),
+                      decoration: BoxDecoration(
+                        color: scheme.surface,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: TextField(
+                        controller: _noteController,
+                        maxLines: 2,
+                        decoration: const InputDecoration(
+                          labelText: 'Add a short note (optional)',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: Spacing.sm),
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(color: scheme.error),
+                      ),
+                    ],
+                    const SizedBox(height: Spacing.xl),
+                    SizedBox(
+                      width: 176,
+                      height: 176,
+                      child: Material(
+                        color: scheme.error,
+                        shape: const CircleBorder(),
+                        elevation: 6,
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: _isSubmitting ? null : _sendSos,
+                          child: Center(
+                            child: _isSubmitting
+                                ? const SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(
+                                        Icons.sos,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ),
+                                      SizedBox(height: Spacing.xs),
+                                      Text(
+                                        'SEND SOS',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
-                  const SizedBox(height: Spacing.lg),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 72,
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                      onPressed: _isSubmitting ? null : _sendSos,
-                      child: _isSubmitting
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              'SEND SOS',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),

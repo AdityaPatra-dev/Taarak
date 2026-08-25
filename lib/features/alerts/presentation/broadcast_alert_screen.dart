@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
-import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/severity_chip.dart';
 
 const _severities = ['low', 'medium', 'high', 'critical'];
 const _validityOptions = {
@@ -54,65 +55,91 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'New broadcast',
-                  style: Theme.of(context).textTheme.titleMedium,
+                const SectionHeader(
+                  title: 'New broadcast',
+                  icon: Icons.campaign_outlined,
                 ),
-                const SizedBox(height: Spacing.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedZoneId,
-                  decoration: const InputDecoration(labelText: 'Target zone'),
-                  items: [
-                    for (final zone in zones)
-                      DropdownMenuItem(
-                        value: zone.id,
-                        child: Text('${zone.hazardType} (${zone.severity})'),
-                      ),
-                  ],
-                  onChanged: (value) => setState(() => _selectedZoneId = value),
-                ),
-                const SizedBox(height: Spacing.sm),
-                TextField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                ),
-                const SizedBox(height: Spacing.sm),
-                TextField(
-                  controller: _messageController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(labelText: 'Message'),
-                ),
-                const SizedBox(height: Spacing.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: _severity,
-                  decoration: const InputDecoration(labelText: 'Severity'),
-                  items: [
-                    for (final severity in _severities)
-                      DropdownMenuItem(value: severity, child: Text(severity)),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _severity = value ?? _severity),
-                ),
-                const SizedBox(height: Spacing.sm),
-                DropdownButtonFormField<String>(
-                  initialValue: _validityLabel,
-                  decoration: const InputDecoration(labelText: 'Valid for'),
-                  items: [
-                    for (final label in _validityOptions.keys)
-                      DropdownMenuItem(value: label, child: Text(label)),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _validityLabel = value ?? _validityLabel),
-                ),
-                const SizedBox(height: Spacing.md),
-                FilledButton.icon(
-                  onPressed: zones.isEmpty ? null : _broadcast,
-                  icon: const Icon(Icons.campaign_outlined),
-                  label: const Text('Broadcast'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedZoneId,
+                          decoration: const InputDecoration(
+                            labelText: 'Target zone',
+                          ),
+                          items: [
+                            for (final zone in zones)
+                              DropdownMenuItem(
+                                value: zone.id,
+                                child: Text(
+                                  '${zone.hazardType} (${zone.severity})',
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _selectedZoneId = value),
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        TextField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(labelText: 'Title'),
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        TextField(
+                          controller: _messageController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Message',
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        DropdownButtonFormField<String>(
+                          initialValue: _severity,
+                          decoration: const InputDecoration(
+                            labelText: 'Severity',
+                          ),
+                          items: [
+                            for (final severity in _severities)
+                              DropdownMenuItem(
+                                value: severity,
+                                child: Text(severity),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _severity = value ?? _severity),
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        DropdownButtonFormField<String>(
+                          initialValue: _validityLabel,
+                          decoration: const InputDecoration(
+                            labelText: 'Valid for',
+                          ),
+                          items: [
+                            for (final label in _validityOptions.keys)
+                              DropdownMenuItem(
+                                value: label,
+                                child: Text(label),
+                              ),
+                          ],
+                          onChanged: (value) => setState(
+                            () => _validityLabel = value ?? _validityLabel,
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.md),
+                        FilledButton.icon(
+                          onPressed: zones.isEmpty ? null : _broadcast,
+                          icon: const Icon(Icons.campaign_outlined),
+                          label: const Text('Broadcast'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: Spacing.lg),
-                Text('History', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: Spacing.sm),
+                const SectionHeader(title: 'History', icon: Icons.history),
                 if (history.isEmpty)
                   const EmptyView(
                     icon: Icons.campaign_outlined,
@@ -177,28 +204,23 @@ class _AlertHistoryCard extends ConsumerWidget {
         .valueOrNull;
 
     return Card(
+      margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.sm),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: severityColor(alert.severity),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Text(
                     alert.title,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
+                const SizedBox(width: Spacing.sm),
+                SeverityChip(severity: alert.severity),
               ],
             ),
             const SizedBox(height: Spacing.xs),

@@ -41,58 +41,99 @@ class _IAmSafeScreenState extends ConsumerState<IAmSafeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final safeGreen = Colors.green.shade600;
+
     return Scaffold(
       appBar: AppBar(title: const Text('I Am Safe')),
       body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Padding(
-            padding: const EdgeInsets.all(Spacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_wasSent) ...[
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.green.shade700,
-                    size: 64,
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(Spacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      color: safeGreen.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _wasSent
+                          ? Icons.check_circle
+                          : Icons.health_and_safety_outlined,
+                      color: safeGreen,
+                      size: 52,
+                    ),
                   ),
-                  const SizedBox(height: Spacing.md),
-                  const Text(
-                    'Your safe status has been recorded with your location.',
-                    textAlign: TextAlign.center,
-                  ),
-                ] else ...[
-                  const Text(
-                    'Let responders know you\'re safe. Your current location '
-                    'is attached automatically.',
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_errorMessage != null) ...[
+                  const SizedBox(height: Spacing.lg),
+                  if (_wasSent) ...[
+                    Text(
+                      'You\'re marked safe',
+                      style: textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: Spacing.sm),
                     Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                      'Your safe status has been recorded with your current location.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium,
+                    ),
+                  ] else ...[
+                    Text(
+                      'Let responders know you\'re safe',
+                      style: textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: Spacing.xs),
+                    Text(
+                      'Your current location is attached automatically.',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: Spacing.sm),
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(color: scheme.error),
+                      ),
+                    ],
+                    const SizedBox(height: Spacing.xl),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 64,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: safeGreen,
+                          textStyle: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onPressed: _isSubmitting ? null : _markSafe,
+                        icon: _isSubmitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.check, color: Colors.white),
+                        label: const Text("I'M SAFE"),
                       ),
                     ),
                   ],
-                  const SizedBox(height: Spacing.lg),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 72,
-                    child: FilledButton(
-                      onPressed: _isSubmitting ? null : _markSafe,
-                      child: _isSubmitting
-                          ? const CircularProgressIndicator()
-                          : const Text(
-                              'I\'M SAFE',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                    ),
-                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ),

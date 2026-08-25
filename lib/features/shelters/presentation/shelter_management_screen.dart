@@ -78,27 +78,72 @@ class _ShelterCard extends ConsumerWidget {
         .read(shelterManagementServiceProvider)
         .facilitiesOf(shelter);
     final available = shelter.capacityTotal - shelter.occupancy;
+    final occupancyFraction = shelter.capacityTotal == 0
+        ? 0.0
+        : (shelter.occupancy / shelter.capacityTotal).clamp(0.0, 1.0);
+    final scheme = Theme.of(context).colorScheme;
+    final barColor = occupancyFraction >= 0.9
+        ? scheme.error
+        : occupancyFraction >= 0.7
+        ? Colors.orange.shade600
+        : Colors.green.shade600;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.sm),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(shelter.name, style: Theme.of(context).textTheme.titleSmall),
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.home_work_outlined,
+                    size: 18,
+                    color: scheme.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                Expanded(
+                  child: Text(
+                    shelter.name,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: Spacing.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: LinearProgressIndicator(
+                value: occupancyFraction,
+                minHeight: 8,
+                backgroundColor: scheme.surfaceContainerHighest,
+                color: barColor,
+              ),
+            ),
             const SizedBox(height: Spacing.xs),
             Text(
-              '${shelter.occupancy}/${shelter.capacityTotal} occupied · '
-              '$available available',
+              '${shelter.occupancy}/${shelter.capacityTotal} occupied · $available available',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             if (facilities.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: Spacing.xs),
+                padding: const EdgeInsets.only(top: Spacing.sm),
                 child: Wrap(
                   spacing: Spacing.xs,
                   children: [
                     for (final facility in facilities)
-                      Chip(label: Text(facility.label)),
+                      Chip(
+                        visualDensity: VisualDensity.compact,
+                        label: Text(facility.label),
+                      ),
                   ],
                 ),
               ),
@@ -106,14 +151,16 @@ class _ShelterCard extends ConsumerWidget {
             Wrap(
               spacing: Spacing.sm,
               children: [
-                OutlinedButton(
+                OutlinedButton.icon(
                   onPressed: () => _showOccupancyDialog(context, ref),
-                  child: const Text('Update occupancy'),
+                  icon: const Icon(Icons.edit_outlined, size: 16),
+                  label: const Text('Update occupancy'),
                 ),
-                OutlinedButton(
+                OutlinedButton.icon(
                   onPressed: () =>
                       _showEditDialog(context, ref, existing: shelter),
-                  child: const Text('Edit'),
+                  icon: const Icon(Icons.tune, size: 16),
+                  label: const Text('Edit'),
                 ),
               ],
             ),

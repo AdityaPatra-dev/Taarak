@@ -8,6 +8,8 @@ import 'package:taarak/features/verification/application/verification_providers.
 import 'package:taarak/features/verification/domain/incident_verification_status.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/severity_chip.dart';
 
 /// Official Verification (M13): unlinked citizen reports (M12) waiting to
 /// be acknowledged into a tracked incident, and tracked incidents an
@@ -32,11 +34,16 @@ class VerificationScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Pending reports',
-                  style: Theme.of(context).textTheme.titleMedium,
+                SectionHeader(
+                  title: 'Pending reports',
+                  icon: Icons.fact_check_outlined,
+                  trailing: pendingReports.isEmpty
+                      ? null
+                      : Chip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text('${pendingReports.length}'),
+                        ),
                 ),
-                const SizedBox(height: Spacing.sm),
                 if (pendingReports.isEmpty)
                   const EmptyView(
                     icon: Icons.fact_check_outlined,
@@ -47,30 +54,53 @@ class VerificationScreen extends ConsumerWidget {
                   for (final report in pendingReports)
                     Card(
                       margin: const EdgeInsets.only(bottom: Spacing.sm),
-                      child: ListTile(
-                        title: Text(
-                          report.description.isEmpty
-                              ? report.reportType
-                              : report.description,
-                        ),
-                        subtitle: Text(
-                          '${report.reportType} · severity ${report.severity}\n'
-                          '${report.latitude.toStringAsFixed(4)}, ${report.longitude.toStringAsFixed(4)}',
-                        ),
-                        isThreeLine: true,
-                        trailing: FilledButton(
-                          onPressed: () =>
-                              _acknowledge(context, ref, report.id),
-                          child: const Text('Acknowledge'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(Spacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    report.description.isEmpty
+                                        ? report.reportType
+                                        : report.description,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleSmall,
+                                  ),
+                                ),
+                                const SizedBox(width: Spacing.sm),
+                                SeverityChip(severity: report.severity),
+                              ],
+                            ),
+                            const SizedBox(height: Spacing.xs),
+                            Text(
+                              '${report.reportType} · '
+                              '${report.latitude.toStringAsFixed(4)}, '
+                              '${report.longitude.toStringAsFixed(4)}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: Spacing.sm),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: FilledButton(
+                                onPressed: () =>
+                                    _acknowledge(context, ref, report.id),
+                                child: const Text('Acknowledge'),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                 const SizedBox(height: Spacing.lg),
-                Text(
-                  'Tracked incidents',
-                  style: Theme.of(context).textTheme.titleMedium,
+                const SectionHeader(
+                  title: 'Tracked incidents',
+                  icon: Icons.report_outlined,
                 ),
-                const SizedBox(height: Spacing.sm),
                 if (incidents.isEmpty)
                   const EmptyView(
                     icon: Icons.report_outlined,
@@ -79,6 +109,7 @@ class VerificationScreen extends ConsumerWidget {
                 else
                   for (final incident in incidents)
                     _IncidentCard(incident: incident),
+                const SizedBox(height: Spacing.lg),
               ],
             ),
           ),
@@ -129,15 +160,30 @@ class _IncidentCard extends ConsumerWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.sm),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${incident.type} — ${status.label}',
-              style: Theme.of(context).textTheme.titleSmall,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    incident.type,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                const SizedBox(width: Spacing.sm),
+                StatusPill(
+                  label: status.label,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
             ),
-            if (incident.description.isNotEmpty) Text(incident.description),
+            if (incident.description.isNotEmpty) ...[
+              const SizedBox(height: Spacing.xs),
+              Text(incident.description),
+            ],
             if (incident.independentSourceCount > 1)
               Padding(
                 padding: const EdgeInsets.only(top: Spacing.xs),
@@ -149,17 +195,20 @@ class _IncidentCard extends ConsumerWidget {
                   ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
-            const SizedBox(height: Spacing.sm),
-            Wrap(
-              spacing: Spacing.sm,
-              children: [
-                for (final next in nextOptions)
-                  OutlinedButton(
-                    onPressed: () => _showTransitionDialog(context, ref, next),
-                    child: Text(next.label),
-                  ),
-              ],
-            ),
+            if (nextOptions.isNotEmpty) ...[
+              const SizedBox(height: Spacing.sm),
+              Wrap(
+                spacing: Spacing.sm,
+                children: [
+                  for (final next in nextOptions)
+                    OutlinedButton(
+                      onPressed: () =>
+                          _showTransitionDialog(context, ref, next),
+                      child: Text(next.label),
+                    ),
+                ],
+              ),
+            ],
           ],
         ),
       ),

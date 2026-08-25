@@ -72,38 +72,47 @@ class _AuditLogScreenState extends ConsumerState<AuditLogScreen> {
                   Spacing.md,
                   0,
                 ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _queryController,
-                      decoration: const InputDecoration(
-                        labelText: 'Search actor, action, object, reason',
-                        prefixIcon: Icon(Icons.search),
-                      ),
-                      onChanged: (value) => setState(() => _query = value),
-                    ),
-                    const SizedBox(height: Spacing.sm),
-                    Wrap(
-                      spacing: Spacing.sm,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(Spacing.sm),
+                    child: Column(
                       children: [
-                        ChoiceChip(
-                          label: const Text('All'),
-                          selected: _objectTypeFilter == null,
-                          onSelected: (_) =>
-                              setState(() => _objectTypeFilter = null),
-                        ),
-                        for (final type in objectTypes)
-                          ChoiceChip(
-                            label: Text(type),
-                            selected: _objectTypeFilter == type,
-                            onSelected: (_) =>
-                                setState(() => _objectTypeFilter = type),
+                        TextField(
+                          controller: _queryController,
+                          decoration: const InputDecoration(
+                            labelText: 'Search actor, action, object, reason',
+                            prefixIcon: Icon(Icons.search),
                           ),
+                          onChanged: (value) => setState(() => _query = value),
+                        ),
+                        const SizedBox(height: Spacing.sm),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Wrap(
+                            spacing: Spacing.sm,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('All'),
+                                selected: _objectTypeFilter == null,
+                                onSelected: (_) =>
+                                    setState(() => _objectTypeFilter = null),
+                              ),
+                              for (final type in objectTypes)
+                                ChoiceChip(
+                                  label: Text(type),
+                                  selected: _objectTypeFilter == type,
+                                  onSelected: (_) =>
+                                      setState(() => _objectTypeFilter = type),
+                                ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
+              const SizedBox(height: Spacing.sm),
               Expanded(
                 child: filtered.isEmpty
                     ? const EmptyView(
@@ -141,21 +150,76 @@ class _AuditEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.sm),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(event.action, style: Theme.of(context).textTheme.titleSmall),
+            Row(
+              children: [
+                Icon(Icons.bolt, size: 16, color: scheme.primary),
+                const SizedBox(width: Spacing.xs),
+                Expanded(
+                  child: Text(event.action, style: textTheme.titleSmall),
+                ),
+                Text(
+                  '${event.occurredAt.toLocal()}'.split('.').first,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: Spacing.xs),
-            Text('Actor: ${event.actorId}'),
-            Text('Object: ${event.objectType} · ${event.objectId}'),
-            Text('Time: ${event.occurredAt.toLocal()}'),
-            if (event.reason != null) Text('Reason: ${event.reason}'),
-            if (event.oldValue != null) Text('Before: ${event.oldValue}'),
-            if (event.newValue != null) Text('After: ${event.newValue}'),
+            Wrap(
+              spacing: Spacing.xs,
+              runSpacing: 4,
+              children: [
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: const Icon(Icons.person_outline, size: 14),
+                  label: Text(event.actorId),
+                ),
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  avatar: const Icon(Icons.category_outlined, size: 14),
+                  label: Text('${event.objectType} · ${event.objectId}'),
+                ),
+              ],
+            ),
+            if (event.reason != null) ...[
+              const SizedBox(height: Spacing.xs),
+              Text('Reason: ${event.reason}', style: textTheme.bodySmall),
+            ],
+            if (event.oldValue != null || event.newValue != null) ...[
+              const SizedBox(height: Spacing.xs),
+              Container(
+                padding: const EdgeInsets.all(Spacing.sm),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (event.oldValue != null)
+                      Text(
+                        'Before: ${event.oldValue}',
+                        style: textTheme.bodySmall,
+                      ),
+                    if (event.newValue != null)
+                      Text(
+                        'After: ${event.newValue}',
+                        style: textTheme.bodySmall,
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

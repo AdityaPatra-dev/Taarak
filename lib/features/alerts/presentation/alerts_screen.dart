@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
-import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
+import 'package:taarak/shared/widgets/severity_chip.dart';
 
 /// M16, citizen-facing ([Permission.viewAlerts]): active alerts for the
 /// citizen's current location up top, full broadcast history below —
@@ -33,11 +34,10 @@ class AlertsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Active for your location',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  const SectionHeader(
+                    title: 'Active for your location',
+                    icon: Icons.notifications_active_outlined,
                   ),
-                  const SizedBox(height: Spacing.sm),
                   activeAlerts.when(
                     data: (alerts) => alerts.isEmpty
                         ? const EmptyView(
@@ -59,11 +59,7 @@ class AlertsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: Spacing.lg),
-                  Text(
-                    'History',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: Spacing.sm),
+                  const SectionHeader(title: 'History', icon: Icons.history),
                   if (history.isEmpty)
                     const EmptyView(
                       icon: Icons.history,
@@ -72,6 +68,7 @@ class AlertsScreen extends ConsumerWidget {
                   else
                     for (final alert in history)
                       _AlertCard(alert: alert, showAcknowledge: false),
+                  const SizedBox(height: Spacing.lg),
                 ],
               ),
             ),
@@ -104,47 +101,66 @@ class _AlertCardState extends ConsumerState<_AlertCard> {
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
-        padding: const EdgeInsets.all(Spacing.sm),
+        padding: const EdgeInsets.all(Spacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: severityColor(alert.severity),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: Spacing.sm),
                 Expanded(
                   child: Text(
                     alert.title,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
+                const SizedBox(width: Spacing.sm),
+                SeverityChip(severity: alert.severity),
               ],
             ),
             const SizedBox(height: Spacing.xs),
             Text(alert.message),
-            const SizedBox(height: Spacing.xs),
-            Text(
-              '${alert.zoneLabel} · ${isActive ? "Active" : "Not active"} · '
-              'valid until ${alert.validUntil.toLocal()}',
-              style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: Spacing.sm),
+            Row(
+              children: [
+                Icon(
+                  isActive ? Icons.check_circle_outline : Icons.circle_outlined,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    '${alert.zoneLabel} · ${isActive ? "Active" : "Not active"} · '
+                    'valid until ${alert.validUntil.toLocal()}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
             ),
-            if (widget.showAcknowledge && isActive)
+            if (widget.showAcknowledge && isActive) ...[
+              const SizedBox(height: Spacing.xs),
               Align(
                 alignment: Alignment.centerRight,
                 child: _acknowledged
-                    ? const Text('Acknowledged')
-                    : TextButton(
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 16,
+                            color: Colors.green.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text('Acknowledged'),
+                        ],
+                      )
+                    : FilledButton.tonal(
                         onPressed: _acknowledge,
                         child: const Text('Acknowledge'),
                       ),
               ),
+            ],
           ],
         ),
       ),

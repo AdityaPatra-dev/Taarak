@@ -15,6 +15,7 @@ import 'package:taarak/features/risk/presentation/risk_class_color.dart';
 import 'package:taarak/features/risk/domain/risk_class.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
 
 /// M18: the single pane a Command user reads the current situation from —
 /// KPIs, a read-only situational map, and the red zones/vulnerable
@@ -77,11 +78,10 @@ class CommandDashboardScreen extends ConsumerWidget {
                   children: [
                     _KpiRow(snapshot: snapshot),
                     const SizedBox(height: Spacing.md),
-                    Text(
-                      'Situation map',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    const SectionHeader(
+                      title: 'Situation map',
+                      icon: Icons.map_outlined,
                     ),
-                    const SizedBox(height: Spacing.sm),
                     map,
                     const SizedBox(height: Spacing.lg),
                     ...leftSections,
@@ -98,11 +98,10 @@ class CommandDashboardScreen extends ConsumerWidget {
                 children: [
                   _KpiRow(snapshot: snapshot),
                   const SizedBox(height: Spacing.lg),
-                  Text(
-                    'Situation map',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  const SectionHeader(
+                    title: 'Situation map',
+                    icon: Icons.map_outlined,
                   ),
-                  const SizedBox(height: Spacing.sm),
                   map,
                   const SizedBox(height: Spacing.lg),
                   IntrinsicHeight(
@@ -287,31 +286,37 @@ class _KpiRow extends StatelessWidget {
           label: 'Red zones',
           value: snapshot.redZoneCount,
           color: scheme.error,
+          icon: Icons.warning_amber,
         ),
         _KpiCard(
           label: 'Vulnerable habitations',
           value: snapshot.vulnerableHabitationCount,
           color: Colors.orange.shade800,
+          icon: Icons.location_city,
         ),
         _KpiCard(
           label: 'Capacity gap',
           value: snapshot.totalCapacityGap,
           color: Colors.deepPurple,
+          icon: Icons.groups,
         ),
         _KpiCard(
           label: 'Active incidents',
           value: snapshot.activeIncidentCount,
           color: Colors.red.shade700,
+          icon: Icons.report,
         ),
         _KpiCard(
           label: 'Active alerts',
           value: snapshot.activeAlertCount,
           color: Colors.amber.shade800,
+          icon: Icons.campaign,
         ),
         _KpiCard(
           label: 'Pending sync',
           value: snapshot.pendingSyncCount,
           color: Colors.blueGrey,
+          icon: Icons.sync,
         ),
       ],
     );
@@ -322,31 +327,53 @@ class _KpiCard extends StatelessWidget {
   final String label;
   final int value;
   final Color color;
+  final IconData icon;
 
   const _KpiCard({
     required this.label,
     required this.value,
     required this.color,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Container(
-        width: 148,
+        width: 168,
         padding: const EdgeInsets.all(Spacing.sm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              '$value',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 20, color: color),
+            ),
+            const SizedBox(width: Spacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$value',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 2),
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
@@ -369,6 +396,7 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Card(
       margin: const EdgeInsets.only(bottom: Spacing.sm),
       child: Padding(
@@ -376,20 +404,51 @@ class _SectionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '$title ($count)',
-              style: Theme.of(context).textTheme.titleSmall,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: Spacing.sm,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: count > 0
+                        ? scheme.primary.withValues(alpha: 0.12)
+                        : scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: count > 0
+                          ? scheme.primary
+                          : scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
             if (children.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: Spacing.xs),
                 child: Text(
                   emptyText,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
               )
-            else
+            else ...[
+              const SizedBox(height: Spacing.xs),
               ...children,
+            ],
           ],
         ),
       ),
