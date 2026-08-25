@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:taarak/core/config/environment.dart';
 
 /// Central app configuration: which backend to talk to and how patient the
@@ -28,8 +29,13 @@ class AppConfig {
 
   bool get isProduction => environment == Environment.production;
 
-  /// Gates dev-only convenience affordances (e.g. the map screen's "load
-  /// demo data" button, useful before M06/M12 produce real hazard/incident
-  /// data) that should never be reachable in a real build.
-  bool get isDevMode => environment == Environment.development;
+  /// Gates dev-only convenience affordances (e.g. the SMS/device-relay
+  /// prototype screens) that should never be reachable in a real build.
+  /// Tied to Flutter's actual compile-time build mode rather than
+  /// [environment] — `environment` only ever gets constructed as
+  /// `.development()` today (there's no real per-environment config yet),
+  /// so gating on it would have shipped these into `flutter build --release`
+  /// too. `kReleaseMode` is the one signal that's genuinely different
+  /// between a debug run and a real release build.
+  bool get isDevMode => !kReleaseMode;
 }

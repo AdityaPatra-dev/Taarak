@@ -1,0 +1,25 @@
+What's incomplete for a real Play Store release
+Blocking / must-fix:
+
+Map ignores real GPS location (above) — trivial fix, high visibility.
+Remove the demo-data button and seeder from the shipped app — replace with either nothing (empty map until real reports/hazards exist) or a real hazard feed.
+Backend is a stub, not production infrastructure — in-memory storage that wipes on every restart, no persistence layer, no HTTPS, no deployment anywhere. Right now "the backend" only exists if someone manually runs it on a laptop. This needs a real hosted database and deployment before any real user's data is safe.
+Auth is mocked by default (AppConfig.useMockAuth = true) — every login is a fake in-memory account, not tied to the real backend at all. Also the real backend's login has no password hashing (plaintext comparison) and tokens never expire — not acceptable for real accounts.
+Sync only covers one table (local_incident_reports). Shelter updates, alert broadcasts, incident verification/status changes, hazard zones — none of these leave the device they were entered on, or come back down to any other device. An official updating shelter capacity today only updates their own phone.
+No real-time hazard data source. Nothing currently populates hazard zones except the demo seeder or a citizen/official manually filing a report. For a disaster app, this is the core data gap.
+Newly-found, unresolved bug: submitting a new incident/SOS report failed with "Local data unavailable" in my last live test on web — reproduced twice, root cause not yet found. Needs a real debug session before shipping, since SOS is the app's single most important action.
+No app identity for a store listing — still the default Flutter launcher icon, default app name in places, no splash branding, no Play Store screenshots/description/privacy policy (Play Store requires a privacy policy URL for any app requesting location).
+No release signing configuration — no keystore, no configured versionCode/versionName, no ProGuard/R8 rules checked. The app has never been built in release-signed form for Android.
+Zero testing on a real Android device this session — everything since Phase 1 was verified via flutter analyze/flutter test/web builds only (at your own request, to save time). Before a store submission, it needs a real walkthrough on an actual phone: permissions prompts, camera, GPS, background behavior, notification prompts.
+Should-fix, not blocking a first release:
+11. Photo attachments queue for sync but there's no real upload endpoint or storage — a photo never actually leaves the device that took it.
+12. No push notifications — citizens/officials only see new alerts/incidents by opening the app.
+13. No password reset / account recovery.
+14. No admin UI to actually provision Field Responder/Official/Admin accounts — the code assumes "a system admin provisions them" but there's no screen for that.
+15. Sync/backend endpoints have no auth check at all right now (anyone who can reach the server can push/pull any table) — fine for a stub, not fine once it's real.
+
+Known, deliberate, and fine as-is:
+16. M20 (on-device LLM) and M25 (advanced ML) were scoped down/deferred earlier in this project — by design, not oversight, per the earlier audit.
+17. River-gauge data is honestly omitted (no free API provides it) — documented, not silently faked.
+
+Want me to start with #1 and #2 (the map fix + demo-data removal) since those are quick and match what you just reported, then move down the list in order?

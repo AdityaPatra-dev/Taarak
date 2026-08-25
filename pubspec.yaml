@@ -48,8 +48,8 @@ dependencies:
   # Encrypted storage for the auth session token.
   flutter_secure_storage: ^9.2.2
   # Offline-first local database (M03): typed SQLite on top of drift.
-  drift: ^2.21.0
-  drift_flutter: ^0.2.4
+  drift: ^2.31.0
+  drift_flutter: ^0.3.1
   # GPS + location permissions (M04).
   geolocator: ^13.0.2
   # GIS map engine (M05): free/open, no API key, works offline-first.
@@ -73,7 +73,7 @@ dev_dependencies:
   build_runner: ^2.4.13
   # Needed directly in tests to point the FFI loader at the sqlite3 lib
   # actually installed on this dev machine (see test/support/sqlite3_test_setup.dart).
-  sqlite3: ^2.9.0
+  sqlite3: ^3.5.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

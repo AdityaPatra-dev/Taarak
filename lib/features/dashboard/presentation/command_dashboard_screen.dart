@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/gis/default_map_center.dart';
 import 'package:taarak/core/gis/severity_palette.dart';
 import 'package:taarak/features/dashboard/application/dashboard_providers.dart';
 import 'package:taarak/features/dashboard/domain/dashboard_snapshot.dart';
-import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/domain/habitation_overview.dart';
 import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
+import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/features/risk/presentation/risk_class_color.dart';
 import 'package:taarak/features/risk/domain/risk_class.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
@@ -39,6 +41,11 @@ class CommandDashboardScreen extends ConsumerWidget {
     final incidents = ref.watch(incidentsProvider).valueOrNull ?? const [];
     final habitations =
         ref.watch(habitationsOverviewProvider).valueOrNull ?? const [];
+    final geoTag = ref.watch(locationStatusProvider).valueOrNull?.geoTag;
+    final mapCenter = geoTag == null
+        ? defaultMapCenter
+        : LatLng(geoTag.fix.latitude, geoTag.fix.longitude);
+    final mapZoom = geoTag == null ? defaultMapZoom : 13.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -65,6 +72,8 @@ class CommandDashboardScreen extends ConsumerWidget {
               shelters: shelters,
               incidents: incidents,
               habitations: habitations,
+              center: mapCenter,
+              zoom: mapZoom,
               height: size == ScreenSize.mobile ? 240 : 360,
             );
             final leftSections = _leftSections(snapshot);
@@ -240,6 +249,8 @@ class _SituationMap extends StatelessWidget {
   final List<LocalShelter> shelters;
   final List<LocalIncident> incidents;
   final List<HabitationOverview> habitations;
+  final LatLng center;
+  final double zoom;
   final double height;
 
   const _SituationMap({
@@ -247,6 +258,8 @@ class _SituationMap extends StatelessWidget {
     required this.shelters,
     required this.incidents,
     required this.habitations,
+    required this.center,
+    required this.zoom,
     required this.height,
   });
 
@@ -257,7 +270,8 @@ class _SituationMap extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: TaarakMapView(
-          initialCenter: DemoMapDataSeeder.demoCenter,
+          initialCenter: center,
+          initialZoom: zoom,
           overlayLayers: [
             buildHazardZoneLayer(hazardZones),
             buildShelterLayer(shelters),

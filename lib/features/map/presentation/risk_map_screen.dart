@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:taarak/core/providers/core_providers.dart';
-import 'package:taarak/features/capacity/application/capacity_providers.dart';
-import 'package:taarak/features/environmental/application/environmental_providers.dart';
-import 'package:taarak/features/hazards/application/hazard_providers.dart';
-import 'package:taarak/features/map/application/demo_map_data_seeder.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:taarak/core/gis/default_map_center.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/application/map_search.dart';
 import 'package:taarak/features/map/presentation/widgets/map_legend.dart';
 import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart';
 import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
-import 'package:taarak/features/relocation/application/relocation_providers.dart';
-import 'package:taarak/features/risk/application/risk_providers.dart';
-import 'package:taarak/features/routing/application/routing_providers.dart';
+import 'package:taarak/features/profile/application/location_status_controller.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
 /// composition of [TaarakMapView] + overlay layers that the official
@@ -29,39 +24,18 @@ class RiskMapScreen extends ConsumerStatefulWidget {
 
 class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
   final _mapController = MapController();
-  bool _isSeeding = false;
+  bool _hasCenteredOnUser = false;
 
-  Future<void> _seedDemoData() async {
-    setState(() => _isSeeding = true);
-    await DemoMapDataSeeder(
-      ref.read(appDatabaseProvider),
-      ref.read(hazardIngestionServiceProvider),
-    ).seedIfEmpty();
-
-    // M24: refresh environmental readings before M07 assesses risk, so
-    // the assessment below has fresh data available to be influenced by.
-    final environmentalDataService = ref.read(environmentalDataServiceProvider);
-    final habitationsResult = await ref.read(localHabitationRepositoryProvider).getAll();
-    for (final habitation in habitationsResult.dataOrNull ?? const []) {
-      await environmentalDataService.refreshForHabitation(
-        habitationId: habitation.id,
-        latitude: habitation.latitude,
-        longitude: habitation.longitude,
-      );
+  @override
+  void initState() {
+    super.initState();
+    // If a location isn't already cached (e.g. nobody has visited Profile
+    // yet this session), ask for one now — a map screen centering on a
+    // fixed point instead of the user is exactly the bug this fixes.
+    final cached = ref.read(locationStatusProvider).valueOrNull?.geoTag;
+    if (cached == null) {
+      ref.read(locationStatusProvider.notifier).refresh();
     }
-
-    await ref.read(riskAssessmentServiceProvider).assessAllHabitations();
-    await ref.read(capacityAssessmentServiceProvider).assessAllHabitations();
-    await ref.read(relocationPlanningServiceProvider).planForAllHabitations();
-    await ref
-        .read(routingServiceProvider)
-        .planEvacuationRoutesForAllHabitations();
-    ref.invalidate(hazardZonesProvider);
-    ref.invalidate(sheltersProvider);
-    ref.invalidate(incidentsProvider);
-    ref.invalidate(habitationsOverviewProvider);
-    ref.invalidate(routesProvider);
-    if (mounted) setState(() => _isSeeding = false);
   }
 
   @override
@@ -72,7 +46,18 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     final habitations =
         ref.watch(habitationsOverviewProvider).valueOrNull ?? const [];
     final routes = ref.watch(routesProvider).valueOrNull ?? const [];
-    final isDevMode = ref.watch(appConfigProvider).isDevMode;
+
+    ref.listen(locationStatusProvider, (previous, next) {
+      final fix = next.valueOrNull?.geoTag?.fix;
+      if (fix == null || _hasCenteredOnUser) return;
+      _hasCenteredOnUser = true;
+      _mapController.move(LatLng(fix.latitude, fix.longitude), 15);
+    });
+    final geoTag = ref.watch(locationStatusProvider).valueOrNull?.geoTag;
+    final userPoint = geoTag == null
+        ? null
+        : LatLng(geoTag.fix.latitude, geoTag.fix.longitude);
+    if (userPoint != null) _hasCenteredOnUser = true;
 
     final searchIndex = buildSearchIndex(
       hazardZones: hazardZones,
@@ -85,7 +70,8 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
       body: Stack(
         children: [
           TaarakMapView(
-            initialCenter: DemoMapDataSeeder.demoCenter,
+            initialCenter: userPoint ?? defaultMapCenter,
+            initialZoom: userPoint != null ? 15 : defaultMapZoom,
             mapController: _mapController,
             overlayLayers: [
               buildHazardZoneLayer(hazardZones),
@@ -105,22 +91,24 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
             ),
           ),
           const Positioned(bottom: 12, right: 12, child: MapLegend()),
-          if (isDevMode)
-            Positioned(
-              bottom: 12,
-              left: 12,
-              child: FloatingActionButton.extended(
-                onPressed: _isSeeding ? null : _seedDemoData,
-                icon: _isSeeding
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.data_object),
-                label: const Text('Load demo data'),
-              ),
+          Positioned(
+            bottom: 12,
+            left: 12,
+            child: FloatingActionButton(
+              heroTag: 'risk-map-recenter',
+              tooltip: 'Center on my location',
+              onPressed: () async {
+                final result = await ref
+                    .read(locationStatusProvider.notifier)
+                    .refresh();
+                final fix = result.dataOrNull?.fix;
+                if (fix != null) {
+                  _mapController.move(LatLng(fix.latitude, fix.longitude), 15);
+                }
+              },
+              child: const Icon(Icons.my_location),
             ),
+          ),
         ],
       ),
     );
