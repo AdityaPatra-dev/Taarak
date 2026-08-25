@@ -35,11 +35,16 @@ service cloud.firestore {
     }
 
     // Permission.submitIncidentReport: any signed-in citizen can file one.
-    // Permission.verifyReports: only Local Officials/District Command can
-    // read or update them (the /verification route's gate).
+    // Reads stay open to any signed-in user — SyncCoordinatorService pulls
+    // this collection into every device's local cache unconditionally, not
+    // just officials', so a read restriction here would break sync for
+    // citizen devices even though the /verification *screen* is already
+    // gated to Permission.verifyReports client-side. Only updating a
+    // report (e.g. linking it to a verified incident) is official-only.
     match /local_incident_reports/{id} {
       allow create: if isSignedIn();
-      allow read, update: if hasAnyRole(['localOfficial', 'districtCommand']);
+      allow read: if isSignedIn();
+      allow update: if hasAnyRole(['localOfficial', 'districtCommand']);
       allow delete: if false;
     }
 

@@ -3,8 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taarak/app/app.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/auth/application/auth_providers.dart';
+import 'package:taarak/features/auth/data/dev_mock_auth_remote_data_source.dart';
 
 import '../../support/fake_secure_key_value_store.dart';
+
+// This suite exercises RBAC/routing behavior, not which auth backend is
+// wired up — pinning the deterministic demo data source keeps it green
+// regardless of AppConfig.development()'s useFirebaseAuth/useMockAuth
+// defaults, which the real app is free to change.
+final _authOverride = authRemoteDataSourceProvider.overrideWithValue(
+  DevMockAuthRemoteDataSource(),
+);
 
 Future<void> _login(WidgetTester tester, String email, String password) async {
   await tester.enterText(find.widgetWithText(TextFormField, 'Email'), email);
@@ -26,6 +36,7 @@ void main() {
             secureKeyValueStoreProvider.overrideWithValue(
               FakeSecureKeyValueStore(),
             ),
+            _authOverride,
           ],
           child: const TaarakApp(),
         ),
@@ -64,6 +75,7 @@ void main() {
           secureKeyValueStoreProvider.overrideWithValue(
             FakeSecureKeyValueStore(),
           ),
+          _authOverride,
         ],
         child: const TaarakApp(),
       ),

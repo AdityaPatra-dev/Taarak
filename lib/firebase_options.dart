@@ -22,19 +22,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: 'REPLACE_ME',
-    messagingSenderId: 'REPLACE_ME',
-    projectId: 'REPLACE_ME',
-    authDomain: 'REPLACE_ME',
-    storageBucket: 'REPLACE_ME',
+    apiKey: 'AIzaSyBebdNwcTIYPJ9b288C7ztn6bjZwe_yag8',
+    appId: '1:329351564706:web:c8f6216f0af1f8bb1776fb',
+    messagingSenderId: '329351564706',
+    projectId: 'taakrak-d9ed0',
+    authDomain: 'taakrak-d9ed0.firebaseapp.com',
+    storageBucket: 'taakrak-d9ed0.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_ME',
-    appId: 'REPLACE_ME',
-    messagingSenderId: 'REPLACE_ME',
-    projectId: 'REPLACE_ME',
-    storageBucket: 'REPLACE_ME',
+    apiKey: 'AIzaSyDc7-SdIyCg_-IXC6N41ADPXfmbmF6d-g8',
+    appId: '1:329351564706:android:65cf6f85c08df2c81776fb',
+    messagingSenderId: '329351564706',
+    projectId: 'taakrak-d9ed0',
+    storageBucket: 'taakrak-d9ed0.firebasestorage.app',
   );
 }

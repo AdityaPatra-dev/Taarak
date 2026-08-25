@@ -33,7 +33,8 @@ class AppConfig {
   factory AppConfig.development() => const AppConfig(
     environment: Environment.development,
     apiBaseUrl: 'http://localhost:8080/api',
-    useMockAuth: true,
+    useMockAuth: false,
+    useFirebaseAuth: true,
   );
 
   bool get isProduction => environment == Environment.production;
