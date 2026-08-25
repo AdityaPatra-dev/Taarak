@@ -69,9 +69,9 @@ dependencies:
   # HTTP transport. Requires `flutterfire configure` to have been run (see
   # backend/README.md) before `firebase_options.dart` exists; until then the
   # Firebase-backed auth/sync paths are wired but never selected by default.
-  firebase_core: ^3.8.0
-  firebase_auth: ^5.3.3
-  cloud_firestore: ^5.5.0
+  firebase_core: ^4.14.0
+  firebase_auth: ^6.6.0
+  cloud_firestore: ^6.9.0
 
 dev_dependencies:
   flutter_test:
@@ -83,8 +83,8 @@ dev_dependencies:
   sqlite3: ^3.5.2
   # In-memory fakes for firebase_auth/cloud_firestore — lets the Firebase-
   # backed auth/sync tests run fast or without a live Firebase project.
-  fake_cloud_firestore: ^3.1.0
-  firebase_auth_mocks: ^0.14.1
+  fake_cloud_firestore: ^4.2.0
+  firebase_auth_mocks: ^0.15.2
   mock_exceptions: ^0.8.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
