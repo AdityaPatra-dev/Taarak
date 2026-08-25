@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/sync/application/firestore_sync_transport.dart';
 import 'package:taarak/features/sync/application/sync_coordinator_service.dart';
 import 'package:taarak/features/sync/application/sync_engine.dart';
 import 'package:taarak/features/sync/application/sync_transport.dart';
@@ -7,9 +8,13 @@ import 'package:taarak/features/sync/domain/sync_queue_summary.dart';
 
 final syncEngineProvider = Provider<SyncEngine>((ref) => SyncEngine());
 
-final syncTransportProvider = Provider<SyncTransport>(
-  (ref) => ApiSyncTransport(ref.watch(apiClientProvider)),
-);
+final syncTransportProvider = Provider<SyncTransport>((ref) {
+  final config = ref.watch(appConfigProvider);
+  if (config.useFirebaseAuth) {
+    return FirestoreSyncTransport();
+  }
+  return ApiSyncTransport(ref.watch(apiClientProvider));
+});
 
 final syncCoordinatorServiceProvider = Provider<SyncCoordinatorService>(
   (ref) => SyncCoordinatorService(
@@ -18,6 +23,10 @@ final syncCoordinatorServiceProvider = Provider<SyncCoordinatorService>(
     transport: ref.watch(syncTransportProvider),
     engine: ref.watch(syncEngineProvider),
     incidentReportRepository: ref.watch(localIncidentReportRepositoryProvider),
+    incidentRepository: ref.watch(localIncidentRepositoryProvider),
+    hazardZoneRepository: ref.watch(localHazardZoneRepositoryProvider),
+    shelterRepository: ref.watch(localShelterRepositoryProvider),
+    alertRepository: ref.watch(localAlertRepositoryProvider),
   ),
 );
 

@@ -23,3 +23,47 @@ Known, deliberate, and fine as-is:
 17. River-gauge data is honestly omitted (no free API provides it) — documented, not silently faked.
 
 Want me to start with #1 and #2 (the map fix + demo-data removal) since those are quick and match what you just reported, then move down the list in order?
+
+
+
+
+Ready for review
+Select text to add comments on the plan
+TAARAK: real Firebase backend (Auth + Firestore), so devices actually connect
+Context
+Everything built so far runs against either mocked auth or a hand-rolled Dart backend stub (in-memory, resets on restart, only reachable if someone runs it on a laptop) — explicitly never meant to be the real thing. The user now wants a real, hosted backend so different devices/logins genuinely share data, plus real authentication, and asked specifically about Firebase.
+
+Decision (confirmed with the user): full Firebase — Auth + Firestore, not a hybrid. Reasoning: Firestore's SDK already solves "different devices connect freely" (offline cache + sync) more robustly than the custom push/pull built this session, Firebase Auth gives real accounts (password reset etc.) for free, and there's no server to host or pay for. This replaces the backend/ stub and its HTTP transport — not the app's actual architecture. The local Drift cache stays the source of truth for reads; the sync engine's dedup/priority/conflict/backoff rules (lib/features/sync/application/sync_engine.dart) stay exactly as built — only the transport underneath swaps from HTTP to Firestore. This is a transport swap, not a rewrite of proven logic.
+
+Scope boundary (deliberately not "sync everything"): only tables that represent genuinely shared, cross-device state get synced — local_incident_reports, local_incidents, local_hazard_zones, local_shelters, local_alerts, local_alert_acknowledgements. Tables that are pure derived computations from that shared data (risk/vulnerability/ capacity assessments, relocation plans, routes) stay local-only — each device recomputes them from synced inputs via the existing engines. Syncing those too would be real over-engineering for what's needed right now.
+
+Out of scope for this plan (flagged, not forgotten): an admin UI to provision Field Responder/Official/Admin accounts. Until that exists, those roles get set by hand-editing the role field on a user's Firestore document — fine for now, a real gap for later.
+
+What you'll need to do yourself (needs your Google account / CLI login)
+Create a Firebase project at console.firebase.google.com — free "Spark" plan is enough for Auth + Firestore at this scale.
+In that project's Auth section, enable the Email/Password sign-in provider.
+Create a Firestore database (Native mode; pick a region — asia-south1 is closest to India).
+Install the Firebase CLI (npm install -g firebase-tools) and run firebase login.
+Install the FlutterFire CLI (dart pub global activate flutterfire_cli), then from the project root run flutterfire configure — pick the project you made, select Android + Web (+ iOS if you want it). This generates lib/firebase_options.dart and android/app/google-services.json automatically. I can't run this step — it needs your interactive Google login.
+Once I've written firestore.rules and firebase.json, run firebase deploy --only firestore:rules and (after flutter build web --release) firebase deploy --only hosting to publish. I can walk you through these or run them directly if you'd rather hand that off — your call when we get there, since pushing to a live public URL is the kind of thing I check before doing.
+To test a non-citizen role: register normally through the app, then in the Firestore console open that user's document under users/ and change its role field (e.g. to districtCommand) by hand.
+What I'll do (code)
+Phase 1 — Firebase Auth
+Add firebase_core, firebase_auth, cloud_firestore to pubspec.yaml.
+main.dart: make main() async, call WidgetsFlutterBinding .ensureInitialized() + Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform) before runApp (standard FlutterFire bootstrap; depends on the firebase_options.dart you generate in step 5 above — I'll leave a clear TODO/comment if it doesn't exist yet so the app still compiles).
+New lib/features/auth/data/firebase_auth_remote_data_source.dart: FirebaseAuthRemoteDataSource implements AuthRemoteDataSource (the existing interface in auth_remote_data_source.dart — login/register returning Result<AuthSession>, unchanged). login calls FirebaseAuth.signInWithEmailAndPassword, then reads the matching users/{uid} Firestore doc for name/role. register calls createUserWithEmailAndPassword, then writes a new users/{uid} doc with role: 'citizen' (same restriction DevMockAuthRemoteDataSource already enforces) and the given name. Firebase AuthException codes map to the existing Failure types the UI already handles.
+auth_providers.dart: add the new data source as a third option alongside DevMockAuthRemoteDataSource/ApiAuthRemoteDataSource in authRemoteDataSourceProvider, selected by a new AppConfig flag (keep DevMockAuthRemoteDataSource — tests and the offline-dev-without-a-Firebase- project case still want it).
+Tests: a fake/in-memory FirebaseAuth/FirebaseFirestore pair (via the fake_cloud_firestore + firebase_auth_mocks packages, no real network or emulator needed) covering login/register/role-lookup, mirroring how sync_coordinator_service_test.dart already fakes its transport.
+Phase 2 — Firestore sync transport (prove it on the table already wired)
+New lib/features/sync/application/firestore_sync_transport.dart: FirestoreSyncTransport implements SyncTransport (same interface as ApiSyncTransport in sync_transport.dart — push/pullAll). push writes to collection(entry.entityTable).doc(entry.entityId) with a version field, checking it server-side isn't older (Firestore transaction) to preserve the existing conflict semantics. pullAll(table) queries that collection and maps documents to RemoteSyncRecord, same shape SyncCoordinatorService already consumes.
+Wire it in as the new default in sync_providers.dart, alongside keeping ApiSyncTransport available (unused by default) for anyone who wants to self-host instead.
+Tests: same fake_cloud_firestore approach — push/pull/conflict cases against the fake, plus reuse the existing sync_coordinator_service_test.dart pull tests against this transport instead of the scripted fake to prove the swap didn't change behavior.
+Phase 3 — Extend sync to the rest of the shared tables
+Generalize SyncCoordinatorService._pullIncidentReports (currently hardcoded to one table) into a small per-table registry — pull each of local_incidents, local_hazard_zones, local_shelters, local_alerts, local_alert_acknowledgements the same way, each with its own payload-JSON → row mapper (same pattern as the existing _reportFromPayload).
+Add the matching _syncQueueDao.enqueue(...) push calls at each table's write site — these don't exist yet for anything but incident reports: ShelterManagementService (add/edit shelter, occupancy update), AlertBroadcastService (broadcast, cancel, acknowledge), IncidentVerificationService (acknowledge report, status transition), HazardIngestionService (new hazard zone). Same one-line-per-write-site pattern already established in CitizenReportSubmissionService. submitReport.
+Tests: extend sync_coordinator_service_test.dart's pattern per table, plus a couple of the affected services' existing test files gain a "queues a sync entry" assertion.
+Phase 4 — Security rules + Hosting
+firestore.rules: role-gated reads/writes per collection, matching defaultRoutePermissions in lib/app/route_guard.dart (e.g. only a role with sendBroadcast can write local_alerts; anyone authenticated can create local_incident_reports; etc.) — reads each user's own role via a get() on their users/{uid} doc.
+firebase.json + .firebaserc: Hosting config pointing at build/web, ready for firebase deploy --only hosting once you're logged in.
+Verification (each phase)
+Same discipline as the rest of this session: flutter analyze clean, flutter test full suite green (new tests included, using fake_cloud_firestore/firebase_auth_mocks so the suite stays fast and doesn't require a live Firebase project or emulator), flutter build web --release succeeds. Phase 1 also gets a real live check once you've done steps 1–5 above — an actual login against your real Firebase project, verified the same way the backend stub was (a live screenshot proof), not just unit tests.

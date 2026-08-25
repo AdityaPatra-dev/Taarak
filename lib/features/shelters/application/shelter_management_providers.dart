@@ -6,5 +6,6 @@ final shelterManagementServiceProvider = Provider<ShelterManagementService>(
   (ref) => ShelterManagementService(
     shelterRepository: ref.watch(localShelterRepositoryProvider),
     auditLogDao: ref.watch(auditLogDaoProvider),
+    syncQueueDao: ref.watch(syncQueueDaoProvider),
   ),
 );

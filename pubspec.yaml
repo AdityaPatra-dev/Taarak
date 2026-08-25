@@ -65,6 +65,13 @@ dependencies:
   # Client-side resize/re-encode before a photo is queued for upload (M21).
   image: ^4.3.0
   path: ^1.9.0
+  # Real, hosted auth + database — replaces the local backend/ stub and its
+  # HTTP transport. Requires `flutterfire configure` to have been run (see
+  # backend/README.md) before `firebase_options.dart` exists; until then the
+  # Firebase-backed auth/sync paths are wired but never selected by default.
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.3
+  cloud_firestore: ^5.5.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +81,11 @@ dev_dependencies:
   # Needed directly in tests to point the FFI loader at the sqlite3 lib
   # actually installed on this dev machine (see test/support/sqlite3_test_setup.dart).
   sqlite3: ^3.5.2
+  # In-memory fakes for firebase_auth/cloud_firestore — lets the Firebase-
+  # backed auth/sync tests run fast or without a live Firebase project.
+  fake_cloud_firestore: ^3.1.0
+  firebase_auth_mocks: ^0.14.1
+  mock_exceptions: ^0.8.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

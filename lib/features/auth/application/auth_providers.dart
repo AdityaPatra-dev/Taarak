@@ -5,9 +5,13 @@ import 'package:taarak/features/auth/data/auth_remote_data_source.dart';
 import 'package:taarak/features/auth/data/auth_repository.dart';
 import 'package:taarak/features/auth/data/auth_repository_impl.dart';
 import 'package:taarak/features/auth/data/dev_mock_auth_remote_data_source.dart';
+import 'package:taarak/features/auth/data/firebase_auth_remote_data_source.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   final config = ref.watch(appConfigProvider);
+  if (config.useFirebaseAuth) {
+    return FirebaseAuthRemoteDataSource();
+  }
   if (config.useMockAuth) {
     return DevMockAuthRemoteDataSource();
   }

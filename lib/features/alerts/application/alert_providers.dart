@@ -13,6 +13,7 @@ final alertBroadcastServiceProvider = Provider<AlertBroadcastService>(
     auditLogDao: ref.watch(auditLogDaoProvider),
     geoTagService: ref.watch(geoTagServiceProvider),
     engine: ref.watch(alertEngineProvider),
+    syncQueueDao: ref.watch(syncQueueDaoProvider),
   ),
 );
 

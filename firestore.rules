@@ -1,0 +1,82 @@
+rules_version = '2';
+
+// Mirrors lib/app/route_guard.dart's defaultRoutePermissions: a collection
+// is only writable by the roles whose permission actually covers that
+// action in the app itself, so these rules can't drift silently out of
+// sync with what the UI already gates.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function hasAnyRole(roles) {
+      return isSignedIn() && role() in roles;
+    }
+
+    // Each user's own profile (name, email, role). Role is set once at
+    // registration — always 'citizen', enforced below — and is never
+    // self-editable afterwards. Promoting a user to a higher role is a
+    // manual step in the Firebase console (admin access bypasses these
+    // rules entirely), matching the "no admin UI yet" gap called out in
+    // the Firebase migration plan.
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.role == 'citizen';
+      allow update: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // Permission.submitIncidentReport: any signed-in citizen can file one.
+    // Permission.verifyReports: only Local Officials/District Command can
+    // read or update them (the /verification route's gate).
+    match /local_incident_reports/{id} {
+      allow create: if isSignedIn();
+      allow read, update: if hasAnyRole(['localOfficial', 'districtCommand']);
+      allow delete: if false;
+    }
+
+    // Confirmed incidents (post ground-truth fusion). Written by the same
+    // roles that can verify/transition them; readable by anyone signed in
+    // so the risk map and dashboard can render them.
+    match /local_incidents/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(['localOfficial', 'districtCommand']);
+      allow delete: if false;
+    }
+
+    // Permission.viewRiskMap is a citizen permission, so reads stay open
+    // to anyone signed in; writes are restricted to the official roles
+    // that ingest hazard data.
+    match /local_hazard_zones/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(
+        ['localOfficial', 'districtCommand', 'stateAdmin', 'systemAdmin']
+      );
+      allow delete: if false;
+    }
+
+    // Permission.viewSheltersRoutes (citizen, read) vs.
+    // Permission.manageSheltersResources (Local Official only, write).
+    match /local_shelters/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(['localOfficial']);
+      allow delete: if false;
+    }
+
+    // Permission.viewAlerts (citizen, read) vs. Permission.sendBroadcast
+    // (Local Official only, write).
+    match /local_alerts/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(['localOfficial']);
+      allow delete: if false;
+    }
+  }
+}

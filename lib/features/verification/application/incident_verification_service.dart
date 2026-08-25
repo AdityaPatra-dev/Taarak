@@ -6,6 +6,7 @@ import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
+import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/fusion/application/ground_truth_fusion_engine.dart';
 import 'package:taarak/features/verification/application/incident_verification_engine.dart';
@@ -25,6 +26,7 @@ class IncidentVerificationService {
   final AuditLogDao _auditLogDao;
   final IncidentVerificationEngine _engine;
   final GroundTruthFusionEngine _fusionEngine;
+  final SyncQueueDao? _syncQueueDao;
 
   IncidentVerificationService({
     required LocalIncidentReportRepository reportRepository,
@@ -32,11 +34,35 @@ class IncidentVerificationService {
     required AuditLogDao auditLogDao,
     IncidentVerificationEngine? engine,
     GroundTruthFusionEngine? fusionEngine,
+    SyncQueueDao? syncQueueDao,
   }) : _reportRepository = reportRepository,
        _incidentRepository = incidentRepository,
        _auditLogDao = auditLogDao,
        _engine = engine ?? IncidentVerificationEngine(),
-       _fusionEngine = fusionEngine ?? GroundTruthFusionEngine();
+       _fusionEngine = fusionEngine ?? GroundTruthFusionEngine(),
+       _syncQueueDao = syncQueueDao;
+
+  Future<void> _enqueueIncidentSync(LocalIncident incident) async {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    await syncQueueDao.enqueue(
+      entityTable: 'local_incidents',
+      entityId: incident.id,
+      operation: 'create',
+      payloadJson: jsonEncode({
+        'type': incident.type,
+        'status': incident.status,
+        'latitude': incident.latitude,
+        'longitude': incident.longitude,
+        'description': incident.description,
+        'severity': incident.severity,
+        'independentSourceCount': incident.independentSourceCount,
+        'confidence': incident.confidence,
+        'createdAt': incident.createdAt.toIso8601String(),
+        'version': incident.version,
+      }),
+    );
+  }
 
   /// Either merges the report into a matching existing incident (M14) or
   /// creates a new one in the "acknowledged" state — the report has been
@@ -111,6 +137,7 @@ class IncidentVerificationService {
     if (saveResult case Failed<LocalIncident>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueIncidentSync(incident);
 
     await _reportRepository.save(
       report.copyWith(incidentId: Value(incident.id), updatedAt: occurredAt),
@@ -171,6 +198,7 @@ class IncidentVerificationService {
     if (saveResult case Failed<LocalIncident>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueIncidentSync(updated);
 
     await _auditLogDao.record(
       actorId: officialId,

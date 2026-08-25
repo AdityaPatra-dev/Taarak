@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
+import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/shelters/domain/shelter_facility_type.dart';
 
@@ -17,12 +18,35 @@ const _uuid = Uuid();
 class ShelterManagementService {
   final LocalShelterRepository _shelterRepository;
   final AuditLogDao _auditLogDao;
+  final SyncQueueDao? _syncQueueDao;
 
   ShelterManagementService({
     required LocalShelterRepository shelterRepository,
     required AuditLogDao auditLogDao,
+    SyncQueueDao? syncQueueDao,
   }) : _shelterRepository = shelterRepository,
-       _auditLogDao = auditLogDao;
+       _auditLogDao = auditLogDao,
+       _syncQueueDao = syncQueueDao;
+
+  Future<void> _enqueueShelterSync(LocalShelter shelter) async {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    await syncQueueDao.enqueue(
+      entityTable: 'local_shelters',
+      entityId: shelter.id,
+      operation: 'create',
+      payloadJson: jsonEncode({
+        'name': shelter.name,
+        'latitude': shelter.latitude,
+        'longitude': shelter.longitude,
+        'capacityTotal': shelter.capacityTotal,
+        'occupancy': shelter.occupancy,
+        'facilitiesJson': shelter.facilitiesJson,
+        'accessQuality': shelter.accessQuality,
+        'version': shelter.version,
+      }),
+    );
+  }
 
   Future<Result<List<LocalShelter>>> listShelters() =>
       _shelterRepository.getAll();
@@ -70,6 +94,7 @@ class ShelterManagementService {
     if (saveResult case Failed<LocalShelter>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueShelterSync(shelter);
 
     await _auditLogDao.record(
       actorId: officialId,
@@ -119,6 +144,7 @@ class ShelterManagementService {
     if (saveResult case Failed<LocalShelter>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueShelterSync(updated);
 
     await _auditLogDao.record(
       actorId: officialId,

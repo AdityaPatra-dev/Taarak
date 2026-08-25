@@ -15,6 +15,7 @@ final incidentVerificationServiceProvider = Provider<IncidentVerificationService
     auditLogDao: ref.watch(auditLogDaoProvider),
     engine: ref.watch(incidentVerificationEngineProvider),
     fusionEngine: ref.watch(groundTruthFusionEngineProvider),
+    syncQueueDao: ref.watch(syncQueueDaoProvider),
   ),
 );
 

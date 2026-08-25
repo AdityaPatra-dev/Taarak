@@ -9,16 +9,25 @@ class AppConfig {
   final String apiBaseUrl;
   final Duration apiTimeout;
 
-  /// When true, auth uses an in-memory demo directory instead of the real
-  /// Identity backend (blueprint section 7), which doesn't exist yet. Flip
-  /// to false once that service is reachable at [apiBaseUrl].
+  /// When true, auth uses an in-memory demo directory instead of a real
+  /// backend. Checked before [useFirebaseAuth] — see that field for why
+  /// both exist.
   final bool useMockAuth;
+
+  /// When true, auth (and eventually sync) goes through the real, hosted
+  /// Firebase project instead of [apiBaseUrl]'s never-deployed backend/
+  /// stub. Only meaningful once `flutterfire configure` has generated
+  /// `firebase_options.dart` and `main.dart` calls `Firebase.initializeApp`
+  /// — stays false until then so the app keeps working without a Firebase
+  /// project. Takes priority over [useMockAuth] when both could apply.
+  final bool useFirebaseAuth;
 
   const AppConfig({
     required this.environment,
     required this.apiBaseUrl,
     this.apiTimeout = const Duration(seconds: 20),
     this.useMockAuth = false,
+    this.useFirebaseAuth = false,
   });
 
   factory AppConfig.development() => const AppConfig(

@@ -8,6 +8,7 @@ import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_alert_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
+import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/location/geo_tag.dart';
 import 'package:taarak/core/location/geo_tag_service.dart';
 import 'package:taarak/core/repository/result.dart';
@@ -26,6 +27,7 @@ class AlertBroadcastService {
   final AuditLogDao _auditLogDao;
   final AlertEngine _engine;
   final GeoTagService _geoTagService;
+  final SyncQueueDao? _syncQueueDao;
 
   AlertBroadcastService({
     required LocalAlertRepository alertRepository,
@@ -34,12 +36,37 @@ class AlertBroadcastService {
     required AuditLogDao auditLogDao,
     required GeoTagService geoTagService,
     AlertEngine? engine,
+    SyncQueueDao? syncQueueDao,
   }) : _alertRepository = alertRepository,
        _hazardZoneRepository = hazardZoneRepository,
        _acknowledgementDao = acknowledgementDao,
        _auditLogDao = auditLogDao,
        _geoTagService = geoTagService,
-       _engine = engine ?? AlertEngine();
+       _engine = engine ?? AlertEngine(),
+       _syncQueueDao = syncQueueDao;
+
+  Future<void> _enqueueAlertSync(LocalAlert alert) async {
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao == null) return;
+    await syncQueueDao.enqueue(
+      entityTable: 'local_alerts',
+      entityId: alert.id,
+      operation: 'create',
+      payloadJson: jsonEncode({
+        'title': alert.title,
+        'message': alert.message,
+        'severity': alert.severity,
+        'zoneId': alert.zoneId,
+        'zoneLabel': alert.zoneLabel,
+        'geometryJson': alert.geometryJson,
+        'issuedBy': alert.issuedBy,
+        'issuedAt': alert.issuedAt.toIso8601String(),
+        'validUntil': alert.validUntil.toIso8601String(),
+        'cancelledAt': alert.cancelledAt?.toIso8601String(),
+        'version': alert.version,
+      }),
+    );
+  }
 
   /// Broadcasts to the given zone — the acceptance criterion itself.
   /// `zoneId` must be an already-ingested [LocalHazardZones] row; the
@@ -78,6 +105,7 @@ class AlertBroadcastService {
     if (saveResult case Failed<LocalAlert>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueAlertSync(alert);
 
     await _auditLogDao.record(
       actorId: officialId,
@@ -117,6 +145,7 @@ class AlertBroadcastService {
     if (saveResult case Failed<LocalAlert>(:final failure)) {
       return Result.failure(failure);
     }
+    await _enqueueAlertSync(cancelled);
 
     await _auditLogDao.record(
       actorId: officialId,
