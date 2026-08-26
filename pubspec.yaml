@@ -98,9 +98,40 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  # Generates platform launcher icons from assets/icon/ (see below).
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+# Source images live in assets/icon/ (icon_master.png: full icon with
+# padding, used everywhere except Android adaptive; icon_foreground.png:
+# alpha-cutout of the logo, padded to Android's adaptive-icon safe zone).
+# Regenerate after changing either file with:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icon/icon_master.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#F7F7F7"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  # icon_foreground.png already bakes in the adaptive-icon safe-zone
+  # padding (content occupies ~62% of the canvas); disable the tool's
+  # own default 16% inset so the two paddings don't stack.
+  adaptive_icon_foreground_inset: 0
+  ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/icon_master.png"
+    background_color: "#F7F7F7"
+    theme_color: "#0D3B5C"
+  macos:
+    generate: true
+    image_path: "assets/icon/icon_master.png"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon_master.png"
+    icon_size: 256
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -114,6 +145,8 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

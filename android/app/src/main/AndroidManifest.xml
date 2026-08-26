@@ -11,7 +11,7 @@
     <application
         android:label="taarak"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <!-- M05: Google Maps API key. Replace REPLACE_WITH_YOUR_MAPS_API_KEY
              with a real key that has "Maps SDK for Android" enabled — see
              console.cloud.google.com/google/maps-apis/credentials on the
