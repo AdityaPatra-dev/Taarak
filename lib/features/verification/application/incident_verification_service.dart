@@ -65,6 +65,47 @@ class IncidentVerificationService {
     );
   }
 
+  /// A System Admin's content-moderation action — an actual delete, both
+  /// locally and (once synced) in Firestore. [SyncCoordinatorService]'s
+  /// pull diffs each device's cache against the current remote id set, so
+  /// this propagates to every other device the same way a delete
+  /// elsewhere is noticed here.
+  Future<Result<void>> removeIncident({
+    required String incidentId,
+    required String adminId,
+    String? reason,
+    DateTime? now,
+  }) async {
+    final incidentResult = await _incidentRepository.getById(incidentId);
+    if (incidentResult case Failed<LocalIncident>(:final failure)) {
+      return Result.failure(failure);
+    }
+    final occurredAt = now ?? DateTime.now();
+
+    final deleteResult = await _incidentRepository.delete(incidentId);
+    if (deleteResult case Failed<void>(:final failure)) {
+      return Result.failure(failure);
+    }
+
+    await _syncQueueDao?.enqueue(
+      entityTable: 'local_incidents',
+      entityId: incidentId,
+      operation: 'delete',
+      payloadJson: '{}',
+    );
+
+    await _auditLogDao.record(
+      actorId: adminId,
+      action: 'incident.removed',
+      objectType: 'incident',
+      objectId: incidentId,
+      reason: reason,
+      now: occurredAt,
+    );
+
+    return const Result.success(null);
+  }
+
   /// Either merges the report into a matching existing incident (M14) or
   /// creates a new one in the "acknowledged" state — the report has been
   /// seen by an official either way, even if not yet confirmed true.

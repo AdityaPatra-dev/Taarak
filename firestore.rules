@@ -56,22 +56,26 @@ service cloud.firestore {
 
     // Confirmed incidents (post ground-truth fusion). Written by the same
     // roles that can verify/transition them; readable by anyone signed in
-    // so the risk map and dashboard can render them.
+    // so the risk map and dashboard can render them. systemAdmin's delete
+    // access is Permission.moderateContent — a real removal (see
+    // ContentModerationService), never a verification-lifecycle transition,
+    // which stays official/command-only and update-only.
     match /local_incidents/{id} {
       allow read: if isSignedIn();
       allow create, update: if hasAnyRole(['localOfficial', 'districtCommand']);
-      allow delete: if false;
+      allow delete: if hasAnyRole(['systemAdmin']);
     }
 
     // Permission.viewRiskMap is a citizen permission, so reads stay open
     // to anyone signed in; writes are restricted to the official roles
-    // that ingest hazard data.
+    // that ingest hazard data. systemAdmin's delete access is
+    // Permission.moderateContent (see ContentModerationService).
     match /local_hazard_zones/{id} {
       allow read: if isSignedIn();
       allow create, update: if hasAnyRole(
-        ['localOfficial', 'districtCommand', 'stateAdmin', 'systemAdmin']
+        ['localOfficial', 'districtCommand', 'stateAdmin']
       );
-      allow delete: if false;
+      allow delete: if hasAnyRole(['systemAdmin']);
     }
 
     // Permission.viewSheltersRoutes (citizen, read) vs.
@@ -83,11 +87,14 @@ service cloud.firestore {
     }
 
     // Permission.viewAlerts (citizen, read) vs. Permission.sendBroadcast
-    // (Local Official only, write).
+    // (Local Official only, write/cancel). systemAdmin's delete access is
+    // Permission.moderateContent — a real removal (see
+    // ContentModerationService), distinct from a Local Official cancelling
+    // one (still an update, via AlertBroadcastService.cancelAlert).
     match /local_alerts/{id} {
       allow read: if isSignedIn();
       allow create, update: if hasAnyRole(['localOfficial']);
-      allow delete: if false;
+      allow delete: if hasAnyRole(['systemAdmin']);
     }
 
     // A Field Responder's on-site damage assessment for an incident

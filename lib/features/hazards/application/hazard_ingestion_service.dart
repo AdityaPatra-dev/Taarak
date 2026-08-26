@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/gis/geometry_codec.dart';
@@ -18,14 +19,17 @@ class HazardIngestionService {
   final HazardNormalizer _normalizer;
   final LocalHazardZoneRepository _repository;
   final SyncQueueDao? _syncQueueDao;
+  final AuditLogDao? _auditLogDao;
 
   HazardIngestionService({
     required HazardNormalizer normalizer,
     required LocalHazardZoneRepository repository,
     SyncQueueDao? syncQueueDao,
+    AuditLogDao? auditLogDao,
   }) : _normalizer = normalizer,
        _repository = repository,
-       _syncQueueDao = syncQueueDao;
+       _syncQueueDao = syncQueueDao,
+       _auditLogDao = auditLogDao;
 
   Future<Result<LocalHazardZone>> ingest({
     required String id,
@@ -59,7 +63,8 @@ class HazardIngestionService {
     );
     final saveResult = await _repository.save(row);
     if (saveResult case Success<LocalHazardZone>()) {
-      await _syncQueueDao?.enqueue(
+      final syncQueueDao = _syncQueueDao;
+      await syncQueueDao?.enqueue(
         entityTable: 'local_hazard_zones',
         entityId: row.id,
         operation: 'create',
@@ -75,5 +80,46 @@ class HazardIngestionService {
       );
     }
     return saveResult;
+  }
+
+  /// A System Admin's content-moderation action — an actual delete, both
+  /// locally and (once synced) in Firestore. [SyncCoordinatorService]'s
+  /// pull diffs each device's cache against the current remote id set, so
+  /// this propagates to every other device the same way a delete
+  /// elsewhere is noticed here.
+  Future<Result<void>> remove({
+    required String id,
+    required String adminId,
+    String? reason,
+    DateTime? now,
+  }) async {
+    final existingResult = await _repository.getById(id);
+    if (existingResult case Failed<LocalHazardZone>(:final failure)) {
+      return Result.failure(failure);
+    }
+    final occurredAt = now ?? DateTime.now();
+
+    final deleteResult = await _repository.delete(id);
+    if (deleteResult case Failed<void>(:final failure)) {
+      return Result.failure(failure);
+    }
+
+    await _syncQueueDao?.enqueue(
+      entityTable: 'local_hazard_zones',
+      entityId: id,
+      operation: 'delete',
+      payloadJson: '{}',
+    );
+
+    await _auditLogDao?.record(
+      actorId: adminId,
+      action: 'hazard_zone.removed',
+      objectType: 'hazard_zone',
+      objectId: id,
+      reason: reason,
+      now: occurredAt,
+    );
+
+    return const Result.success(null);
   }
 }

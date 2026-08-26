@@ -159,6 +159,47 @@ class AlertBroadcastService {
     return Result.success(cancelled);
   }
 
+  /// A System Admin's content-moderation action — an actual delete,
+  /// distinct from [cancelAlert]'s soft "end it early but keep it in
+  /// history" behavior. [SyncCoordinatorService]'s pull diffs each
+  /// device's cache against the current remote id set, so this propagates
+  /// to every other device the same way a delete elsewhere is noticed here.
+  Future<Result<void>> deleteAlert({
+    required String alertId,
+    required String adminId,
+    String? reason,
+    DateTime? now,
+  }) async {
+    final existingResult = await _alertRepository.getById(alertId);
+    if (existingResult case Failed<LocalAlert>(:final failure)) {
+      return Result.failure(failure);
+    }
+    final occurredAt = now ?? DateTime.now();
+
+    final deleteResult = await _alertRepository.delete(alertId);
+    if (deleteResult case Failed<void>(:final failure)) {
+      return Result.failure(failure);
+    }
+
+    await _syncQueueDao?.enqueue(
+      entityTable: 'local_alerts',
+      entityId: alertId,
+      operation: 'delete',
+      payloadJson: '{}',
+    );
+
+    await _auditLogDao.record(
+      actorId: adminId,
+      action: 'alert.removed',
+      objectType: 'alert',
+      objectId: alertId,
+      reason: reason,
+      now: occurredAt,
+    );
+
+    return const Result.success(null);
+  }
+
   Future<Result<void>> acknowledge({
     required String alertId,
     required String userId,

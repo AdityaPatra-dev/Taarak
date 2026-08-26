@@ -13,6 +13,7 @@ final hazardIngestionServiceProvider = Provider<HazardIngestionService>(
     normalizer: ref.watch(hazardNormalizerProvider),
     repository: ref.watch(localHazardZoneRepositoryProvider),
     syncQueueDao: ref.watch(syncQueueDaoProvider),
+    auditLogDao: ref.watch(auditLogDaoProvider),
   ),
 );
 

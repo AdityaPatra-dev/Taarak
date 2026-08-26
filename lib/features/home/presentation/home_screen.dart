@@ -98,6 +98,12 @@ class HomeScreen extends ConsumerWidget {
           label: 'Manage Accounts',
           onTap: () => context.push('/admin/users'),
         ),
+      if (user.role.can(Permission.moderateContent))
+        _QuickAction(
+          icon: Icons.remove_moderator_outlined,
+          label: 'Content Moderation',
+          onTap: () => context.push('/admin/moderation'),
+        ),
       if (user.role.can(Permission.viewAssignedIncidents))
         _QuickAction(
           icon: Icons.assignment_turned_in_outlined,

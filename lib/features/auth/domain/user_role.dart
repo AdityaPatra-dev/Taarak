@@ -58,6 +58,7 @@ const Map<UserRole, Set<Permission>> rolePermissions = {
     Permission.managePermissions,
     Permission.manageTechnicalConfiguration,
     Permission.reviewAudit,
+    Permission.moderateContent,
   },
 };
 

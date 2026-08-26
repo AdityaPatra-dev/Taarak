@@ -21,6 +21,7 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/dashboard': Permission.monitorZones,
   '/audit': Permission.reviewAudit,
   '/admin/users': Permission.manageAccounts,
+  '/admin/moderation': Permission.moderateContent,
   '/field/incidents': Permission.viewAssignedIncidents,
   '/command/responders': Permission.manageResponders,
   '/command/resources': Permission.manageResources,

@@ -147,15 +147,57 @@ class SyncCoordinatorService {
   /// in — tests that only care about a subset (or the push path only) can
   /// omit the rest and those pulls are simply no-ops.
   Future<int> _pullAll() async {
+    // A table's still-pending/failed sync entries at this point are local
+    // creations that haven't reached Firestore yet — excluded from each
+    // pull's delete-diff below so a System Admin's removal elsewhere
+    // never gets confused with "not synced yet" and wipes a fresh local
+    // creation before it's had a chance to actually push.
+    final stillPendingResult = await _syncQueueDao.listSyncable();
+    final pendingIdsByTable = <String, Set<String>>{};
+    for (final entry in stillPendingResult.dataOrNull ?? const []) {
+      pendingIdsByTable
+          .putIfAbsent(entry.entityTable, () => <String>{})
+          .add(entry.entityId);
+    }
+
     var applied = 0;
     applied += await _pullIncidentReports();
-    applied += await _pullIncidents();
-    applied += await _pullHazardZones();
+    applied += await _pullIncidents(
+      pendingIdsByTable['local_incidents'] ?? const {},
+    );
+    applied += await _pullHazardZones(
+      pendingIdsByTable['local_hazard_zones'] ?? const {},
+    );
     applied += await _pullShelters();
-    applied += await _pullAlerts();
+    applied += await _pullAlerts(pendingIdsByTable['local_alerts'] ?? const {});
     applied += await _pullDamageReports();
     applied += await _pullResources();
     return applied;
+  }
+
+  /// A System Admin's content-moderation delete is only visible to this
+  /// device as "this id is no longer in the remote set" — there's no
+  /// per-record delete event to react to, since [SyncTransport.pullAll]
+  /// just returns whatever currently exists. So after applying every
+  /// create/update above, anything cached locally that's missing from the
+  /// current remote set (and isn't itself a not-yet-pushed local creation)
+  /// was deleted elsewhere, and gets deleted here too.
+  Future<int> _deleteLocallyMissing<T>({
+    required Future<Result<List<T>>> Function() getAllLocal,
+    required Future<Result<void>> Function(String id) deleteLocal,
+    required String Function(T) idOf,
+    required Set<String> remoteIds,
+    required Set<String> pendingIds,
+  }) async {
+    final localResult = await getAllLocal();
+    var deleted = 0;
+    for (final item in localResult.dataOrNull ?? const []) {
+      final id = idOf(item);
+      if (remoteIds.contains(id) || pendingIds.contains(id)) continue;
+      await deleteLocal(id);
+      deleted++;
+    }
+    return deleted;
   }
 
   Future<int> _pullIncidentReports() async {
@@ -208,7 +250,7 @@ class SyncCoordinatorService {
     }
   }
 
-  Future<int> _pullIncidents() async {
+  Future<int> _pullIncidents(Set<String> pendingIds) async {
     final repository = _incidentRepository;
     if (repository == null) return 0;
 
@@ -227,6 +269,13 @@ class SyncCoordinatorService {
       await repository.save(incident);
       applied++;
     }
+    applied += await _deleteLocallyMissing<LocalIncident>(
+      getAllLocal: repository.getAll,
+      deleteLocal: repository.delete,
+      idOf: (incident) => incident.id,
+      remoteIds: remoteRecords.map((r) => r.entityId).toSet(),
+      pendingIds: pendingIds,
+    );
     return applied;
   }
 
@@ -255,7 +304,7 @@ class SyncCoordinatorService {
     }
   }
 
-  Future<int> _pullHazardZones() async {
+  Future<int> _pullHazardZones(Set<String> pendingIds) async {
     final repository = _hazardZoneRepository;
     if (repository == null) return 0;
 
@@ -274,6 +323,13 @@ class SyncCoordinatorService {
       await repository.save(zone);
       applied++;
     }
+    applied += await _deleteLocallyMissing<LocalHazardZone>(
+      getAllLocal: repository.getAll,
+      deleteLocal: repository.delete,
+      idOf: (zone) => zone.id,
+      remoteIds: remoteRecords.map((r) => r.entityId).toSet(),
+      pendingIds: pendingIds,
+    );
     return applied;
   }
 
@@ -338,7 +394,7 @@ class SyncCoordinatorService {
     }
   }
 
-  Future<int> _pullAlerts() async {
+  Future<int> _pullAlerts(Set<String> pendingIds) async {
     final repository = _alertRepository;
     if (repository == null) return 0;
 
@@ -357,6 +413,13 @@ class SyncCoordinatorService {
       await repository.save(alert);
       applied++;
     }
+    applied += await _deleteLocallyMissing<LocalAlert>(
+      getAllLocal: repository.getAll,
+      deleteLocal: repository.delete,
+      idOf: (alert) => alert.id,
+      remoteIds: remoteRecords.map((r) => r.entityId).toSet(),
+      pendingIds: pendingIds,
+    );
     return applied;
   }
 

@@ -12,6 +12,7 @@ import 'package:taarak/features/device_relay/presentation/device_relay_screen.da
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
+import 'package:taarak/features/admin/presentation/content_moderation_screen.dart';
 import 'package:taarak/features/admin/presentation/user_admin_screen.dart';
 import 'package:taarak/features/command/presentation/manage_relocation_screen.dart';
 import 'package:taarak/features/command/presentation/manage_resources_screen.dart';
@@ -114,6 +115,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/users',
         builder: (context, state) => const UserAdminScreen(),
+      ),
+      GoRoute(
+        path: '/admin/moderation',
+        builder: (context, state) => const ContentModerationScreen(),
       ),
       GoRoute(
         path: '/field/incidents',

@@ -41,6 +41,7 @@ enum Permission {
   managePermissions,
   manageTechnicalConfiguration,
   reviewAudit,
+  moderateContent,
 }
 
 extension PermissionLabel on Permission {
@@ -72,5 +73,6 @@ extension PermissionLabel on Permission {
     Permission.managePermissions => 'Manage permissions',
     Permission.manageTechnicalConfiguration => 'Manage technical configuration',
     Permission.reviewAudit => 'Review audit log',
+    Permission.moderateContent => 'Remove hazard zones, incidents & alerts',
   };
 }

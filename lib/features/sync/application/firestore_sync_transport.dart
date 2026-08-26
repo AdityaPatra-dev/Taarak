@@ -26,8 +26,16 @@ class FirestoreSyncTransport implements SyncTransport {
       final docRef = _firestore
           .collection(entry.entityTable)
           .doc(entry.entityId);
-      final incomingVersion = _versionOf(entry.payloadJson);
 
+      // A hard delete (System Admin content moderation) has no version to
+      // conflict-check against — deleting an already-gone document is
+      // just a no-op success, not an error.
+      if (entry.operation == 'delete') {
+        await docRef.delete();
+        return const Result.success(SyncPushOutcome.accepted());
+      }
+
+      final incomingVersion = _versionOf(entry.payloadJson);
       final outcome = await _firestore.runTransaction<SyncPushOutcome>((
         transaction,
       ) async {
