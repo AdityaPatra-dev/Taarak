@@ -98,6 +98,48 @@ class HomeScreen extends ConsumerWidget {
           label: 'Manage Accounts',
           onTap: () => context.push('/admin/users'),
         ),
+      if (user.role.can(Permission.viewAssignedIncidents))
+        _QuickAction(
+          icon: Icons.assignment_turned_in_outlined,
+          label: 'My Assigned Incidents',
+          onTap: () => context.push('/field/incidents'),
+        ),
+      if (user.role.can(Permission.manageResponders))
+        _QuickAction(
+          icon: Icons.groups_outlined,
+          label: 'Manage Responders',
+          onTap: () => context.push('/command/responders'),
+        ),
+      if (user.role.can(Permission.manageResources))
+        _QuickAction(
+          icon: Icons.inventory_2_outlined,
+          label: 'Manage Resources',
+          onTap: () => context.push('/command/resources'),
+        ),
+      if (user.role.can(Permission.manageRelocation))
+        _QuickAction(
+          icon: Icons.moving_outlined,
+          label: 'Manage Relocation',
+          onTap: () => context.push('/command/relocation'),
+        ),
+      if (user.role.can(Permission.crossDistrictOversight))
+        _QuickAction(
+          icon: Icons.public_outlined,
+          label: 'Cross-District Oversight',
+          onTap: () => context.push('/state/oversight'),
+        ),
+      if (user.role.can(Permission.viewReports))
+        _QuickAction(
+          icon: Icons.bar_chart_outlined,
+          label: 'State Reports',
+          onTap: () => context.push('/state/reports'),
+        ),
+      if (user.role.can(Permission.managePolicyConfiguration))
+        _QuickAction(
+          icon: Icons.tune,
+          label: 'Policy Configuration',
+          onTap: () => context.push('/state/policy'),
+        ),
       if (isDevMode && hasSos)
         _QuickAction(
           icon: Icons.sms_outlined,

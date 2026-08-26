@@ -23,10 +23,13 @@ service cloud.firestore {
     // registration — always 'citizen', enforced below — and is never
     // self-editable by the user themselves. Permission.manageAccounts
     // (System Admin only) can read every profile and change anyone's role
-    // via the in-app account management screen.
+    // via the in-app account management screen. District/Command can also
+    // read the full list — needed to pick a Field Responder to assign an
+    // incident to — but not write anyone else's role.
     match /users/{uid} {
       allow read: if isSignedIn()
-                  && (request.auth.uid == uid || hasAnyRole(['systemAdmin']));
+                  && (request.auth.uid == uid
+                      || hasAnyRole(['systemAdmin', 'districtCommand']));
       allow create: if isSignedIn() && request.auth.uid == uid
                     && request.resource.data.role == 'citizen';
       allow update: if isSignedIn() && (
@@ -85,6 +88,33 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update: if hasAnyRole(['localOfficial']);
       allow delete: if false;
+    }
+
+    // A Field Responder's on-site damage assessment for an incident
+    // they're assigned to. Read stays open (District/Command and Local
+    // Officials review these; the app doesn't restrict who can see one).
+    match /local_damage_reports/{id} {
+      allow read: if isSignedIn();
+      allow create: if hasAnyRole(['fieldResponder']);
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Permission.manageResources (District/Command only, write). Read
+    // stays open, same reasoning as every other shared-state collection.
+    match /local_resources/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(['districtCommand']);
+      allow delete: if false;
+    }
+
+    // Permission.managePolicyConfiguration (State/Admin only, write) —
+    // read stays open since broadcast_alert_screen.dart and
+    // report_hazard_zone_screen.dart read this regardless of the
+    // viewer's own role.
+    match /config/policy {
+      allow read: if isSignedIn();
+      allow write: if hasAnyRole(['stateAdmin']);
     }
   }
 }

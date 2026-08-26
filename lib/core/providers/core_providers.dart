@@ -5,12 +5,14 @@ import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/audit_log_dao.dart';
 import 'package:taarak/core/database/repositories/local_alert_repository.dart';
 import 'package:taarak/core/database/repositories/local_capacity_assessment_repository.dart';
+import 'package:taarak/core/database/repositories/local_damage_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_environmental_observation_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
 import 'package:taarak/core/database/repositories/local_relocation_plan_repository.dart';
+import 'package:taarak/core/database/repositories/local_resource_repository.dart';
 import 'package:taarak/core/database/repositories/local_risk_assessment_repository.dart';
 import 'package:taarak/core/database/repositories/local_route_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
@@ -103,6 +105,15 @@ final localRelocationPlanRepositoryProvider =
     Provider<LocalRelocationPlanRepository>(
       (ref) => LocalRelocationPlanRepository(ref.watch(appDatabaseProvider)),
     );
+
+final localDamageReportRepositoryProvider =
+    Provider<LocalDamageReportRepository>(
+      (ref) => LocalDamageReportRepository(ref.watch(appDatabaseProvider)),
+    );
+
+final localResourceRepositoryProvider = Provider<LocalResourceRepository>(
+  (ref) => LocalResourceRepository(ref.watch(appDatabaseProvider)),
+);
 
 final syncQueueDaoProvider = Provider<SyncQueueDao>(
   (ref) => SyncQueueDao(ref.watch(appDatabaseProvider)),

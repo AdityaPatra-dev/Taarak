@@ -5,6 +5,8 @@ import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
+import 'package:taarak/features/state_admin/application/state_admin_providers.dart';
+import 'package:taarak/features/state_admin/domain/app_policy.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
@@ -12,11 +14,10 @@ import 'package:taarak/shared/widgets/severity_chip.dart';
 import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 const _severities = ['low', 'medium', 'high', 'critical'];
-const _validityOptions = {
-  '1 hour': Duration(hours: 1),
-  '6 hours': Duration(hours: 6),
-  '24 hours': Duration(hours: 24),
-};
+
+String _durationLabel(Duration duration) => duration.inHours < 24
+    ? '${duration.inHours} hour${duration.inHours == 1 ? '' : 's'}'
+    : '${duration.inDays} day${duration.inDays == 1 ? '' : 's'}';
 
 /// M16: lets a Local Official ([Permission.sendBroadcast]) broadcast to a
 /// selected zone — the acceptance criterion — and shows the broadcast
@@ -34,7 +35,7 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
   final _messageController = TextEditingController();
   String? _selectedZoneId;
   String _severity = 'high';
-  String _validityLabel = '6 hours';
+  Duration? _selectedValidity;
 
   @override
   void dispose() {
@@ -47,6 +48,14 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
   Widget build(BuildContext context) {
     final zones = ref.watch(hazardZonesProvider).valueOrNull ?? const [];
     final history = ref.watch(alertHistoryProvider).valueOrNull ?? const [];
+    final validityOptions =
+        ref.watch(appPolicyProvider).valueOrNull?.alertValidityOptions ??
+        AppPolicy.defaults.alertValidityOptions;
+    final selectedValidity =
+        _selectedValidity ??
+        (validityOptions.contains(const Duration(hours: 6))
+            ? const Duration(hours: 6)
+            : validityOptions.first);
 
     return Scaffold(
       appBar: const TaarakAppBar(title: 'Broadcast Alert'),
@@ -113,25 +122,26 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
                               setState(() => _severity = value ?? _severity),
                         ),
                         const SizedBox(height: Spacing.sm),
-                        DropdownButtonFormField<String>(
-                          initialValue: _validityLabel,
+                        DropdownButtonFormField<Duration>(
+                          initialValue: selectedValidity,
                           decoration: const InputDecoration(
                             labelText: 'Valid for',
                           ),
                           items: [
-                            for (final label in _validityOptions.keys)
+                            for (final duration in validityOptions)
                               DropdownMenuItem(
-                                value: label,
-                                child: Text(label),
+                                value: duration,
+                                child: Text(_durationLabel(duration)),
                               ),
                           ],
-                          onChanged: (value) => setState(
-                            () => _validityLabel = value ?? _validityLabel,
-                          ),
+                          onChanged: (value) =>
+                              setState(() => _selectedValidity = value),
                         ),
                         const SizedBox(height: Spacing.md),
                         FilledButton.icon(
-                          onPressed: zones.isEmpty ? null : _broadcast,
+                          onPressed: zones.isEmpty
+                              ? null
+                              : () => _broadcast(selectedValidity),
                           icon: const Icon(Icons.campaign_outlined),
                           label: const Text('Broadcast'),
                         ),
@@ -156,7 +166,7 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
     );
   }
 
-  Future<void> _broadcast() async {
+  Future<void> _broadcast(Duration validFor) async {
     final zoneId = _selectedZoneId;
     final officialId = ref.read(currentUserProvider)?.id;
     if (zoneId == null || officialId == null) return;
@@ -169,7 +179,7 @@ class _BroadcastAlertScreenState extends ConsumerState<BroadcastAlertScreen> {
           title: _titleController.text.trim(),
           message: _messageController.text.trim(),
           severity: _severity,
-          validFor: _validityOptions[_validityLabel]!,
+          validFor: validFor,
           officialId: officialId,
         );
 

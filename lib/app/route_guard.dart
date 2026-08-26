@@ -21,6 +21,13 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/dashboard': Permission.monitorZones,
   '/audit': Permission.reviewAudit,
   '/admin/users': Permission.manageAccounts,
+  '/field/incidents': Permission.viewAssignedIncidents,
+  '/command/responders': Permission.manageResponders,
+  '/command/resources': Permission.manageResources,
+  '/command/relocation': Permission.manageRelocation,
+  '/state/oversight': Permission.crossDistrictOversight,
+  '/state/reports': Permission.viewReports,
+  '/state/policy': Permission.managePolicyConfiguration,
   '/sms-prototype': Permission.sendSos,
   '/device-relay': Permission.sendSos,
 };
@@ -29,6 +36,7 @@ const Map<String, Permission> defaultRoutePermissions = {
 /// path parameter (like the incident detail drill-down) needs its own
 /// prefix check since its concrete path varies per incident.
 const dashboardIncidentDetailPrefix = '/dashboard/incidents/';
+const fieldIncidentDetailPrefix = '/field/incidents/';
 
 /// Pure redirect decision for the app router: unauthenticated users are sent
 /// to login, authenticated users are kept off the auth screens, and anyone
@@ -50,6 +58,8 @@ String? computeRedirect({
 
   final required = location.startsWith(dashboardIncidentDetailPrefix)
       ? Permission.monitorZones
+      : location.startsWith(fieldIncidentDetailPrefix)
+      ? Permission.viewAssignedIncidents
       : routePermissions[location];
   if (required != null && !session.user.role.can(required)) {
     return '/unauthorized';

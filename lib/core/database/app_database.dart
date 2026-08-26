@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:taarak/core/database/tables/local_alert_acknowledgements_table.dart';
 import 'package:taarak/core/database/tables/local_alerts_table.dart';
 import 'package:taarak/core/database/tables/local_audit_events_table.dart';
+import 'package:taarak/core/database/tables/local_damage_reports_table.dart';
 import 'package:taarak/core/database/tables/local_environmental_observations_table.dart';
 import 'package:taarak/core/database/tables/local_capacity_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_habitations_table.dart';
@@ -10,6 +11,7 @@ import 'package:taarak/core/database/tables/local_hazard_zones_table.dart';
 import 'package:taarak/core/database/tables/local_incident_reports_table.dart';
 import 'package:taarak/core/database/tables/local_incidents_table.dart';
 import 'package:taarak/core/database/tables/local_relocation_plans_table.dart';
+import 'package:taarak/core/database/tables/local_resources_table.dart';
 import 'package:taarak/core/database/tables/local_risk_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_routes_table.dart';
 import 'package:taarak/core/database/tables/local_shelters_table.dart';
@@ -39,6 +41,8 @@ part 'app_database.g.dart';
     LocalAlerts,
     LocalAlertAcknowledgements,
     LocalEnvironmentalObservations,
+    LocalDamageReports,
+    LocalResources,
     SyncQueueEntries,
   ],
 )
@@ -59,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

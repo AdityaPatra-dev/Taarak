@@ -16,18 +16,16 @@ import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_controller.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
+import 'package:taarak/features/state_admin/application/state_admin_providers.dart';
+import 'package:taarak/features/state_admin/domain/app_policy.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
 import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 const _uuid = Uuid();
-const _radiusOptions = {
-  '200 m': 200.0,
-  '500 m': 500.0,
-  '1 km': 1000.0,
-  '2 km': 2000.0,
-  '5 km': 5000.0,
-};
+
+String _radiusLabel(double meters) =>
+    meters >= 1000 ? '${(meters / 1000).toStringAsFixed(meters % 1000 == 0 ? 0 : 1)} km' : '${meters.toInt()} m';
 
 /// Lets a Local Official ([Permission.manageLocalIncidents]) mark a hazard's
 /// epicenter and affected radius on the map — the front door M06's
@@ -51,7 +49,7 @@ class _ReportHazardZoneScreenState
   LatLng? _center;
   HazardType _hazardType = HazardType.flood;
   HazardSeverity _severity = HazardSeverity.medium;
-  String _radiusLabel = '500 m';
+  double? _selectedRadiusMeters;
   bool _isSubmitting = false;
 
   @override
@@ -60,7 +58,12 @@ class _ReportHazardZoneScreenState
     final fallbackCenter = userPoint == null
         ? defaultMapCenter
         : LatLng(userPoint.fix.latitude, userPoint.fix.longitude);
-    final radiusMeters = _radiusOptions[_radiusLabel]!;
+    final radiusOptions =
+        ref.watch(appPolicyProvider).valueOrNull?.hazardRadiusOptionsMeters ??
+        AppPolicy.defaults.hazardRadiusOptionsMeters;
+    final radiusMeters =
+        _selectedRadiusMeters ??
+        (radiusOptions.contains(500.0) ? 500.0 : radiusOptions.first);
 
     return Scaffold(
       appBar: const TaarakAppBar(title: 'Report Hazard Zone'),
@@ -180,24 +183,26 @@ class _ReportHazardZoneScreenState
                               setState(() => _severity = value ?? _severity),
                         ),
                         const SizedBox(height: Spacing.sm),
-                        DropdownButtonFormField<String>(
-                          initialValue: _radiusLabel,
+                        DropdownButtonFormField<double>(
+                          initialValue: radiusMeters,
                           decoration: const InputDecoration(
                             labelText: 'Affected radius',
                           ),
                           items: [
-                            for (final label in _radiusOptions.keys)
-                              DropdownMenuItem(value: label, child: Text(label)),
+                            for (final meters in radiusOptions)
+                              DropdownMenuItem(
+                                value: meters,
+                                child: Text(_radiusLabel(meters)),
+                              ),
                           ],
-                          onChanged: (value) => setState(
-                            () => _radiusLabel = value ?? _radiusLabel,
-                          ),
+                          onChanged: (value) =>
+                              setState(() => _selectedRadiusMeters = value),
                         ),
                         const SizedBox(height: Spacing.md),
                         FilledButton.icon(
                           onPressed: _center == null || _isSubmitting
                               ? null
-                              : _submit,
+                              : () => _submit(radiusMeters),
                           icon: _isSubmitting
                               ? const SizedBox(
                                   width: 16,
@@ -226,7 +231,7 @@ class _ReportHazardZoneScreenState
     );
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(double radiusMeters) async {
     final center = _center;
     final officialId = ref.read(currentUserProvider)?.id;
     if (center == null || officialId == null) return;
@@ -238,10 +243,7 @@ class _ReportHazardZoneScreenState
       observation: RawHazardObservation(
         hazardType: _hazardType.storageValue,
         severityScore: _severity.intensity,
-        boundaryPoints: circlePolygonPoints(
-          center,
-          _radiusOptions[_radiusLabel]!,
-        ),
+        boundaryPoints: circlePolygonPoints(center, radiusMeters),
         source: 'official:$officialId',
         observedAt: DateTime.now(),
       ),

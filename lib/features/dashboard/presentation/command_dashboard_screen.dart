@@ -32,7 +32,9 @@ import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 /// across a desktop window, per the UI audit's specific call-out that
 /// this screen in particular should take advantage of larger displays.
 class CommandDashboardScreen extends ConsumerWidget {
-  const CommandDashboardScreen({super.key});
+  final String title;
+
+  const CommandDashboardScreen({super.key, this.title = 'Command Dashboard'});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +52,7 @@ class CommandDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: TaarakAppBar(
-        title: 'Command Dashboard',
+        title: title,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

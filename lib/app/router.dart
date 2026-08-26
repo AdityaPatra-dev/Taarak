@@ -13,9 +13,16 @@ import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
 import 'package:taarak/features/admin/presentation/user_admin_screen.dart';
+import 'package:taarak/features/command/presentation/manage_relocation_screen.dart';
+import 'package:taarak/features/command/presentation/manage_resources_screen.dart';
+import 'package:taarak/features/command/presentation/manage_responders_screen.dart';
+import 'package:taarak/features/field_response/presentation/assigned_incidents_screen.dart';
+import 'package:taarak/features/field_response/presentation/field_incident_detail_screen.dart';
 import 'package:taarak/features/hazards/presentation/report_hazard_zone_screen.dart';
 import 'package:taarak/features/home/presentation/unauthorized_screen.dart';
 import 'package:taarak/features/map/presentation/risk_map_screen.dart';
+import 'package:taarak/features/state_admin/presentation/policy_configuration_screen.dart';
+import 'package:taarak/features/state_admin/presentation/state_reports_screen.dart';
 import 'package:taarak/features/profile/presentation/profile_screen.dart';
 import 'package:taarak/features/reporting/presentation/i_am_safe_screen.dart';
 import 'package:taarak/features/reporting/presentation/report_incident_screen.dart';
@@ -103,6 +110,41 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/users',
         builder: (context, state) => const UserAdminScreen(),
+      ),
+      GoRoute(
+        path: '/field/incidents',
+        builder: (context, state) => const AssignedIncidentsScreen(),
+      ),
+      GoRoute(
+        path: '/field/incidents/:incidentId',
+        builder: (context, state) => FieldIncidentDetailScreen(
+          incidentId: state.pathParameters['incidentId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/command/responders',
+        builder: (context, state) => const ManageRespondersScreen(),
+      ),
+      GoRoute(
+        path: '/command/resources',
+        builder: (context, state) => const ManageResourcesScreen(),
+      ),
+      GoRoute(
+        path: '/command/relocation',
+        builder: (context, state) => const ManageRelocationScreen(),
+      ),
+      GoRoute(
+        path: '/state/oversight',
+        builder: (context, state) =>
+            const CommandDashboardScreen(title: 'Cross-District Oversight'),
+      ),
+      GoRoute(
+        path: '/state/reports',
+        builder: (context, state) => const StateReportsScreen(),
+      ),
+      GoRoute(
+        path: '/state/policy',
+        builder: (context, state) => const PolicyConfigurationScreen(),
       ),
       GoRoute(
         path: '/sms-prototype',

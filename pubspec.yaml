@@ -76,6 +76,7 @@ dependencies:
   # see the placeholders in android/app/src/main/AndroidManifest.xml and
   # web/index.html.
   google_maps_flutter: ^2.18.0
+  flutter_local_notifications: ^22.3.0
 
 dev_dependencies:
   flutter_test:

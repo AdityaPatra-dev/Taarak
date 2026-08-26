@@ -15,7 +15,6 @@ import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/features/routing/application/routing_providers.dart';
 import 'package:taarak/features/routing/domain/route_candidate.dart';
-import 'package:taarak/features/sync/application/sync_providers.dart';
 import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
@@ -45,21 +44,9 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     if (cached == null) {
       ref.read(locationStatusProvider.notifier).refresh();
     }
-    // Sync otherwise only fires on the home screen's explicit "Sync now"
-    // button or an offline→online reconnect — without this, a shelter or
-    // hazard zone another device just created stays invisible here until
-    // someone thinks to go trigger a sync first.
-    _pullLatest();
-  }
-
-  Future<void> _pullLatest() async {
-    await ref.read(syncCoordinatorServiceProvider).syncPendingEntries();
-    if (!mounted) return;
-    ref.invalidate(hazardZonesProvider);
-    ref.invalidate(sheltersProvider);
-    ref.invalidate(incidentsProvider);
-    ref.invalidate(habitationsOverviewProvider);
-    ref.invalidate(routesProvider);
+    // Fresh-data pulls are now handled app-wide by
+    // syncPollingTriggerProvider (watched once from TaarakApp), so this
+    // screen doesn't need its own pull-on-open anymore.
   }
 
   Future<void> _routeToShelter(LocalShelter shelter, LatLng? userPoint) async {

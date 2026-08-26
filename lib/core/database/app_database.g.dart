@@ -1120,6 +1120,17 @@ class $LocalIncidentsTable extends LocalIncidents
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _assignedResponderIdMeta =
+      const VerificationMeta('assignedResponderId');
+  @override
+  late final GeneratedColumn<String> assignedResponderId =
+      GeneratedColumn<String>(
+        'assigned_responder_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1135,6 +1146,7 @@ class $LocalIncidentsTable extends LocalIncidents
     updatedAt,
     version,
     isSynced,
+    assignedResponderId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1243,6 +1255,15 @@ class $LocalIncidentsTable extends LocalIncidents
         isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
       );
     }
+    if (data.containsKey('assigned_responder_id')) {
+      context.handle(
+        _assignedResponderIdMeta,
+        assignedResponderId.isAcceptableOrUnknown(
+          data['assigned_responder_id']!,
+          _assignedResponderIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1304,6 +1325,10 @@ class $LocalIncidentsTable extends LocalIncidents
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
       )!,
+      assignedResponderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assigned_responder_id'],
+      ),
     );
   }
 
@@ -1332,6 +1357,11 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
   final DateTime updatedAt;
   final int version;
   final bool isSynced;
+
+  /// Set by District/Command's responder-assignment screen; read by a
+  /// Field Responder's "my assigned incidents" list. Null means
+  /// unassigned — not every incident needs a responder sent to it.
+  final String? assignedResponderId;
   const LocalIncident({
     required this.id,
     required this.type,
@@ -1346,6 +1376,7 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     required this.updatedAt,
     required this.version,
     required this.isSynced,
+    this.assignedResponderId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1363,6 +1394,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     map['updated_at'] = Variable<DateTime>(updatedAt);
     map['version'] = Variable<int>(version);
     map['is_synced'] = Variable<bool>(isSynced);
+    if (!nullToAbsent || assignedResponderId != null) {
+      map['assigned_responder_id'] = Variable<String>(assignedResponderId);
+    }
     return map;
   }
 
@@ -1381,6 +1415,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       updatedAt: Value(updatedAt),
       version: Value(version),
       isSynced: Value(isSynced),
+      assignedResponderId: assignedResponderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assignedResponderId),
     );
   }
 
@@ -1405,6 +1442,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       version: serializer.fromJson<int>(json['version']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
+      assignedResponderId: serializer.fromJson<String?>(
+        json['assignedResponderId'],
+      ),
     );
   }
   @override
@@ -1424,6 +1464,7 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'version': serializer.toJson<int>(version),
       'isSynced': serializer.toJson<bool>(isSynced),
+      'assignedResponderId': serializer.toJson<String?>(assignedResponderId),
     };
   }
 
@@ -1441,6 +1482,7 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     DateTime? updatedAt,
     int? version,
     bool? isSynced,
+    Value<String?> assignedResponderId = const Value.absent(),
   }) => LocalIncident(
     id: id ?? this.id,
     type: type ?? this.type,
@@ -1456,6 +1498,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     updatedAt: updatedAt ?? this.updatedAt,
     version: version ?? this.version,
     isSynced: isSynced ?? this.isSynced,
+    assignedResponderId: assignedResponderId.present
+        ? assignedResponderId.value
+        : this.assignedResponderId,
   );
   LocalIncident copyWithCompanion(LocalIncidentsCompanion data) {
     return LocalIncident(
@@ -1478,6 +1523,9 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       version: data.version.present ? data.version.value : this.version,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      assignedResponderId: data.assignedResponderId.present
+          ? data.assignedResponderId.value
+          : this.assignedResponderId,
     );
   }
 
@@ -1496,7 +1544,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
-          ..write('isSynced: $isSynced')
+          ..write('isSynced: $isSynced, ')
+          ..write('assignedResponderId: $assignedResponderId')
           ..write(')'))
         .toString();
   }
@@ -1516,6 +1565,7 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
     updatedAt,
     version,
     isSynced,
+    assignedResponderId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1533,7 +1583,8 @@ class LocalIncident extends DataClass implements Insertable<LocalIncident> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.version == this.version &&
-          other.isSynced == this.isSynced);
+          other.isSynced == this.isSynced &&
+          other.assignedResponderId == this.assignedResponderId);
 }
 
 class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
@@ -1550,6 +1601,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
   final Value<DateTime> updatedAt;
   final Value<int> version;
   final Value<bool> isSynced;
+  final Value<String?> assignedResponderId;
   final Value<int> rowid;
   const LocalIncidentsCompanion({
     this.id = const Value.absent(),
@@ -1565,6 +1617,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     this.updatedAt = const Value.absent(),
     this.version = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.assignedResponderId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalIncidentsCompanion.insert({
@@ -1581,6 +1634,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     required DateTime updatedAt,
     this.version = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.assignedResponderId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        type = Value(type),
@@ -1603,6 +1657,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     Expression<DateTime>? updatedAt,
     Expression<int>? version,
     Expression<bool>? isSynced,
+    Expression<String>? assignedResponderId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1620,6 +1675,8 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (version != null) 'version': version,
       if (isSynced != null) 'is_synced': isSynced,
+      if (assignedResponderId != null)
+        'assigned_responder_id': assignedResponderId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1638,6 +1695,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     Value<DateTime>? updatedAt,
     Value<int>? version,
     Value<bool>? isSynced,
+    Value<String?>? assignedResponderId,
     Value<int>? rowid,
   }) {
     return LocalIncidentsCompanion(
@@ -1655,6 +1713,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       isSynced: isSynced ?? this.isSynced,
+      assignedResponderId: assignedResponderId ?? this.assignedResponderId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1703,6 +1762,11 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
+    if (assignedResponderId.present) {
+      map['assigned_responder_id'] = Variable<String>(
+        assignedResponderId.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1725,6 +1789,7 @@ class LocalIncidentsCompanion extends UpdateCompanion<LocalIncident> {
           ..write('updatedAt: $updatedAt, ')
           ..write('version: $version, ')
           ..write('isSynced: $isSynced, ')
+          ..write('assignedResponderId: $assignedResponderId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -9094,6 +9159,987 @@ class LocalEnvironmentalObservationsCompanion
   }
 }
 
+class $LocalDamageReportsTable extends LocalDamageReports
+    with TableInfo<$LocalDamageReportsTable, LocalDamageReport> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalDamageReportsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _incidentIdMeta = const VerificationMeta(
+    'incidentId',
+  );
+  @override
+  late final GeneratedColumn<String> incidentId = GeneratedColumn<String>(
+    'incident_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _responderIdMeta = const VerificationMeta(
+    'responderId',
+  );
+  @override
+  late final GeneratedColumn<String> responderId = GeneratedColumn<String>(
+    'responder_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _severityMeta = const VerificationMeta(
+    'severity',
+  );
+  @override
+  late final GeneratedColumn<String> severity = GeneratedColumn<String>(
+    'severity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('unknown'),
+  );
+  static const VerificationMeta _mediaPathMeta = const VerificationMeta(
+    'mediaPath',
+  );
+  @override
+  late final GeneratedColumn<String> mediaPath = GeneratedColumn<String>(
+    'media_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _submittedAtMeta = const VerificationMeta(
+    'submittedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> submittedAt = GeneratedColumn<DateTime>(
+    'submitted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    incidentId,
+    responderId,
+    description,
+    severity,
+    mediaPath,
+    submittedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_damage_reports';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalDamageReport> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('incident_id')) {
+      context.handle(
+        _incidentIdMeta,
+        incidentId.isAcceptableOrUnknown(data['incident_id']!, _incidentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_incidentIdMeta);
+    }
+    if (data.containsKey('responder_id')) {
+      context.handle(
+        _responderIdMeta,
+        responderId.isAcceptableOrUnknown(
+          data['responder_id']!,
+          _responderIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_responderIdMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('severity')) {
+      context.handle(
+        _severityMeta,
+        severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    }
+    if (data.containsKey('media_path')) {
+      context.handle(
+        _mediaPathMeta,
+        mediaPath.isAcceptableOrUnknown(data['media_path']!, _mediaPathMeta),
+      );
+    }
+    if (data.containsKey('submitted_at')) {
+      context.handle(
+        _submittedAtMeta,
+        submittedAt.isAcceptableOrUnknown(
+          data['submitted_at']!,
+          _submittedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_submittedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalDamageReport map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalDamageReport(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      incidentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}incident_id'],
+      )!,
+      responderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}responder_id'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      severity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}severity'],
+      )!,
+      mediaPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_path'],
+      ),
+      submittedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}submitted_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalDamageReportsTable createAlias(String alias) {
+    return $LocalDamageReportsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalDamageReport extends DataClass
+    implements Insertable<LocalDamageReport> {
+  final String id;
+  final String incidentId;
+  final String responderId;
+  final String description;
+  final String severity;
+
+  /// Local file path to an optionally-attached photo, same pattern as
+  /// [LocalIncidentReports.mediaPath].
+  final String? mediaPath;
+  final DateTime submittedAt;
+  final int version;
+  const LocalDamageReport({
+    required this.id,
+    required this.incidentId,
+    required this.responderId,
+    required this.description,
+    required this.severity,
+    this.mediaPath,
+    required this.submittedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['incident_id'] = Variable<String>(incidentId);
+    map['responder_id'] = Variable<String>(responderId);
+    map['description'] = Variable<String>(description);
+    map['severity'] = Variable<String>(severity);
+    if (!nullToAbsent || mediaPath != null) {
+      map['media_path'] = Variable<String>(mediaPath);
+    }
+    map['submitted_at'] = Variable<DateTime>(submittedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalDamageReportsCompanion toCompanion(bool nullToAbsent) {
+    return LocalDamageReportsCompanion(
+      id: Value(id),
+      incidentId: Value(incidentId),
+      responderId: Value(responderId),
+      description: Value(description),
+      severity: Value(severity),
+      mediaPath: mediaPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaPath),
+      submittedAt: Value(submittedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalDamageReport.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalDamageReport(
+      id: serializer.fromJson<String>(json['id']),
+      incidentId: serializer.fromJson<String>(json['incidentId']),
+      responderId: serializer.fromJson<String>(json['responderId']),
+      description: serializer.fromJson<String>(json['description']),
+      severity: serializer.fromJson<String>(json['severity']),
+      mediaPath: serializer.fromJson<String?>(json['mediaPath']),
+      submittedAt: serializer.fromJson<DateTime>(json['submittedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'incidentId': serializer.toJson<String>(incidentId),
+      'responderId': serializer.toJson<String>(responderId),
+      'description': serializer.toJson<String>(description),
+      'severity': serializer.toJson<String>(severity),
+      'mediaPath': serializer.toJson<String?>(mediaPath),
+      'submittedAt': serializer.toJson<DateTime>(submittedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalDamageReport copyWith({
+    String? id,
+    String? incidentId,
+    String? responderId,
+    String? description,
+    String? severity,
+    Value<String?> mediaPath = const Value.absent(),
+    DateTime? submittedAt,
+    int? version,
+  }) => LocalDamageReport(
+    id: id ?? this.id,
+    incidentId: incidentId ?? this.incidentId,
+    responderId: responderId ?? this.responderId,
+    description: description ?? this.description,
+    severity: severity ?? this.severity,
+    mediaPath: mediaPath.present ? mediaPath.value : this.mediaPath,
+    submittedAt: submittedAt ?? this.submittedAt,
+    version: version ?? this.version,
+  );
+  LocalDamageReport copyWithCompanion(LocalDamageReportsCompanion data) {
+    return LocalDamageReport(
+      id: data.id.present ? data.id.value : this.id,
+      incidentId: data.incidentId.present
+          ? data.incidentId.value
+          : this.incidentId,
+      responderId: data.responderId.present
+          ? data.responderId.value
+          : this.responderId,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      severity: data.severity.present ? data.severity.value : this.severity,
+      mediaPath: data.mediaPath.present ? data.mediaPath.value : this.mediaPath,
+      submittedAt: data.submittedAt.present
+          ? data.submittedAt.value
+          : this.submittedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalDamageReport(')
+          ..write('id: $id, ')
+          ..write('incidentId: $incidentId, ')
+          ..write('responderId: $responderId, ')
+          ..write('description: $description, ')
+          ..write('severity: $severity, ')
+          ..write('mediaPath: $mediaPath, ')
+          ..write('submittedAt: $submittedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    incidentId,
+    responderId,
+    description,
+    severity,
+    mediaPath,
+    submittedAt,
+    version,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalDamageReport &&
+          other.id == this.id &&
+          other.incidentId == this.incidentId &&
+          other.responderId == this.responderId &&
+          other.description == this.description &&
+          other.severity == this.severity &&
+          other.mediaPath == this.mediaPath &&
+          other.submittedAt == this.submittedAt &&
+          other.version == this.version);
+}
+
+class LocalDamageReportsCompanion extends UpdateCompanion<LocalDamageReport> {
+  final Value<String> id;
+  final Value<String> incidentId;
+  final Value<String> responderId;
+  final Value<String> description;
+  final Value<String> severity;
+  final Value<String?> mediaPath;
+  final Value<DateTime> submittedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalDamageReportsCompanion({
+    this.id = const Value.absent(),
+    this.incidentId = const Value.absent(),
+    this.responderId = const Value.absent(),
+    this.description = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.mediaPath = const Value.absent(),
+    this.submittedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalDamageReportsCompanion.insert({
+    required String id,
+    required String incidentId,
+    required String responderId,
+    this.description = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.mediaPath = const Value.absent(),
+    required DateTime submittedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       incidentId = Value(incidentId),
+       responderId = Value(responderId),
+       submittedAt = Value(submittedAt);
+  static Insertable<LocalDamageReport> custom({
+    Expression<String>? id,
+    Expression<String>? incidentId,
+    Expression<String>? responderId,
+    Expression<String>? description,
+    Expression<String>? severity,
+    Expression<String>? mediaPath,
+    Expression<DateTime>? submittedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (incidentId != null) 'incident_id': incidentId,
+      if (responderId != null) 'responder_id': responderId,
+      if (description != null) 'description': description,
+      if (severity != null) 'severity': severity,
+      if (mediaPath != null) 'media_path': mediaPath,
+      if (submittedAt != null) 'submitted_at': submittedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalDamageReportsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? incidentId,
+    Value<String>? responderId,
+    Value<String>? description,
+    Value<String>? severity,
+    Value<String?>? mediaPath,
+    Value<DateTime>? submittedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalDamageReportsCompanion(
+      id: id ?? this.id,
+      incidentId: incidentId ?? this.incidentId,
+      responderId: responderId ?? this.responderId,
+      description: description ?? this.description,
+      severity: severity ?? this.severity,
+      mediaPath: mediaPath ?? this.mediaPath,
+      submittedAt: submittedAt ?? this.submittedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (incidentId.present) {
+      map['incident_id'] = Variable<String>(incidentId.value);
+    }
+    if (responderId.present) {
+      map['responder_id'] = Variable<String>(responderId.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (severity.present) {
+      map['severity'] = Variable<String>(severity.value);
+    }
+    if (mediaPath.present) {
+      map['media_path'] = Variable<String>(mediaPath.value);
+    }
+    if (submittedAt.present) {
+      map['submitted_at'] = Variable<DateTime>(submittedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalDamageReportsCompanion(')
+          ..write('id: $id, ')
+          ..write('incidentId: $incidentId, ')
+          ..write('responderId: $responderId, ')
+          ..write('description: $description, ')
+          ..write('severity: $severity, ')
+          ..write('mediaPath: $mediaPath, ')
+          ..write('submittedAt: $submittedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LocalResourcesTable extends LocalResources
+    with TableInfo<$LocalResourcesTable, LocalResource> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalResourcesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _shelterIdMeta = const VerificationMeta(
+    'shelterId',
+  );
+  @override
+  late final GeneratedColumn<String> shelterId = GeneratedColumn<String>(
+    'shelter_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    type,
+    quantity,
+    shelterId,
+    updatedAt,
+    version,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_resources';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalResource> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('shelter_id')) {
+      context.handle(
+        _shelterIdMeta,
+        shelterId.isAcceptableOrUnknown(data['shelter_id']!, _shelterIdMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalResource map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalResource(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+      shelterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shelter_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalResourcesTable createAlias(String alias) {
+    return $LocalResourcesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalResource extends DataClass implements Insertable<LocalResource> {
+  final String id;
+  final String name;
+  final String type;
+  final int quantity;
+
+  /// Optional — a resource doesn't have to be tied to a specific shelter
+  /// to be tracked (e.g. a district-wide vehicle pool).
+  final String? shelterId;
+  final DateTime updatedAt;
+  final int version;
+  const LocalResource({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.quantity,
+    this.shelterId,
+    required this.updatedAt,
+    required this.version,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['type'] = Variable<String>(type);
+    map['quantity'] = Variable<int>(quantity);
+    if (!nullToAbsent || shelterId != null) {
+      map['shelter_id'] = Variable<String>(shelterId);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['version'] = Variable<int>(version);
+    return map;
+  }
+
+  LocalResourcesCompanion toCompanion(bool nullToAbsent) {
+    return LocalResourcesCompanion(
+      id: Value(id),
+      name: Value(name),
+      type: Value(type),
+      quantity: Value(quantity),
+      shelterId: shelterId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shelterId),
+      updatedAt: Value(updatedAt),
+      version: Value(version),
+    );
+  }
+
+  factory LocalResource.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalResource(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      type: serializer.fromJson<String>(json['type']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      shelterId: serializer.fromJson<String?>(json['shelterId']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      version: serializer.fromJson<int>(json['version']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(type),
+      'quantity': serializer.toJson<int>(quantity),
+      'shelterId': serializer.toJson<String?>(shelterId),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'version': serializer.toJson<int>(version),
+    };
+  }
+
+  LocalResource copyWith({
+    String? id,
+    String? name,
+    String? type,
+    int? quantity,
+    Value<String?> shelterId = const Value.absent(),
+    DateTime? updatedAt,
+    int? version,
+  }) => LocalResource(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    quantity: quantity ?? this.quantity,
+    shelterId: shelterId.present ? shelterId.value : this.shelterId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    version: version ?? this.version,
+  );
+  LocalResource copyWithCompanion(LocalResourcesCompanion data) {
+    return LocalResource(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      shelterId: data.shelterId.present ? data.shelterId.value : this.shelterId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      version: data.version.present ? data.version.value : this.version,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalResource(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('quantity: $quantity, ')
+          ..write('shelterId: $shelterId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, type, quantity, shelterId, updatedAt, version);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalResource &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.quantity == this.quantity &&
+          other.shelterId == this.shelterId &&
+          other.updatedAt == this.updatedAt &&
+          other.version == this.version);
+}
+
+class LocalResourcesCompanion extends UpdateCompanion<LocalResource> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> type;
+  final Value<int> quantity;
+  final Value<String?> shelterId;
+  final Value<DateTime> updatedAt;
+  final Value<int> version;
+  final Value<int> rowid;
+  const LocalResourcesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.shelterId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalResourcesCompanion.insert({
+    required String id,
+    required String name,
+    required String type,
+    this.quantity = const Value.absent(),
+    this.shelterId = const Value.absent(),
+    required DateTime updatedAt,
+    this.version = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       type = Value(type),
+       updatedAt = Value(updatedAt);
+  static Insertable<LocalResource> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<int>? quantity,
+    Expression<String>? shelterId,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? version,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (quantity != null) 'quantity': quantity,
+      if (shelterId != null) 'shelter_id': shelterId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (version != null) 'version': version,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalResourcesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? type,
+    Value<int>? quantity,
+    Value<String?>? shelterId,
+    Value<DateTime>? updatedAt,
+    Value<int>? version,
+    Value<int>? rowid,
+  }) {
+    return LocalResourcesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      quantity: quantity ?? this.quantity,
+      shelterId: shelterId ?? this.shelterId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      version: version ?? this.version,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (shelterId.present) {
+      map['shelter_id'] = Variable<String>(shelterId.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalResourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('quantity: $quantity, ')
+          ..write('shelterId: $shelterId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('version: $version, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueEntriesTable extends SyncQueueEntries
     with TableInfo<$SyncQueueEntriesTable, SyncQueueEntry> {
   @override
@@ -9693,6 +10739,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $LocalAlertAcknowledgementsTable(this);
   late final $LocalEnvironmentalObservationsTable
   localEnvironmentalObservations = $LocalEnvironmentalObservationsTable(this);
+  late final $LocalDamageReportsTable localDamageReports =
+      $LocalDamageReportsTable(this);
+  late final $LocalResourcesTable localResources = $LocalResourcesTable(this);
   late final $SyncQueueEntriesTable syncQueueEntries = $SyncQueueEntriesTable(
     this,
   );
@@ -9716,6 +10765,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     localAlerts,
     localAlertAcknowledgements,
     localEnvironmentalObservations,
+    localDamageReports,
+    localResources,
     syncQueueEntries,
   ];
 }
@@ -10241,6 +11292,7 @@ typedef $$LocalIncidentsTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<int> version,
       Value<bool> isSynced,
+      Value<String?> assignedResponderId,
       Value<int> rowid,
     });
 typedef $$LocalIncidentsTableUpdateCompanionBuilder =
@@ -10258,6 +11310,7 @@ typedef $$LocalIncidentsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<int> version,
       Value<bool> isSynced,
+      Value<String?> assignedResponderId,
       Value<int> rowid,
     });
 
@@ -10332,6 +11385,11 @@ class $$LocalIncidentsTableFilterComposer
 
   ColumnFilters<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assignedResponderId => $composableBuilder(
+    column: $table.assignedResponderId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10409,6 +11467,11 @@ class $$LocalIncidentsTableOrderingComposer
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get assignedResponderId => $composableBuilder(
+    column: $table.assignedResponderId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalIncidentsTableAnnotationComposer
@@ -10464,6 +11527,11 @@ class $$LocalIncidentsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<String> get assignedResponderId => $composableBuilder(
+    column: $table.assignedResponderId,
+    builder: (column) => column,
+  );
 }
 
 class $$LocalIncidentsTableTableManager
@@ -10512,6 +11580,7 @@ class $$LocalIncidentsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> version = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> assignedResponderId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalIncidentsCompanion(
                 id: id,
@@ -10527,6 +11596,7 @@ class $$LocalIncidentsTableTableManager
                 updatedAt: updatedAt,
                 version: version,
                 isSynced: isSynced,
+                assignedResponderId: assignedResponderId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -10544,6 +11614,7 @@ class $$LocalIncidentsTableTableManager
                 required DateTime updatedAt,
                 Value<int> version = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<String?> assignedResponderId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalIncidentsCompanion.insert(
                 id: id,
@@ -10559,6 +11630,7 @@ class $$LocalIncidentsTableTableManager
                 updatedAt: updatedAt,
                 version: version,
                 isSynced: isSynced,
+                assignedResponderId: assignedResponderId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -14231,6 +15303,524 @@ typedef $$LocalEnvironmentalObservationsTableProcessedTableManager =
       LocalEnvironmentalObservation,
       PrefetchHooks Function()
     >;
+typedef $$LocalDamageReportsTableCreateCompanionBuilder =
+    LocalDamageReportsCompanion Function({
+      required String id,
+      required String incidentId,
+      required String responderId,
+      Value<String> description,
+      Value<String> severity,
+      Value<String?> mediaPath,
+      required DateTime submittedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalDamageReportsTableUpdateCompanionBuilder =
+    LocalDamageReportsCompanion Function({
+      Value<String> id,
+      Value<String> incidentId,
+      Value<String> responderId,
+      Value<String> description,
+      Value<String> severity,
+      Value<String?> mediaPath,
+      Value<DateTime> submittedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalDamageReportsTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalDamageReportsTable> {
+  $$LocalDamageReportsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get incidentId => $composableBuilder(
+    column: $table.incidentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get responderId => $composableBuilder(
+    column: $table.responderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaPath => $composableBuilder(
+    column: $table.mediaPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get submittedAt => $composableBuilder(
+    column: $table.submittedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalDamageReportsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalDamageReportsTable> {
+  $$LocalDamageReportsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get incidentId => $composableBuilder(
+    column: $table.incidentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get responderId => $composableBuilder(
+    column: $table.responderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaPath => $composableBuilder(
+    column: $table.mediaPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get submittedAt => $composableBuilder(
+    column: $table.submittedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalDamageReportsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalDamageReportsTable> {
+  $$LocalDamageReportsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get incidentId => $composableBuilder(
+    column: $table.incidentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get responderId => $composableBuilder(
+    column: $table.responderId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get severity =>
+      $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaPath =>
+      $composableBuilder(column: $table.mediaPath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get submittedAt => $composableBuilder(
+    column: $table.submittedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalDamageReportsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalDamageReportsTable,
+          LocalDamageReport,
+          $$LocalDamageReportsTableFilterComposer,
+          $$LocalDamageReportsTableOrderingComposer,
+          $$LocalDamageReportsTableAnnotationComposer,
+          $$LocalDamageReportsTableCreateCompanionBuilder,
+          $$LocalDamageReportsTableUpdateCompanionBuilder,
+          (
+            LocalDamageReport,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalDamageReportsTable,
+              LocalDamageReport
+            >,
+          ),
+          LocalDamageReport,
+          PrefetchHooks Function()
+        > {
+  $$LocalDamageReportsTableTableManager(
+    _$AppDatabase db,
+    $LocalDamageReportsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalDamageReportsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalDamageReportsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalDamageReportsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> incidentId = const Value.absent(),
+                Value<String> responderId = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<String> severity = const Value.absent(),
+                Value<String?> mediaPath = const Value.absent(),
+                Value<DateTime> submittedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalDamageReportsCompanion(
+                id: id,
+                incidentId: incidentId,
+                responderId: responderId,
+                description: description,
+                severity: severity,
+                mediaPath: mediaPath,
+                submittedAt: submittedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String incidentId,
+                required String responderId,
+                Value<String> description = const Value.absent(),
+                Value<String> severity = const Value.absent(),
+                Value<String?> mediaPath = const Value.absent(),
+                required DateTime submittedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalDamageReportsCompanion.insert(
+                id: id,
+                incidentId: incidentId,
+                responderId: responderId,
+                description: description,
+                severity: severity,
+                mediaPath: mediaPath,
+                submittedAt: submittedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalDamageReportsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalDamageReportsTable,
+      LocalDamageReport,
+      $$LocalDamageReportsTableFilterComposer,
+      $$LocalDamageReportsTableOrderingComposer,
+      $$LocalDamageReportsTableAnnotationComposer,
+      $$LocalDamageReportsTableCreateCompanionBuilder,
+      $$LocalDamageReportsTableUpdateCompanionBuilder,
+      (
+        LocalDamageReport,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalDamageReportsTable,
+          LocalDamageReport
+        >,
+      ),
+      LocalDamageReport,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalResourcesTableCreateCompanionBuilder =
+    LocalResourcesCompanion Function({
+      required String id,
+      required String name,
+      required String type,
+      Value<int> quantity,
+      Value<String?> shelterId,
+      required DateTime updatedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+typedef $$LocalResourcesTableUpdateCompanionBuilder =
+    LocalResourcesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> type,
+      Value<int> quantity,
+      Value<String?> shelterId,
+      Value<DateTime> updatedAt,
+      Value<int> version,
+      Value<int> rowid,
+    });
+
+class $$LocalResourcesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalResourcesTable> {
+  $$LocalResourcesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shelterId => $composableBuilder(
+    column: $table.shelterId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalResourcesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalResourcesTable> {
+  $$LocalResourcesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shelterId => $composableBuilder(
+    column: $table.shelterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalResourcesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalResourcesTable> {
+  $$LocalResourcesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get shelterId =>
+      $composableBuilder(column: $table.shelterId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+}
+
+class $$LocalResourcesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalResourcesTable,
+          LocalResource,
+          $$LocalResourcesTableFilterComposer,
+          $$LocalResourcesTableOrderingComposer,
+          $$LocalResourcesTableAnnotationComposer,
+          $$LocalResourcesTableCreateCompanionBuilder,
+          $$LocalResourcesTableUpdateCompanionBuilder,
+          (
+            LocalResource,
+            BaseReferences<_$AppDatabase, $LocalResourcesTable, LocalResource>,
+          ),
+          LocalResource,
+          PrefetchHooks Function()
+        > {
+  $$LocalResourcesTableTableManager(
+    _$AppDatabase db,
+    $LocalResourcesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalResourcesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LocalResourcesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LocalResourcesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<String?> shelterId = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalResourcesCompanion(
+                id: id,
+                name: name,
+                type: type,
+                quantity: quantity,
+                shelterId: shelterId,
+                updatedAt: updatedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String type,
+                Value<int> quantity = const Value.absent(),
+                Value<String?> shelterId = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> version = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalResourcesCompanion.insert(
+                id: id,
+                name: name,
+                type: type,
+                quantity: quantity,
+                shelterId: shelterId,
+                updatedAt: updatedAt,
+                version: version,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalResourcesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalResourcesTable,
+      LocalResource,
+      $$LocalResourcesTableFilterComposer,
+      $$LocalResourcesTableOrderingComposer,
+      $$LocalResourcesTableAnnotationComposer,
+      $$LocalResourcesTableCreateCompanionBuilder,
+      $$LocalResourcesTableUpdateCompanionBuilder,
+      (
+        LocalResource,
+        BaseReferences<_$AppDatabase, $LocalResourcesTable, LocalResource>,
+      ),
+      LocalResource,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueEntriesTableCreateCompanionBuilder =
     SyncQueueEntriesCompanion Function({
       Value<int> id,
@@ -14564,6 +16154,10 @@ class $AppDatabaseManager {
         _db,
         _db.localEnvironmentalObservations,
       );
+  $$LocalDamageReportsTableTableManager get localDamageReports =>
+      $$LocalDamageReportsTableTableManager(_db, _db.localDamageReports);
+  $$LocalResourcesTableTableManager get localResources =>
+      $$LocalResourcesTableTableManager(_db, _db.localResources);
   $$SyncQueueEntriesTableTableManager get syncQueueEntries =>
       $$SyncQueueEntriesTableTableManager(_db, _db.syncQueueEntries);
 }

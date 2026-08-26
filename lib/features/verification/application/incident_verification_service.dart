@@ -60,6 +60,7 @@ class IncidentVerificationService {
         'confidence': incident.confidence,
         'createdAt': incident.createdAt.toIso8601String(),
         'version': incident.version,
+        'assignedResponderId': incident.assignedResponderId,
       }),
     );
   }
@@ -208,6 +209,47 @@ class IncidentVerificationService {
       oldValue: jsonEncode({'status': currentStatus.storageValue}),
       newValue: jsonEncode({'status': to.storageValue, 'evidence': ?evidence}),
       reason: reason,
+      now: occurredAt,
+    );
+
+    return Result.success(updated);
+  }
+
+  /// District/Command's responder-assignment action. `responderId: null`
+  /// unassigns — an incident that no longer needs someone sent to it.
+  Future<Result<LocalIncident>> assignResponder({
+    required String incidentId,
+    required String? responderId,
+    required String officialId,
+    DateTime? now,
+  }) async {
+    final incidentResult = await _incidentRepository.getById(incidentId);
+    if (incidentResult case Failed<LocalIncident>(:final failure)) {
+      return Result.failure(failure);
+    }
+    final incident = incidentResult.dataOrNull!;
+    final occurredAt = now ?? DateTime.now();
+
+    final updated = incident.copyWith(
+      assignedResponderId: Value(responderId),
+      updatedAt: occurredAt,
+      version: incident.version + 1,
+    );
+
+    final saveResult = await _incidentRepository.save(updated);
+    if (saveResult case Failed<LocalIncident>(:final failure)) {
+      return Result.failure(failure);
+    }
+    await _enqueueIncidentSync(updated);
+
+    await _auditLogDao.record(
+      actorId: officialId,
+      action: responderId == null
+          ? 'incident.responder_unassigned'
+          : 'incident.responder_assigned',
+      objectType: 'incident',
+      objectId: incident.id,
+      newValue: jsonEncode({'assignedResponderId': responderId}),
       now: occurredAt,
     );
 

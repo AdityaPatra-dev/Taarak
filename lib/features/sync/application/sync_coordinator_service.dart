@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/repositories/local_alert_repository.dart';
+import 'package:taarak/core/database/repositories/local_damage_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
+import 'package:taarak/core/database/repositories/local_resource_repository.dart';
 import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
 import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/network/network_info.dart';
@@ -33,6 +35,8 @@ class SyncCoordinatorService {
   final LocalHazardZoneRepository? _hazardZoneRepository;
   final LocalShelterRepository? _shelterRepository;
   final LocalAlertRepository? _alertRepository;
+  final LocalDamageReportRepository? _damageReportRepository;
+  final LocalResourceRepository? _resourceRepository;
 
   SyncCoordinatorService({
     required SyncQueueDao syncQueueDao,
@@ -44,6 +48,8 @@ class SyncCoordinatorService {
     LocalHazardZoneRepository? hazardZoneRepository,
     LocalShelterRepository? shelterRepository,
     LocalAlertRepository? alertRepository,
+    LocalDamageReportRepository? damageReportRepository,
+    LocalResourceRepository? resourceRepository,
   }) : _syncQueueDao = syncQueueDao,
        _networkInfo = networkInfo,
        _transport = transport,
@@ -52,7 +58,9 @@ class SyncCoordinatorService {
        _incidentRepository = incidentRepository,
        _hazardZoneRepository = hazardZoneRepository,
        _shelterRepository = shelterRepository,
-       _alertRepository = alertRepository;
+       _alertRepository = alertRepository,
+       _damageReportRepository = damageReportRepository,
+       _resourceRepository = resourceRepository;
 
   Future<SyncRunSummary> syncPendingEntries({DateTime? now}) async {
     if (!await _networkInfo.isConnected) {
@@ -145,6 +153,8 @@ class SyncCoordinatorService {
     applied += await _pullHazardZones();
     applied += await _pullShelters();
     applied += await _pullAlerts();
+    applied += await _pullDamageReports();
+    applied += await _pullResources();
     return applied;
   }
 
@@ -238,6 +248,7 @@ class SyncCoordinatorService {
         updatedAt: DateTime.now(),
         version: record.version,
         isSynced: true,
+        assignedResponderId: payload['assignedResponderId'] as String?,
       );
     } catch (_) {
       return null;
@@ -365,6 +376,85 @@ class SyncCoordinatorService {
         issuedAt: DateTime.parse(payload['issuedAt'] as String),
         validUntil: DateTime.parse(payload['validUntil'] as String),
         cancelledAt: cancelledAt == null ? null : DateTime.parse(cancelledAt),
+        version: record.version,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<int> _pullDamageReports() async {
+    final repository = _damageReportRepository;
+    if (repository == null) return 0;
+
+    final pullResult = await _transport.pullAll('local_damage_reports');
+    final remoteRecords = pullResult.dataOrNull ?? const <RemoteSyncRecord>[];
+
+    var applied = 0;
+    for (final record in remoteRecords) {
+      final localResult = await repository.getById(record.entityId);
+      final local = localResult.dataOrNull;
+      if (local != null && local.version >= record.version) continue;
+
+      final report = _damageReportFromPayload(record);
+      if (report == null) continue;
+
+      await repository.save(report);
+      applied++;
+    }
+    return applied;
+  }
+
+  LocalDamageReport? _damageReportFromPayload(RemoteSyncRecord record) {
+    try {
+      final payload = jsonDecode(record.payloadJson) as Map<String, dynamic>;
+      return LocalDamageReport(
+        id: record.entityId,
+        incidentId: payload['incidentId'] as String,
+        responderId: payload['responderId'] as String,
+        description: payload['description'] as String? ?? '',
+        severity: payload['severity'] as String? ?? 'unknown',
+        mediaPath: null,
+        submittedAt: DateTime.parse(payload['submittedAt'] as String),
+        version: record.version,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<int> _pullResources() async {
+    final repository = _resourceRepository;
+    if (repository == null) return 0;
+
+    final pullResult = await _transport.pullAll('local_resources');
+    final remoteRecords = pullResult.dataOrNull ?? const <RemoteSyncRecord>[];
+
+    var applied = 0;
+    for (final record in remoteRecords) {
+      final localResult = await repository.getById(record.entityId);
+      final local = localResult.dataOrNull;
+      if (local != null && local.version >= record.version) continue;
+
+      final resource = _resourceFromPayload(record);
+      if (resource == null) continue;
+
+      await repository.save(resource);
+      applied++;
+    }
+    return applied;
+  }
+
+  LocalResource? _resourceFromPayload(RemoteSyncRecord record) {
+    try {
+      final payload = jsonDecode(record.payloadJson) as Map<String, dynamic>;
+      return LocalResource(
+        id: record.entityId,
+        name: payload['name'] as String,
+        type: payload['type'] as String,
+        quantity: (payload['quantity'] as num?)?.toInt() ?? 0,
+        shelterId: payload['shelterId'] as String?,
+        updatedAt: DateTime.now(),
         version: record.version,
       );
     } catch (_) {

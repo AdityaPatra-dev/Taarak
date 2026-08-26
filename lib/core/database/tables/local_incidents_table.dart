@@ -25,6 +25,11 @@ class LocalIncidents extends Table {
   IntColumn get version => integer().withDefault(const Constant(1))();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 
+  /// Set by District/Command's responder-assignment screen; read by a
+  /// Field Responder's "my assigned incidents" list. Null means
+  /// unassigned — not every incident needs a responder sent to it.
+  TextColumn get assignedResponderId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
