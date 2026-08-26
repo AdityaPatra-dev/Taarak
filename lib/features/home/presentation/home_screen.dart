@@ -62,6 +62,12 @@ class HomeScreen extends ConsumerWidget {
           label: 'Shelters & Resources',
           onTap: () => context.push('/shelters/manage'),
         ),
+      if (user.role.can(Permission.manageLocalIncidents))
+        _QuickAction(
+          icon: Icons.warning_amber_outlined,
+          label: 'Report Hazard Zone',
+          onTap: () => context.push('/hazards/report'),
+        ),
       if (user.role.can(Permission.viewAlerts))
         _QuickAction(
           icon: Icons.campaign_outlined,

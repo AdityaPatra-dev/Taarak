@@ -13,6 +13,7 @@ class TaarakMapView extends StatelessWidget {
   final double initialZoom;
   final List<Widget> overlayLayers;
   final MapController? mapController;
+  final void Function(LatLng point)? onTap;
 
   const TaarakMapView({
     super.key,
@@ -20,13 +21,18 @@ class TaarakMapView extends StatelessWidget {
     this.initialZoom = 13,
     this.overlayLayers = const [],
     this.mapController,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
       mapController: mapController,
-      options: MapOptions(initialCenter: initialCenter, initialZoom: initialZoom),
+      options: MapOptions(
+        initialCenter: initialCenter,
+        initialZoom: initialZoom,
+        onTap: onTap == null ? null : (_, point) => onTap!(point),
+      ),
       children: [
         TileLayer(
           // OpenStreetMap's shared tile server — fine for development and

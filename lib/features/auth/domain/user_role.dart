@@ -36,6 +36,10 @@ const Map<UserRole, Set<Permission>> rolePermissions = {
     Permission.manageLocalIncidents,
     Permission.manageSheltersResources,
     Permission.sendBroadcast,
+    // Without this, an official reporting hazard zones/broadcasting to
+    // them, verifying reports, or managing shelters had no way to see the
+    // very map those actions place things on.
+    Permission.viewRiskMap,
   },
   UserRole.districtCommand: {
     Permission.monitorZones,

@@ -35,7 +35,13 @@ String _shelterTooltip(LocalShelter shelter) {
       '(${available > 0 ? '$available available' : 'full'})';
 }
 
-MarkerLayer buildShelterLayer(List<LocalShelter> shelters) {
+/// [onTap], when given, turns each marker into "get directions here" —
+/// used by the citizen Risk Map to trigger M11 routing without a separate
+/// shelter-picker screen.
+MarkerLayer buildShelterLayer(
+  List<LocalShelter> shelters, {
+  void Function(LocalShelter shelter)? onTap,
+}) {
   return MarkerLayer(
     markers: [
       for (final shelter in shelters)
@@ -44,13 +50,18 @@ MarkerLayer buildShelterLayer(List<LocalShelter> shelters) {
           width: 36,
           height: 36,
           child: Tooltip(
-            message: _shelterTooltip(shelter),
-            child: Icon(
-              Icons.home_filled,
-              color: shelter.capacityTotal > 0 &&
-                      shelter.occupancy >= shelter.capacityTotal
-                  ? Colors.grey
-                  : Colors.blue,
+            message: onTap == null
+                ? _shelterTooltip(shelter)
+                : '${_shelterTooltip(shelter)}\nTap for directions',
+            child: GestureDetector(
+              onTap: onTap == null ? null : () => onTap(shelter),
+              child: Icon(
+                Icons.home_filled,
+                color: shelter.capacityTotal > 0 &&
+                        shelter.occupancy >= shelter.capacityTotal
+                    ? Colors.grey
+                    : Colors.blue,
+              ),
             ),
           ),
         ),

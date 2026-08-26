@@ -10,6 +10,7 @@ const _authRoutes = {'/login', '/register'};
 /// map engine once those modules land.
 const Map<String, Permission> defaultRoutePermissions = {
   '/map': Permission.viewRiskMap,
+  '/hazards/report': Permission.manageLocalIncidents,
   '/report': Permission.submitIncidentReport,
   '/sos': Permission.sendSos,
   '/safe-status': Permission.updateSafeStatus,

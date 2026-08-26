@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/default_map_center.dart';
+import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/application/map_search.dart';
 import 'package:taarak/features/map/presentation/widgets/map_legend.dart';
@@ -10,6 +12,8 @@ import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart
 import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
+import 'package:taarak/features/routing/application/routing_providers.dart';
+import 'package:taarak/features/routing/domain/route_candidate.dart';
 import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// Citizen "Risk Map" screen (blueprint section 4). Also the reference
@@ -26,6 +30,7 @@ class RiskMapScreen extends ConsumerStatefulWidget {
 class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
   final _mapController = MapController();
   bool _hasCenteredOnUser = false;
+  bool _isRouting = false;
 
   @override
   void initState() {
@@ -36,6 +41,41 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
     final cached = ref.read(locationStatusProvider).valueOrNull?.geoTag;
     if (cached == null) {
       ref.read(locationStatusProvider.notifier).refresh();
+    }
+  }
+
+  Future<void> _routeToShelter(LocalShelter shelter, LatLng? userPoint) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (userPoint == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Your location isn\'t available yet — try again in a moment.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isRouting = true);
+    final result = await ref
+        .read(routingServiceProvider)
+        .planRoute(origin: userPoint, destination: LatLng(shelter.latitude, shelter.longitude));
+    if (!mounted) return;
+    setState(() => _isRouting = false);
+
+    switch (result) {
+      case Success<RoutePlan>(:final data):
+        ref.invalidate(routesProvider);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              data.primaryRoute.isSafe
+                  ? 'Route to ${shelter.name} ready — clear of known hazards.'
+                  : 'Route to ${shelter.name} ready — passes near a hazard zone, proceed with caution.',
+            ),
+          ),
+        );
+      case Failed<RoutePlan>(:final failure):
+        messenger.showSnackBar(SnackBar(content: Text(failure.message)));
     }
   }
 
@@ -76,7 +116,10 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
             mapController: _mapController,
             overlayLayers: [
               buildHazardZoneLayer(hazardZones),
-              buildShelterLayer(shelters),
+              buildShelterLayer(
+                shelters,
+                onTap: (shelter) => _routeToShelter(shelter, userPoint),
+              ),
               buildIncidentLayer(incidents),
               buildHabitationLayer(habitations),
               buildRouteLayer(routes),
@@ -91,6 +134,13 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
               onSelect: (result) => _mapController.move(result.point, 15),
             ),
           ),
+          if (_isRouting)
+            const Positioned(
+              top: 70,
+              left: 12,
+              right: 12,
+              child: LinearProgressIndicator(),
+            ),
           const Positioned(bottom: 12, right: 12, child: MapLegend()),
           Positioned(
             bottom: 12,
