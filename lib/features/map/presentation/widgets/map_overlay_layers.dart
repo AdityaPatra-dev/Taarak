@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/geometry_codec.dart';
 import 'package:taarak/core/gis/severity_palette.dart';
@@ -11,19 +10,27 @@ import 'package:taarak/features/map/domain/road_blockage.dart';
 import 'package:taarak/features/risk/domain/risk_class.dart';
 import 'package:taarak/features/risk/presentation/risk_class_color.dart';
 
-PolygonLayer buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
-  return PolygonLayer(
-    polygons: [
-      for (final zone in hazardZones)
-        Polygon(
-          points: decodePolygonPoints(zone.geometryJson),
-          color: severityColor(zone.severity).withValues(alpha: 0.35),
-          borderColor: severityColor(zone.severity),
-          borderStrokeWidth: 2,
-          label: zone.hazardType,
-        ),
-    ],
-  );
+gmaps.LatLng _toG(double lat, double lng) => gmaps.LatLng(lat, lng);
+
+/// Google Maps markers only tint a standard pin by hue (0–360), not an
+/// arbitrary [Color] — the closest a marker glyph can get to this app's
+/// severity/status palette without shipping custom bitmap icons.
+double _markerHue(Color color) => HSVColor.fromColor(color).hue;
+
+Set<gmaps.Polygon> buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
+  return {
+    for (final zone in hazardZones)
+      gmaps.Polygon(
+        polygonId: gmaps.PolygonId('hazard-${zone.id}'),
+        points: [
+          for (final point in decodePolygonPoints(zone.geometryJson))
+            _toG(point.latitude, point.longitude),
+        ],
+        fillColor: severityColor(zone.severity).withValues(alpha: 0.35),
+        strokeColor: severityColor(zone.severity),
+        strokeWidth: 2,
+      ),
+  };
 }
 
 /// M15 made visible: a citizen deciding where to go should see whether a
@@ -31,84 +38,75 @@ PolygonLayer buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
 String _shelterTooltip(LocalShelter shelter) {
   final available = shelter.capacityTotal - shelter.occupancy;
   if (shelter.capacityTotal <= 0) return shelter.name;
-  return '${shelter.name}\n${shelter.occupancy}/${shelter.capacityTotal} occupied '
+  return '${shelter.occupancy}/${shelter.capacityTotal} occupied '
       '(${available > 0 ? '$available available' : 'full'})';
 }
 
 /// [onTap], when given, turns each marker into "get directions here" —
 /// used by the citizen Risk Map to trigger M11 routing without a separate
 /// shelter-picker screen.
-MarkerLayer buildShelterLayer(
+Set<gmaps.Marker> buildShelterLayer(
   List<LocalShelter> shelters, {
   void Function(LocalShelter shelter)? onTap,
 }) {
-  return MarkerLayer(
-    markers: [
-      for (final shelter in shelters)
-        Marker(
-          point: LatLng(shelter.latitude, shelter.longitude),
-          width: 36,
-          height: 36,
-          child: Tooltip(
-            message: onTap == null
-                ? _shelterTooltip(shelter)
-                : '${_shelterTooltip(shelter)}\nTap for directions',
-            child: GestureDetector(
-              onTap: onTap == null ? null : () => onTap(shelter),
-              child: Icon(
-                Icons.home_filled,
-                color: shelter.capacityTotal > 0 &&
-                        shelter.occupancy >= shelter.capacityTotal
-                    ? Colors.grey
-                    : Colors.blue,
-              ),
-            ),
-          ),
+  return {
+    for (final shelter in shelters)
+      gmaps.Marker(
+        markerId: gmaps.MarkerId('shelter-${shelter.id}'),
+        position: _toG(shelter.latitude, shelter.longitude),
+        icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+          shelter.capacityTotal > 0 && shelter.occupancy >= shelter.capacityTotal
+              ? gmaps.BitmapDescriptor.hueAzure
+              : gmaps.BitmapDescriptor.hueBlue,
         ),
-    ],
-  );
+        infoWindow: gmaps.InfoWindow(
+          title: shelter.name,
+          snippet: onTap == null
+              ? _shelterTooltip(shelter)
+              : '${_shelterTooltip(shelter)} · Tap for directions',
+        ),
+        onTap: onTap == null ? null : () => onTap(shelter),
+      ),
+  };
 }
 
 /// M07's risk assessment made visible: each habitation renders in its risk
 /// class color, with the tooltip spelling out the factor breakdown the
 /// engine produced (hazard exposure, vulnerability, weights) plus M09's
 /// capacity gap — not just the score.
-MarkerLayer buildHabitationLayer(List<HabitationOverview> habitations) {
-  return MarkerLayer(
-    markers: [
-      for (final item in habitations)
-        Marker(
-          point: LatLng(item.habitation.latitude, item.habitation.longitude),
-          width: 36,
-          height: 36,
-          child: Tooltip(
-            message: _habitationTooltip(item),
-            child: Icon(
-              Icons.location_city,
-              color: item.riskAssessment == null
-                  ? Colors.grey
-                  : riskClassColor(
-                      RiskClass.values.byName(item.riskAssessment!.riskClass),
-                    ),
-            ),
-          ),
+Set<gmaps.Marker> buildHabitationLayer(List<HabitationOverview> habitations) {
+  return {
+    for (final item in habitations)
+      gmaps.Marker(
+        markerId: gmaps.MarkerId('habitation-${item.habitation.id}'),
+        position: _toG(item.habitation.latitude, item.habitation.longitude),
+        icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+          item.riskAssessment == null
+              ? gmaps.BitmapDescriptor.hueViolet
+              : _markerHue(
+                  riskClassColor(RiskClass.values.byName(item.riskAssessment!.riskClass)),
+                ),
         ),
-    ],
-  );
+        infoWindow: gmaps.InfoWindow(
+          title: item.habitation.name,
+          snippet: _habitationTooltip(item),
+        ),
+      ),
+  };
 }
 
 String _habitationTooltip(HabitationOverview item) {
   final risk = item.riskAssessment;
   final capacity = item.capacityAssessment;
 
-  final buffer = StringBuffer(item.habitation.name);
+  final buffer = StringBuffer();
 
   if (risk == null) {
-    buffer.write(' — not yet assessed');
+    buffer.write('Not yet assessed');
   } else {
     buffer.write(
-      ' — ${riskClassLabel(RiskClass.values.byName(risk.riskClass))} '
-      '(score ${risk.riskScore.toStringAsFixed(2)})\n'
+      '${riskClassLabel(RiskClass.values.byName(risk.riskClass))} '
+      '(score ${risk.riskScore.toStringAsFixed(2)}) — '
       'hazard ${risk.hazardExposure.toStringAsFixed(2)}, '
       'vulnerability ${risk.vulnerabilityIndex.toStringAsFixed(2)}',
     );
@@ -121,8 +119,7 @@ String _habitationTooltip(HabitationOverview item) {
           .toSet()
           .join(', ');
       buffer.write(
-        '\n+${risk.environmentalAdjustment.toStringAsFixed(2)} from environmental data '
-        '($sources)',
+        ' · +${risk.environmentalAdjustment.toStringAsFixed(2)} from environmental data ($sources)',
       );
     }
   }
@@ -130,8 +127,8 @@ String _habitationTooltip(HabitationOverview item) {
   if (capacity != null && capacity.exposedPopulation > 0) {
     buffer.write(
       capacity.hasSufficientCapacity
-          ? '\nCapacity: sufficient (${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})'
-          : '\nCapacity gap: short by ${capacity.capacityGap} '
+          ? ' · Capacity sufficient (${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})'
+          : ' · Capacity gap: short by ${capacity.capacityGap} '
                 '(${capacity.availableSafeCapacity} available for ${capacity.exposedPopulation})',
     );
   }
@@ -142,9 +139,9 @@ String _habitationTooltip(HabitationOverview item) {
     if (candidates.isNotEmpty) {
       final top = candidates.first as Map<String, dynamic>;
       final distanceKm = ((top['distanceMeters'] as num) / 1000).toStringAsFixed(1);
-      buffer.write('\nBest relocation option: ${top['shelterName']} ($distanceKm km)');
+      buffer.write(' · Best relocation: ${top['shelterName']} ($distanceKm km)');
     } else {
-      buffer.write('\nNo safe relocation candidate found nearby');
+      buffer.write(' · No safe relocation candidate found nearby');
     }
   }
 
@@ -157,20 +154,22 @@ String _habitationTooltip(HabitationOverview item) {
 /// Solid means the geometry came from a real road-network provider; dashed
 /// means it's the offline/no-provider straight-line estimate — a route is
 /// never shown in a way that could be mistaken for the other kind.
-PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
-  return PolylineLayer(
-    polylines: [
-      for (final route in routes)
-        Polyline(
-          points: decodePolygonPoints(route.polylineJson),
-          strokeWidth: 4,
-          color: route.isSafe ? Colors.green.shade700 : Colors.orange.shade900,
-          pattern: route.isRoadSnapped
-              ? const StrokePattern.solid()
-              : StrokePattern.dashed(segments: const [10, 6]),
-        ),
-    ],
-  );
+Set<gmaps.Polyline> buildRouteLayer(List<LocalRoute> routes) {
+  return {
+    for (final route in routes)
+      gmaps.Polyline(
+        polylineId: gmaps.PolylineId('route-${route.id}'),
+        points: [
+          for (final point in decodePolygonPoints(route.polylineJson))
+            _toG(point.latitude, point.longitude),
+        ],
+        width: 4,
+        color: route.isSafe ? Colors.green.shade700 : Colors.orange.shade900,
+        patterns: route.isRoadSnapped
+            ? const []
+            : [gmaps.PatternItem.dash(20), gmaps.PatternItem.gap(12)],
+      ),
+  };
 }
 
 /// M14 made visible: once a second independent source corroborates an
@@ -179,28 +178,25 @@ PolylineLayer buildRouteLayer(List<LocalRoute> routes) {
 String _incidentTooltip(LocalIncident incident) {
   final label = incident.description.isEmpty ? incident.type : incident.description;
   if (incident.independentSourceCount <= 1) return label;
-  return '$label\nConfirmed by ${incident.independentSourceCount} independent sources '
+  return '$label · Confirmed by ${incident.independentSourceCount} independent sources '
       '(${(incident.confidence * 100).round()}% confidence)';
 }
 
-MarkerLayer buildIncidentLayer(List<LocalIncident> incidents) {
-  return MarkerLayer(
-    markers: [
-      for (final incident in incidents)
-        Marker(
-          point: LatLng(incident.latitude, incident.longitude),
-          width: 36,
-          height: 36,
-          child: Tooltip(
-            message: _incidentTooltip(incident),
-            child: Icon(
-              incident.type == roadBlockageIncidentType
-                  ? Icons.block
-                  : Icons.warning_amber,
-              color: severityColor(incident.severity),
-            ),
-          ),
+Set<gmaps.Marker> buildIncidentLayer(List<LocalIncident> incidents) {
+  return {
+    for (final incident in incidents)
+      gmaps.Marker(
+        markerId: gmaps.MarkerId('incident-${incident.id}'),
+        position: _toG(incident.latitude, incident.longitude),
+        icon: gmaps.BitmapDescriptor.defaultMarkerWithHue(
+          _markerHue(severityColor(incident.severity)),
         ),
-    ],
-  );
+        infoWindow: gmaps.InfoWindow(
+          title: incident.type == roadBlockageIncidentType
+              ? 'Blocked road'
+              : 'Incident',
+          snippet: _incidentTooltip(incident),
+        ),
+      ),
+  };
 }

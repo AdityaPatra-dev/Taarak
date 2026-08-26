@@ -273,12 +273,12 @@ class _SituationMap extends StatelessWidget {
         child: TaarakMapView(
           initialCenter: center,
           initialZoom: zoom,
-          overlayLayers: [
-            buildHazardZoneLayer(hazardZones),
-            buildShelterLayer(shelters),
-            buildIncidentLayer(incidents),
-            buildHabitationLayer(habitations),
-          ],
+          polygons: buildHazardZoneLayer(hazardZones),
+          markers: {
+            ...buildShelterLayer(shelters),
+            ...buildIncidentLayer(incidents),
+            ...buildHabitationLayer(habitations),
+          },
         ),
       ),
     );

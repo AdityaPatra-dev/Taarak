@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
 import 'package:taarak/app/spacing.dart';
@@ -13,6 +13,7 @@ import 'package:taarak/features/hazards/domain/hazard_severity.dart';
 import 'package:taarak/features/hazards/domain/hazard_type.dart';
 import 'package:taarak/features/hazards/domain/raw_hazard_observation.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
+import 'package:taarak/features/map/presentation/widgets/taarak_map_controller.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
@@ -46,6 +47,7 @@ class ReportHazardZoneScreen extends ConsumerStatefulWidget {
 
 class _ReportHazardZoneScreenState
     extends ConsumerState<ReportHazardZoneScreen> {
+  final _mapController = TaarakMapController();
   LatLng? _center;
   HazardType _hazardType = HazardType.flood;
   HazardSeverity _severity = HazardSeverity.medium;
@@ -92,41 +94,48 @@ class _ReportHazardZoneScreenState
                       child: TaarakMapView(
                         initialCenter: fallbackCenter,
                         initialZoom: userPoint != null ? 13 : defaultMapZoom,
-                        onTap: (point) => setState(() => _center = point),
-                        overlayLayers: [
-                          if (_center != null)
-                            PolygonLayer(
-                              polygons: [
-                                Polygon(
-                                  points: circlePolygonPoints(
-                                    _center!,
-                                    radiusMeters,
-                                  ),
-                                  color: severityColor(
+                        mapController: _mapController,
+                        onTap: (point) {
+                          setState(() => _center = point);
+                          // A hazard radius (200 m–5 km) is invisible at
+                          // the whole-country zoom an official starts at
+                          // without a cached location — zoom to where the
+                          // tap actually is so the preview circle is
+                          // visible immediately, not just recorded blind.
+                          _mapController.move(point, 13);
+                        },
+                        polygons: _center == null
+                            ? const {}
+                            : {
+                                gmaps.Polygon(
+                                  polygonId: const gmaps.PolygonId('preview'),
+                                  points: [
+                                    for (final p in circlePolygonPoints(
+                                      _center!,
+                                      radiusMeters,
+                                    ))
+                                      gmaps.LatLng(p.latitude, p.longitude),
+                                  ],
+                                  fillColor: severityColor(
                                     _severity.storageValue,
                                   ).withValues(alpha: 0.35),
-                                  borderColor: severityColor(
+                                  strokeColor: severityColor(
                                     _severity.storageValue,
                                   ),
-                                  borderStrokeWidth: 2,
+                                  strokeWidth: 2,
                                 ),
-                              ],
-                            ),
-                          if (_center != null)
-                            MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: _center!,
-                                  width: 28,
-                                  height: 28,
-                                  child: const Icon(
-                                    Icons.location_pin,
-                                    color: Colors.black87,
+                              },
+                        markers: _center == null
+                            ? const {}
+                            : {
+                                gmaps.Marker(
+                                  markerId: const gmaps.MarkerId('epicenter'),
+                                  position: gmaps.LatLng(
+                                    _center!.latitude,
+                                    _center!.longitude,
                                   ),
                                 ),
-                              ],
-                            ),
-                        ],
+                              },
                       ),
                     ),
                   ),

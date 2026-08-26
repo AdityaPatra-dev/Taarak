@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:latlong2/latlong.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/database/app_database.dart';
+import 'package:taarak/core/gis/default_map_center.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
+import 'package:taarak/features/map/presentation/widgets/taarak_map_controller.dart';
+import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
+import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/features/shelters/application/shelter_management_providers.dart';
 import 'package:taarak/features/shelters/domain/shelter_facility_type.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
+import 'package:taarak/shared/widgets/section_header.dart';
 import 'package:taarak/shared/widgets/taarak_app_bar.dart';
 
 /// M15: lets a Local Official ([Permission.manageSheltersResources]) keep
@@ -25,7 +32,7 @@ class ShelterManagementScreen extends ConsumerWidget {
     return Scaffold(
       appBar: const TaarakAppBar(title: 'Shelters & Resources'),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showEditDialog(context, ref, existing: null),
+        onPressed: () => _openShelterForm(context, ref, existing: null),
         icon: const Icon(Icons.add),
         label: const Text('Add shelter'),
       ),
@@ -159,7 +166,7 @@ class _ShelterCard extends ConsumerWidget {
                 ),
                 OutlinedButton.icon(
                   onPressed: () =>
-                      _showEditDialog(context, ref, existing: shelter),
+                      _openShelterForm(context, ref, existing: shelter),
                   icon: const Icon(Icons.tune, size: 16),
                   label: const Text('Edit'),
                 ),
@@ -227,133 +234,223 @@ class _ShelterCard extends ConsumerWidget {
   }
 }
 
-Future<void> _showEditDialog(
+void _openShelterForm(
   BuildContext context,
   WidgetRef ref, {
   required LocalShelter? existing,
-}) async {
-  final nameController = TextEditingController(text: existing?.name ?? '');
-  final latController = TextEditingController(
-    text: existing?.latitude.toString() ?? '',
-  );
-  final lngController = TextEditingController(
-    text: existing?.longitude.toString() ?? '',
-  );
-  final capacityController = TextEditingController(
-    text: existing?.capacityTotal.toString() ?? '',
-  );
-  final selectedFacilities = existing == null
-      ? <ShelterFacilityType>{}
-      : ref.read(shelterManagementServiceProvider).facilitiesOf(existing);
-
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (dialogContext) => StatefulBuilder(
-      builder: (dialogContext, setState) => AlertDialog(
-        title: Text(existing == null ? 'Add shelter' : 'Edit shelter'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              TextField(
-                controller: latController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Latitude'),
-              ),
-              TextField(
-                controller: lngController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                  signed: true,
-                ),
-                decoration: const InputDecoration(labelText: 'Longitude'),
-              ),
-              TextField(
-                controller: capacityController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Total capacity'),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final type in ShelterFacilityType.values)
-                    FilterChip(
-                      label: Text(type.label),
-                      selected: selectedFacilities.contains(type),
-                      onSelected: (selected) => setState(() {
-                        if (selected) {
-                          selectedFacilities.add(type);
-                        } else {
-                          selectedFacilities.remove(type);
-                        }
-                      }),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+}) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => _ShelterFormScreen(existing: existing),
     ),
   );
+}
 
-  if (confirmed != true) return;
+/// The location a shelter sits at needs to be pinpointed on the map it'll
+/// later show up on — asking an official to type raw latitude/longitude is
+/// exactly the kind of friction/error surface a tap-to-place map avoids,
+/// matching [ReportHazardZoneScreen]'s pattern.
+class _ShelterFormScreen extends ConsumerStatefulWidget {
+  final LocalShelter? existing;
 
-  final latitude = double.tryParse(latController.text.trim());
-  final longitude = double.tryParse(lngController.text.trim());
-  final capacityTotal = int.tryParse(capacityController.text.trim());
-  final name = nameController.text.trim();
-  if (name.isEmpty ||
-      latitude == null ||
-      longitude == null ||
-      capacityTotal == null) {
-    return;
+  const _ShelterFormScreen({required this.existing});
+
+  @override
+  ConsumerState<_ShelterFormScreen> createState() => _ShelterFormScreenState();
+}
+
+class _ShelterFormScreenState extends ConsumerState<_ShelterFormScreen> {
+  final _mapController = TaarakMapController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _capacityController;
+  late final Set<ShelterFacilityType> _selectedFacilities;
+  LatLng? _location;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    _nameController = TextEditingController(text: existing?.name ?? '');
+    _capacityController = TextEditingController(
+      text: existing?.capacityTotal.toString() ?? '',
+    );
+    _selectedFacilities = existing == null
+        ? <ShelterFacilityType>{}
+        : ref.read(shelterManagementServiceProvider).facilitiesOf(existing);
+    _location = existing == null
+        ? null
+        : LatLng(existing.latitude, existing.longitude);
   }
 
-  final officialId = ref.read(currentUserProvider)?.id;
-  if (officialId == null) return;
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _capacityController.dispose();
+    super.dispose();
+  }
 
-  final result = await ref
-      .read(shelterManagementServiceProvider)
-      .upsertShelter(
-        id: existing?.id,
-        name: name,
-        latitude: latitude,
-        longitude: longitude,
-        capacityTotal: capacityTotal,
-        facilities: selectedFacilities,
-        officialId: officialId,
-      );
+  @override
+  Widget build(BuildContext context) {
+    final userPoint = ref.watch(locationStatusProvider).valueOrNull?.geoTag;
+    final fallbackCenter = _location ??
+        (userPoint == null
+            ? defaultMapCenter
+            : LatLng(userPoint.fix.latitude, userPoint.fix.longitude));
 
-  ref.invalidate(sheltersProvider);
-
-  if (!context.mounted) return;
-  result.when(
-    success: (_) => ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(existing == null ? 'Shelter added' : 'Shelter updated'),
+    return Scaffold(
+      appBar: TaarakAppBar(
+        title: widget.existing == null ? 'Add Shelter' : 'Edit Shelter',
       ),
-    ),
-    failure: (failure) => ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(failure.message))),
-  );
+      body: ListView(
+        children: [
+          const SectionHeader(
+            title: 'Mark the shelter\'s location',
+            icon: Icons.home_work_outlined,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            child: Text(
+              'Tap the map where the shelter actually is.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(height: Spacing.sm),
+          SizedBox(
+            height: 320,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: TaarakMapView(
+                  initialCenter: fallbackCenter,
+                  initialZoom: _location != null || userPoint != null ? 14 : defaultMapZoom,
+                  mapController: _mapController,
+                  onTap: (point) {
+                    setState(() => _location = point);
+                    _mapController.move(point, 14);
+                  },
+                  markers: _location == null
+                      ? const {}
+                      : {
+                          gmaps.Marker(
+                            markerId: const gmaps.MarkerId('shelter-location'),
+                            position: gmaps.LatLng(
+                              _location!.latitude,
+                              _location!.longitude,
+                            ),
+                          ),
+                        },
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: Spacing.md),
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: Spacing.md),
+            child: Padding(
+              padding: const EdgeInsets.all(Spacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: 'Name'),
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  TextField(
+                    controller: _capacityController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Total capacity'),
+                  ),
+                  const SizedBox(height: Spacing.sm),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final type in ShelterFacilityType.values)
+                        FilterChip(
+                          label: Text(type.label),
+                          selected: _selectedFacilities.contains(type),
+                          onSelected: (selected) => setState(() {
+                            if (selected) {
+                              _selectedFacilities.add(type);
+                            } else {
+                              _selectedFacilities.remove(type);
+                            }
+                          }),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: Spacing.md),
+                  FilledButton.icon(
+                    onPressed: _location == null || _isSubmitting
+                        ? null
+                        : _submit,
+                    icon: _isSubmitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.check),
+                    label: Text(
+                      _location == null
+                          ? 'Tap the map to mark the location'
+                          : widget.existing == null
+                          ? 'Add shelter'
+                          : 'Save changes',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: Spacing.lg),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submit() async {
+    final location = _location;
+    final capacityTotal = int.tryParse(_capacityController.text.trim());
+    final name = _nameController.text.trim();
+    if (location == null || name.isEmpty || capacityTotal == null) return;
+
+    final officialId = ref.read(currentUserProvider)?.id;
+    if (officialId == null) return;
+
+    setState(() => _isSubmitting = true);
+
+    final result = await ref.read(shelterManagementServiceProvider).upsertShelter(
+      id: widget.existing?.id,
+      name: name,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      capacityTotal: capacityTotal,
+      facilities: _selectedFacilities,
+      officialId: officialId,
+    );
+
+    ref.invalidate(sheltersProvider);
+
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    result.when(
+      success: (_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.existing == null ? 'Shelter added' : 'Shelter updated',
+            ),
+          ),
+        );
+        Navigator.of(context).pop();
+      },
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+    );
+  }
 }

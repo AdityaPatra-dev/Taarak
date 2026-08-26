@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/gis/default_map_center.dart';
+import 'package:taarak/core/gis/geometry_codec.dart';
 import 'package:taarak/core/repository/result.dart';
 import 'package:taarak/features/map/application/map_data_providers.dart';
 import 'package:taarak/features/map/application/map_search.dart';
 import 'package:taarak/features/map/presentation/widgets/map_legend.dart';
 import 'package:taarak/features/map/presentation/widgets/map_overlay_layers.dart';
 import 'package:taarak/features/map/presentation/widgets/map_search_bar.dart';
+import 'package:taarak/features/map/presentation/widgets/taarak_map_controller.dart';
 import 'package:taarak/features/map/presentation/widgets/taarak_map_view.dart';
 import 'package:taarak/features/profile/application/location_status_controller.dart';
 import 'package:taarak/features/routing/application/routing_providers.dart';
@@ -28,8 +29,9 @@ class RiskMapScreen extends ConsumerStatefulWidget {
 }
 
 class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
-  final _mapController = MapController();
+  final _mapController = TaarakMapController();
   bool _hasCenteredOnUser = false;
+  bool _hasFitToData = false;
   bool _isRouting = false;
 
   @override
@@ -100,6 +102,25 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
         : LatLng(geoTag.fix.latitude, geoTag.fix.longitude);
     if (userPoint != null) _hasCenteredOnUser = true;
 
+    // Without a GPS fix, the map opens on the whole-country default view —
+    // fine as a fallback, but a hazard zone's few-hundred-meter radius is
+    // literally invisible at that zoom. Once real data exists, frame it
+    // instead of leaving an official staring at an empty subcontinent.
+    if (!_hasCenteredOnUser && !_hasFitToData) {
+      final dataPoints = <LatLng>[
+        for (final shelter in shelters) LatLng(shelter.latitude, shelter.longitude),
+        for (final incident in incidents) LatLng(incident.latitude, incident.longitude),
+        for (final zone in hazardZones) ...decodePolygonPoints(zone.geometryJson),
+      ];
+      if (dataPoints.isNotEmpty) {
+        _hasFitToData = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _mapController.fitBounds(dataPoints);
+        });
+      }
+    }
+
     final searchIndex = buildSearchIndex(
       hazardZones: hazardZones,
       shelters: shelters,
@@ -114,16 +135,16 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
             initialCenter: userPoint ?? defaultMapCenter,
             initialZoom: userPoint != null ? 15 : defaultMapZoom,
             mapController: _mapController,
-            overlayLayers: [
-              buildHazardZoneLayer(hazardZones),
-              buildShelterLayer(
+            polygons: buildHazardZoneLayer(hazardZones),
+            markers: {
+              ...buildShelterLayer(
                 shelters,
                 onTap: (shelter) => _routeToShelter(shelter, userPoint),
               ),
-              buildIncidentLayer(incidents),
-              buildHabitationLayer(habitations),
-              buildRouteLayer(routes),
-            ],
+              ...buildIncidentLayer(incidents),
+              ...buildHabitationLayer(habitations),
+            },
+            polylines: buildRouteLayer(routes),
           ),
           Positioned(
             top: 12,
