@@ -21,16 +21,19 @@ service cloud.firestore {
 
     // Each user's own profile (name, email, role). Role is set once at
     // registration — always 'citizen', enforced below — and is never
-    // self-editable afterwards. Promoting a user to a higher role is a
-    // manual step in the Firebase console (admin access bypasses these
-    // rules entirely), matching the "no admin UI yet" gap called out in
-    // the Firebase migration plan.
+    // self-editable by the user themselves. Permission.manageAccounts
+    // (System Admin only) can read every profile and change anyone's role
+    // via the in-app account management screen.
     match /users/{uid} {
-      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow read: if isSignedIn()
+                  && (request.auth.uid == uid || hasAnyRole(['systemAdmin']));
       allow create: if isSignedIn() && request.auth.uid == uid
                     && request.resource.data.role == 'citizen';
-      allow update: if isSignedIn() && request.auth.uid == uid
-                    && request.resource.data.role == resource.data.role;
+      allow update: if isSignedIn() && (
+                      (request.auth.uid == uid
+                        && request.resource.data.role == resource.data.role)
+                      || hasAnyRole(['systemAdmin'])
+                    );
       allow delete: if false;
     }
 

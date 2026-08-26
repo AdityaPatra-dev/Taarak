@@ -92,6 +92,12 @@ class HomeScreen extends ConsumerWidget {
           label: 'Audit Log',
           onTap: () => context.push('/audit'),
         ),
+      if (user.role.can(Permission.manageAccounts))
+        _QuickAction(
+          icon: Icons.manage_accounts_outlined,
+          label: 'Manage Accounts',
+          onTap: () => context.push('/admin/users'),
+        ),
       if (isDevMode && hasSos)
         _QuickAction(
           icon: Icons.sms_outlined,

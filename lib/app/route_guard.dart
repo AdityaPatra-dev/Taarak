@@ -20,6 +20,7 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/alerts/broadcast': Permission.sendBroadcast,
   '/dashboard': Permission.monitorZones,
   '/audit': Permission.reviewAudit,
+  '/admin/users': Permission.manageAccounts,
   '/sms-prototype': Permission.sendSos,
   '/device-relay': Permission.sendSos,
 };

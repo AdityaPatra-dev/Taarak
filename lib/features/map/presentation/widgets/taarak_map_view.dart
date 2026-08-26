@@ -42,6 +42,7 @@ class TaarakMapView extends StatelessWidget {
       markers: markers,
       polygons: polygons,
       polylines: polylines,
+      myLocationEnabled: true,
       myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       mapToolbarEnabled: false,
