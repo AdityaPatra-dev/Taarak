@@ -54,7 +54,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ref.watch(_routerRefreshProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    // No initialLocation override — go_router's own default reads the
+    // real browser URL on web (Uri.base), so a refresh or a direct link
+    // to e.g. /command/responders lands there instead of always bouncing
+    // to home. computeRedirect below still gates it exactly the same way
+    // regardless of how the location was reached.
     refreshListenable: refreshNotifier,
     redirect: (context, state) => computeRedirect(
       session: ref.read(authControllerProvider).valueOrNull,

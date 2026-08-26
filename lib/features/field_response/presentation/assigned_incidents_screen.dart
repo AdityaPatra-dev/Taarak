@@ -34,7 +34,7 @@ class AssignedIncidentsScreen extends ConsumerWidget {
               icon: Icons.assignment_turned_in_outlined,
               title: 'No incidents assigned to you',
               message:
-                  'District/Command assigns incidents from the dashboard.',
+                  'District/Command assigns incidents from Manage Responders.',
             );
           }
           return RefreshIndicator(

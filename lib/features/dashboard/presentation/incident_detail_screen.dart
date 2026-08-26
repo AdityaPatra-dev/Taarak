@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/command/application/command_providers.dart';
+import 'package:taarak/features/field_response/application/field_response_providers.dart';
 import 'package:taarak/features/verification/application/verification_providers.dart';
 import 'package:taarak/shared/widgets/async_state_views.dart';
 import 'package:taarak/shared/widgets/responsive.dart';
@@ -23,6 +25,10 @@ class IncidentDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final incidentAsync = ref.watch(_incidentProvider(incidentId));
     final auditTrailAsync = ref.watch(_auditTrailProvider(incidentId));
+    final respondersAsync = ref.watch(fieldRespondersProvider);
+    final damageReportsAsync = ref.watch(
+      damageReportsForIncidentProvider(incidentId),
+    );
 
     return Scaffold(
       appBar: const TaarakAppBar(title: 'Incident Detail'),
@@ -102,9 +108,63 @@ class IncidentDetailScreen extends ConsumerWidget {
                                 ),
                               ),
                             ],
+                            const SizedBox(height: Spacing.sm),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.person_pin_circle_outlined,
+                                  size: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  incident.assignedResponderId == null
+                                      ? 'No responder assigned yet'
+                                      : 'Assigned to: ${respondersAsync.valueOrNull?.where((r) => r.uid == incident.assignedResponderId).firstOrNull?.name ?? incident.assignedResponderId}',
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
+                    ),
+                    const SizedBox(height: Spacing.lg),
+                    const SectionHeader(
+                      title: 'Damage reports',
+                      icon: Icons.assignment_outlined,
+                    ),
+                    damageReportsAsync.when(
+                      loading: () => const LoadingView(),
+                      error: (error, _) => ErrorView(
+                        message: 'Could not load damage reports: $error',
+                      ),
+                      data: (reports) => reports.isEmpty
+                          ? const EmptyView(
+                              icon: Icons.assignment_outlined,
+                              title: 'No damage reports submitted yet',
+                            )
+                          : Column(
+                              children: [
+                                for (final report in reports)
+                                  Card(
+                                    margin: const EdgeInsets.only(
+                                      bottom: Spacing.xs,
+                                    ),
+                                    child: ListTile(
+                                      title: Text(report.description),
+                                      subtitle: Text(
+                                        'By ${report.responderId} · '
+                                        '${report.submittedAt.toLocal()}',
+                                      ),
+                                      trailing: SeverityChip(
+                                        severity: report.severity,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                     ),
                     const SizedBox(height: Spacing.lg),
                     const SectionHeader(
