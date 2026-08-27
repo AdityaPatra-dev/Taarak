@@ -35,7 +35,7 @@ git clone <this-repo>
 cd Taarak
 flutter pub get
 flutter analyze   # should report 0 errors (a handful of pre-existing lint infos is normal)
-flutter test      # 401 tests, all should pass
+flutter test      # 440 tests, all should pass
 flutter run       # pick a device when prompted (emulator, physical Android device, or Chrome)
 ```
 
@@ -183,7 +183,7 @@ dart run flutter_launcher_icons
 flutter test
 ```
 
-401 tests, all passing as of this audit. A handful of tests intentionally
+440 tests, all passing as of this audit. A handful of tests intentionally
 exercise a "not cached locally" error path during sync — you'll see red
 `CacheException` blocks scroll by in the output; that's expected logged
 output from a passing test, not a failure (check the final `+401: All

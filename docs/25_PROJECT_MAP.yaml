@@ -1,0 +1,318 @@
+# TAARAK — machine-readable project map
+# Generated from direct repository inspection (5 parallel research passes +
+# direct verification), not from assumptions. See docs/*.md for full detail
+# and evidence behind every claim below. "files:" lists only the most
+# structurally important files — full per-file dossiers live in
+# docs/modules/<module>.md.
+
+project:
+  name: taarak
+  purpose: >
+    Offline-first Flutter disaster-management app (SIH 2026, PS 26191):
+    identifies hazard zones, scores habitation risk, tracks shelter
+    capacity, and produces an explainable relocation-priority queue for
+    disaster-management authorities.
+  frontend: "Flutter (Dart 3), Riverpod state management, go_router navigation"
+  backend: "Firebase (Auth + Cloud Firestore), project taakrak-d9ed0 — real and live. A dormant secondary backend (shelf/shelf_router Dart stub in backend/) exists but is never selected at runtime."
+  database: "Drift (typed SQLite) — 18 tables, schema version 11, destructive migration strategy"
+  state_management: "Riverpod (flutter_riverpod ^2.6.1) — Provider for DI, FutureProvider.autoDispose for screen data, one AsyncNotifierProvider for auth session, root-lifetime Provider.autoDispose<void> triggers for background behavior"
+  authentication: "Firebase Auth, email/password. Public self-registration is Citizen-only by hard structural design. A dormant in-memory mock-auth path exists (DevMockAuthRemoteDataSource) but is never selected (AppConfig.useMockAuth is always false)."
+
+modules:
+  - name: auth
+    status: implemented
+    entry_points: ["/login", "/register", "/forgot-password"]
+    files: 15
+    dependencies: [core/repository, core/storage, core/error]
+    external_services: [firebase_auth, cloud_firestore]
+  - name: admin
+    status: implemented
+    entry_points: ["/admin/users", "/admin/moderation", "/admin/permissions", "/admin/technical"]
+    files: 12
+    dependencies: [auth, core/database]
+    external_services: [cloud_firestore]
+  - name: home
+    status: implemented
+    entry_points: ["/"]
+    files: 2
+    dependencies: [auth, admin, sync]
+    external_services: []
+  - name: profile
+    status: implemented
+    entry_points: ["/profile"]
+    files: 2
+    dependencies: [core/location]
+    external_services: []
+  - name: audit
+    status: implemented
+    entry_points: ["/audit"]
+    files: 3
+    dependencies: [core/database]
+    external_services: []
+    known_issue: "Audit records are local-only (Drift), never synced to Firestore — no cross-device audit trail."
+  - name: hazards
+    status: implemented
+    entry_points: ["/hazards/report", "/hazards/simulate-alert"]
+    files: 10
+    dependencies: [core/database, core/gis]
+    external_services: [cloud_firestore]
+  - name: risk
+    status: partially_implemented
+    entry_points: ["indirect only — via relocation module"]
+    files: 7
+    dependencies: [hazards, vulnerability, environmental, core/database]
+    external_services: []
+    known_issue: "assessAllHabitations has exactly one production caller: relocation's buildQueue()."
+  - name: vulnerability
+    status: partially_implemented
+    entry_points: ["indirect only — via risk module"]
+    files: 10
+    dependencies: [core/database]
+    external_services: []
+    known_issue: "Same single-trigger issue as risk. Infrastructure/access indicators default to 0.5 for any habitation not explicitly configured at registration."
+  - name: capacity
+    status: partially_implemented
+    entry_points: ["indirect only — via relocation module"]
+    files: 4
+    dependencies: [core/database, shelters]
+    external_services: []
+    known_issue: "Same single-trigger issue as risk/vulnerability."
+  - name: relocation
+    status: implemented
+    entry_points: ["/relocation/priority", "/command/relocation"]
+    files: 10
+    dependencies: [risk, capacity, vulnerability, routing, habitations, hazards, core/database]
+    external_services: []
+    note: "Flagship module — pure, deterministic, versioned, most heavily tested. Structurally the risk/capacity/vulnerability pipeline's only production trigger."
+  - name: susceptibility
+    status: placeholder
+    entry_points: []
+    files: 3
+    dependencies: []
+    external_services: []
+    known_issue: "UnavailableHazardSusceptibilityModel.predict() always returns null by design. No trained model. No caller anywhere in the app. Zero test coverage."
+  - name: environmental
+    status: implemented
+    entry_points: ["indirect — feeds risk"]
+    files: 9
+    dependencies: [core/network, core/database]
+    external_services: [open-meteo]
+    known_issue: "OpenMeteoDataSource.refreshForHabitation() has no confirmed production caller; only the cached-read path (adjustmentFor) is confirmed reached."
+  - name: fusion
+    status: implemented
+    entry_points: ["indirect — used by verification, not by the risk/hazard pipeline"]
+    files: 3
+    dependencies: [core/gis]
+    external_services: []
+    note: "Citizen-report deduplication, unrelated to hazard/environmental data fusion despite the module name."
+  - name: map
+    status: implemented
+    entry_points: ["/map"]
+    files: 12
+    dependencies: [hazards, shelters, habitations, routing, reporting, verification]
+    external_services: [google_maps]
+    known_issue: "demo_map_data_seeder.dart is real, tested code with no call site anywhere in lib/ — currently dead."
+  - name: routing
+    status: implemented
+    entry_points: ["indirect — via map's shelter-route action"]
+    files: 5
+    dependencies: [core/routing, core/gis, hazards]
+    external_services: [osrm]
+  - name: shelters
+    status: implemented
+    entry_points: ["/shelters/manage"]
+    files: 4
+    dependencies: [core/database]
+    external_services: [cloud_firestore]
+  - name: reporting
+    status: implemented
+    entry_points: ["/report", "/sos", "/safe-status"]
+    files: 7
+    dependencies: [core/location, core/media, core/database]
+    external_services: [cloud_firestore]
+  - name: verification
+    status: implemented
+    entry_points: ["/verification"]
+    files: 5
+    dependencies: [reporting, fusion, core/database]
+    external_services: [cloud_firestore]
+  - name: field_response
+    status: implemented
+    entry_points: ["/field/incidents", "/field/incidents/:id"]
+    files: 4
+    dependencies: [verification, routing, map]
+    external_services: []
+    known_issue: "Zero test coverage. DamageReportService writes no audit-log entry, unlike sibling write-services."
+  - name: habitations
+    status: implemented
+    entry_points: ["/habitations/register"]
+    files: 3
+    dependencies: [core/database, core/gis]
+    external_services: [cloud_firestore]
+  - name: alerts
+    status: implemented
+    entry_points: ["/alerts", "/alerts/broadcast"]
+    files: 5
+    dependencies: [core/database]
+    external_services: [cloud_firestore]
+  - name: dashboard
+    status: implemented
+    entry_points: ["/dashboard", "/dashboard/incidents/:id", "/state/oversight"]
+    files: 5
+    dependencies: [map, capacity, alerts]
+    external_services: []
+  - name: command
+    status: implemented
+    entry_points: ["/command/responders", "/command/resources", "/command/relocation"]
+    files: 5
+    dependencies: [relocation, field_response]
+    external_services: [cloud_firestore]
+    known_issue: "Zero test coverage."
+  - name: state_admin
+    status: implemented
+    entry_points: ["/state/reports", "/state/policy"]
+    files: 7
+    dependencies: [dashboard, alerts, hazards]
+    external_services: [cloud_firestore]
+    known_issue: "Zero test coverage."
+  - name: disaster_events
+    status: implemented
+    entry_points: ["/hazards/simulate-alert"]
+    files: 5
+    dependencies: [hazards]
+    external_services: []
+    note: "GovernmentAlertParser is pure regex, not an LLM. Never geocodes a location from text. Only landslide/riverRise event types are wired to a real pipeline; 5 of 7 DisasterEventType values are not yet actionable."
+  - name: sms_prototype
+    status: demo
+    entry_points: ["/sms-prototype"]
+    files: 8
+    dependencies: []
+    external_services: []
+    known_issue: "LoopbackSmsTransport is a confirmed simulation — no real SMS is ever sent. No SMS permission or package exists in the app."
+  - name: device_relay
+    status: demo
+    entry_points: ["/device-relay"]
+    files: 6
+    dependencies: []
+    external_services: []
+    known_issue: "LoopbackRelayTransport is a confirmed simulation — no real Bluetooth/WiFi transport exists."
+  - name: notifications
+    status: implemented
+    entry_points: ["app-root trigger, not a screen"]
+    files: 2
+    dependencies: [alerts, core/database]
+    external_services: [flutter_local_notifications]
+    known_issue: "Zero test coverage. No in-app notification history."
+  - name: sync
+    status: implemented
+    entry_points: ["app-root triggers, not a screen"]
+    files: 11
+    dependencies: [core/database, core/network]
+    external_services: [cloud_firestore]
+    known_issue: "Sync failures are caught and silently discarded with no logging or surfaced state."
+
+files:
+  - path: lib/main.dart
+    purpose: "App entry point; Firebase.initializeApp with retry/backoff for a known FlutterFire web race condition"
+    status: implemented
+    imports: [firebase_core, lib/app/app.dart, lib/firebase_options.dart]
+    used_by: ["(entry point — nothing imports this)"]
+  - path: lib/app/app.dart
+    purpose: "Root widget; watches four root-lifetime providers; shows splash during session restore; builds MaterialApp.router"
+    status: implemented
+    imports: [lib/app/router.dart, lib/features/sync/application/sync_providers.dart, lib/features/notifications/application/notification_providers.dart, lib/features/admin/application/admin_providers.dart, lib/features/auth/application/auth_controller.dart]
+    used_by: [lib/main.dart]
+  - path: lib/app/router.dart
+    purpose: "The full 33-route GoRouter table plus the redirect wiring"
+    status: implemented
+    imports: ["every top-level feature presentation screen (29 imports)", lib/app/route_guard.dart]
+    used_by: [lib/app/app.dart]
+  - path: lib/app/route_guard.dart
+    purpose: "Pure computeRedirect() function: unauthenticated/auth-route/permission gating logic"
+    status: implemented
+    imports: [lib/features/auth/domain/*.dart, lib/features/admin/domain/role_permission_overrides.dart]
+    used_by: [lib/app/router.dart, "test/features/auth/route_guard_test.dart"]
+  - path: lib/core/database/app_database.dart
+    purpose: "The entire Drift schema definition, 18 tables, schema version 11"
+    status: implemented
+    imports: [drift, "lib/core/database/tables/*.dart"]
+    used_by: ["every LocalXRepository in the app"]
+  - path: lib/features/relocation/application/relocation_priority_service.dart
+    purpose: "Orchestrates risk + capacity + relocation-planning across every habitation into a ranked priority queue"
+    status: implemented
+    imports: [risk, capacity, relocation_planning_service, core/database repositories]
+    used_by: ["lib/features/relocation/application/relocation_priority_providers.dart"]
+  - path: lib/features/relocation/application/relocation_priority_engine.dart
+    purpose: "Pure scoring: 0.4×risk + 0.3×capacityGap + 0.2×distance + 0.1×accessibility, versioned, tiered"
+    status: implemented
+    imports: [relocation domain models]
+    used_by: [relocation_priority_service.dart]
+  - path: lib/features/susceptibility/application/hazard_susceptibility_model.dart
+    purpose: "AI/ML extension point — abstract interface plus a deliberate always-null stub implementation"
+    status: placeholder
+    imports: [hazard_susceptibility_prediction.dart]
+    used_by: ["susceptibility_providers.dart — no other file in the app consumes this"]
+  - path: lib/features/map/application/demo_map_data_seeder.dart
+    purpose: "Seeds sample hazard zones/shelters/incidents/habitations for local development"
+    status: unused
+    imports: [hazards, shelters, habitations services]
+    used_by: ["its own test file only — no production call site found"]
+  - path: firestore.rules
+    purpose: "Server-side security enforcement for every Firestore collection, mirroring route_guard.dart's permission table"
+    status: implemented
+    imports: []
+    used_by: ["deployed separately via firebase deploy --only firestore:rules"]
+
+external_services:
+  - name: firebase_auth
+    purpose: "User authentication (email/password)"
+    status: production
+  - name: cloud_firestore
+    purpose: "Shared backend database — 12 rule-gated collections/documents"
+    status: production
+  - name: google_maps
+    purpose: "Interactive map rendering"
+    status: production_unrestricted_key
+  - name: open-meteo
+    purpose: "Live weather data feeding the risk engine's environmental adjustment"
+    status: production_but_trigger_unconfirmed
+  - name: osrm
+    purpose: "Road-network routing for evacuation routes"
+    status: third_party_demo_server
+  - name: backend_stub
+    purpose: "Historical local Dart backend (shelf/shelf_router) for validating the sync contract before the Firebase migration"
+    status: dormant_not_selected_at_runtime
+
+known_gaps:
+  - priority: P1
+    description: "Risk/capacity/vulnerability assessment has exactly one production trigger: opening the Relocation Priority screen."
+  - priority: P1
+    description: "demo_map_data_seeder.dart has no call site anywhere in lib/ — dead code as shipped."
+  - priority: P1
+    description: "Six features have zero test coverage: command, field_response, home, notifications, state_admin, susceptibility."
+  - priority: P1
+    description: "core/database (18 tables, 39 files) has exactly 1 dedicated test file."
+  - priority: P1
+    description: "Sync failures are caught and silently discarded with no logging or surfaced state."
+  - priority: P1
+    description: "Android release builds are signed with the debug keystore; applicationId is still com.example.taarak."
+  - priority: P1
+    description: "The Google Maps API key has no application-identity restriction."
+  - priority: P1
+    description: "route_guard.dart does not check isDevMode for /sms-prototype and /device-relay — reachable by URL in a release build by any Citizen."
+  - priority: P2
+    description: "Two parallel backend implementations coexist in source (dormant backend/ stub vs. live Firebase)."
+  - priority: P2
+    description: "RemoteRepository interface is defined but has no implementation anywhere."
+  - priority: P2
+    description: "Demo account credentials are duplicated between DevMockAuthRemoteDataSource and LoginScreen with no shared constant."
+  - priority: P2
+    description: "DamageReportService writes no audit-log entry, unlike every sibling write-service."
+  - priority: P2
+    description: "Audit records never sync to Firestore — no cross-device audit trail."
+  - priority: P2
+    description: "HomeScreen's quick-action list is a manually maintained ~20-branch list with no single source of truth shared with route_guard.dart."
+  - priority: P2
+    description: "No in-app notification history/inbox."
+  - priority: P2
+    description: "No CI/CD pipeline of any kind — all builds/deploys are manual developer commands."
