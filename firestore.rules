@@ -135,5 +135,21 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if hasAnyRole(['stateAdmin']);
     }
+
+    // Permission.managePermissions / Permission.manageTechnicalConfiguration
+    // (System Admin only, write) — read stays open the same way
+    // config/policy's does: the route guard and home screen resolve every
+    // signed-in user's effective permissions against this doc regardless
+    // of their own role, and the sync polling trigger reads the interval
+    // the same way for every device.
+    match /config/role_permissions {
+      allow read: if isSignedIn();
+      allow write: if hasAnyRole(['systemAdmin']);
+    }
+
+    match /config/technical {
+      allow read: if isSignedIn();
+      allow write: if hasAnyRole(['systemAdmin']);
+    }
   }
 }

@@ -140,6 +140,35 @@ void main() {
     expect(hard.priorityScore, greaterThan(easy.priorityScore));
   });
 
+  test('hazard zone sources are surfaced in reasoning when provided', () {
+    final withSources = engine.assess(
+      habitation: habitation(),
+      risk: riskOf(0.5),
+      capacity: capacityOf(exposedPopulation: 200, availableSafeCapacity: 100),
+      relocationPlan: planWith([candidateAt(1000)]),
+      hazardZoneSources: const ['official:local-1', 'Geological Survey of India'],
+      now: now,
+    );
+    final withoutSources = engine.assess(
+      habitation: habitation(),
+      risk: riskOf(0.5),
+      capacity: capacityOf(exposedPopulation: 200, availableSafeCapacity: 100),
+      relocationPlan: planWith([candidateAt(1000)]),
+      now: now,
+    );
+
+    expect(
+      withSources.reasoning.any(
+        (r) => r.contains('official:local-1') && r.contains('Geological Survey of India'),
+      ),
+      isTrue,
+    );
+    expect(
+      withoutSources.reasoning.any((r) => r.contains('Hazard data source')),
+      isFalse,
+    );
+  });
+
   test('reasoning is never empty and carries the model version', () {
     final result = engine.assess(
       habitation: habitation(),

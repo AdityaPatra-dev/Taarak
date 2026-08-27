@@ -13,6 +13,8 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<Result<void>> sendPasswordResetEmail({required String email});
+
   Future<void> logout();
 
   /// Reads a previously persisted session, if any — used on app start to

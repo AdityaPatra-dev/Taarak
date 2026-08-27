@@ -13,6 +13,8 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
   });
+
+  Future<Result<void>> sendPasswordResetEmail({required String email});
 }
 
 /// Talks to the Identity backend module (blueprint section 7). Not usable
@@ -45,6 +47,15 @@ class ApiAuthRemoteDataSource implements AuthRemoteDataSource {
       '/auth/register',
       data: {'name': name, 'email': email, 'password': password},
       parser: (json) => AuthSession.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  @override
+  Future<Result<void>> sendPasswordResetEmail({required String email}) {
+    return _apiClient.post<void>(
+      '/auth/forgot-password',
+      data: {'email': email},
+      parser: (_) {},
     );
   }
 }

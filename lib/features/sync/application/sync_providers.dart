@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/admin/application/admin_providers.dart';
+import 'package:taarak/features/admin/domain/technical_config.dart';
 import 'package:taarak/features/alerts/application/alert_providers.dart';
 import 'package:taarak/features/audit/application/audit_providers.dart';
 import 'package:taarak/features/dashboard/application/dashboard_providers.dart';
@@ -82,12 +84,20 @@ final syncOnReconnectTriggerProvider = Provider.autoDispose<void>((ref) {
 /// Polling centrally here means every screen that already `ref.watch`es
 /// its data provider benefits automatically, with no per-screen wiring.
 final syncPollingTriggerProvider = Provider.autoDispose<void>((ref) {
+  // Watching the admin-configurable interval here (rather than reading it
+  // once) means an admin's change on Manage Technical Configuration
+  // rebuilds this provider — cancelling and recreating the timer with the
+  // new interval — for every running session, not just after a restart.
+  final intervalSeconds =
+      ref.watch(technicalConfigProvider).valueOrNull?.syncIntervalSeconds ??
+      TechnicalConfig.defaults.syncIntervalSeconds;
+
   // Timer.periodic's first tick only fires after the interval elapses —
-  // sync once immediately too, so app launch doesn't wait 45s for the
-  // first pull (matching how fast the old per-screen pull used to be).
+  // sync once immediately too, so app launch doesn't wait for the first
+  // pull (matching how fast the old per-screen pull used to be).
   _syncAndRefresh(ref);
   final timer = Timer.periodic(
-    const Duration(seconds: 45),
+    Duration(seconds: intervalSeconds),
     (_) => _syncAndRefresh(ref),
   );
   ref.onDispose(timer.cancel);

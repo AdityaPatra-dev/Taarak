@@ -105,6 +105,18 @@ class DevMockAuthRemoteDataSource implements AuthRemoteDataSource {
     return Result.success(_sessionFor(account));
   }
 
+  @override
+  Future<Result<void>> sendPasswordResetEmail({required String email}) async {
+    if (!_accounts.containsKey(email)) {
+      return const Result.failure(
+        NotFoundFailure('No account found for this email'),
+      );
+    }
+    // No real email to send in the demo directory — this just confirms
+    // the account exists, which is all the login screen needs from it.
+    return const Result.success(null);
+  }
+
   AuthSession _sessionFor(_DevAccount account) => AuthSession(
     user: AppUser(
       id: account.email,

@@ -66,6 +66,24 @@ void main() {
     });
   });
 
+  group('sendPasswordResetEmail', () {
+    test('succeeds for a known demo account', () async {
+      final result = await repository.sendPasswordResetEmail(
+        email: 'citizen@taarak.dev',
+      );
+
+      expect(result.isSuccess, isTrue);
+    });
+
+    test('fails for an email with no account', () async {
+      final result = await repository.sendPasswordResetEmail(
+        email: 'nobody@example.com',
+      );
+
+      expect(result.isFailure, isTrue);
+    });
+  });
+
   group('session lifecycle', () {
     test('restoreSession reflects the last login until logout', () async {
       await repository.login(

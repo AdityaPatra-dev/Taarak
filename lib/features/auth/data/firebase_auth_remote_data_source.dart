@@ -91,6 +91,18 @@ class FirebaseAuthRemoteDataSource implements AuthRemoteDataSource {
     }
   }
 
+  @override
+  Future<Result<void>> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return const Result.success(null);
+    } on FirebaseAuthException catch (error) {
+      return Result.failure(_mapAuthException(error));
+    } catch (_) {
+      return const Result.failure(UnknownFailure());
+    }
+  }
+
   Future<Result<AuthSession>> _sessionForExistingUser(User user) async {
     try {
       final doc = await _firestore.collection('users').doc(user.uid).get();

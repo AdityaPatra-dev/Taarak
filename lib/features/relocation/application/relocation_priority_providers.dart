@@ -14,6 +14,7 @@ final relocationPriorityEngineProvider = Provider<RelocationPriorityEngine>(
 final relocationPriorityServiceProvider = Provider<RelocationPriorityService>(
   (ref) => RelocationPriorityService(
     habitationRepository: ref.watch(localHabitationRepositoryProvider),
+    hazardZoneRepository: ref.watch(localHazardZoneRepositoryProvider),
     riskAssessmentService: ref.watch(riskAssessmentServiceProvider),
     capacityAssessmentService: ref.watch(capacityAssessmentServiceProvider),
     relocationPlanningService: ref.watch(relocationPlanningServiceProvider),

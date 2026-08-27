@@ -30,6 +30,11 @@ const Map<UserRole, Set<Permission>> rolePermissions = {
     Permission.submitDamageReport,
     Permission.updateFieldStatus,
     Permission.verifyFieldObservation,
+    // navigateToIncident's only implementation is planning a route and
+    // pushing to /map to show it — without this, that push itself got
+    // bounced to /unauthorized. Same fix, same reason, as localOfficial
+    // below.
+    Permission.viewRiskMap,
   },
   UserRole.localOfficial: {
     Permission.verifyReports,

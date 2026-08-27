@@ -68,6 +68,12 @@ class RelocationPriorityScreen extends ConsumerWidget {
   }
 }
 
+String _accessibilityLabel(double difficulty) {
+  if (difficulty >= 0.7) return 'Difficult';
+  if (difficulty >= 0.4) return 'Moderate';
+  return 'Easy';
+}
+
 Color _tierColor(RelocationPriorityTier tier) => switch (tier) {
   RelocationPriorityTier.immediate => const Color(0xFFB3261E),
   RelocationPriorityTier.shortTerm => const Color(0xFFB4540A),
@@ -134,6 +140,10 @@ class _PriorityCard extends StatelessWidget {
                     value: '${result.populationExposed}',
                   ),
                   _Stat(
+                    label: 'Shelter capacity',
+                    value: '${result.shelterCapacity}',
+                  ),
+                  _Stat(
                     label: 'Shelter deficit',
                     value: result.capacityGap > 0
                         ? '${result.capacityGap}'
@@ -144,6 +154,10 @@ class _PriorityCard extends StatelessWidget {
                     value: result.distanceToShelterMeters == null
                         ? 'None found'
                         : '${(result.distanceToShelterMeters! / 1000).toStringAsFixed(1)} km',
+                  ),
+                  _Stat(
+                    label: 'Accessibility',
+                    value: _accessibilityLabel(result.accessibilityDifficulty),
                   ),
                 ],
               ),

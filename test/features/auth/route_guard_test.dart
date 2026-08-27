@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taarak/app/route_guard.dart';
+import 'package:taarak/features/admin/domain/role_permission_overrides.dart';
 import 'package:taarak/features/auth/domain/app_user.dart';
 import 'package:taarak/features/auth/domain/auth_session.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
@@ -169,5 +170,70 @@ void main() {
         );
       },
     );
+
+    test(
+      'a role permission override grants access to a route the role would '
+      'otherwise be turned away from',
+      () {
+        final citizen = _sessionFor(UserRole.citizen);
+        final overrides = const RolePermissionOverrides().withRole(
+          UserRole.citizen,
+          {...UserRole.citizen.permissions, Permission.manageLocalIncidents},
+        );
+
+        expect(
+          computeRedirect(
+            session: citizen,
+            location: '/hazards/report',
+            permissionOverrides: overrides,
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test(
+      'a role permission override revokes access to a route the role would '
+      'otherwise be admitted to',
+      () {
+        final official = _sessionFor(UserRole.localOfficial);
+        final overrides = const RolePermissionOverrides().withRole(
+          UserRole.localOfficial,
+          {...UserRole.localOfficial.permissions}
+            ..remove(Permission.manageLocalIncidents),
+        );
+
+        expect(
+          computeRedirect(
+            session: official,
+            location: '/hazards/report',
+            permissionOverrides: overrides,
+          ),
+          '/unauthorized',
+        );
+      },
+    );
+
+    test(
+      'a field responder can reach /map — the route that navigateToIncident '
+      'pushes to after planning a route to an assigned incident',
+      () {
+        final responder = _sessionFor(UserRole.fieldResponder);
+        expect(computeRedirect(session: responder, location: '/map'), isNull);
+      },
+    );
+
+    test('a role with no override falls back to its default permissions', () {
+      final official = _sessionFor(UserRole.localOfficial);
+
+      expect(
+        computeRedirect(
+          session: official,
+          location: '/hazards/report',
+          permissionOverrides: const RolePermissionOverrides(),
+        ),
+        isNull,
+      );
+    });
   });
 }

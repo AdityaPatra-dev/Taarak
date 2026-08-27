@@ -1,36 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show TextInput;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/shared/widgets/auth_brand_header.dart';
 
-/// Public self-registration always creates a Citizen account. Field
-/// Responder, Official and Admin roles are provisioned separately rather
-/// than self-declared — letting anyone pick their own government role at
-/// signup would defeat the RBAC restrictions in blueprint section 3.
-class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+/// Reached from [LoginScreen]'s "Forgot password?" link — sends a
+/// Firebase-issued reset email via [AuthController.sendPasswordResetEmail].
+/// Shows the real result rather than a blanket "check your email" message
+/// regardless of outcome: this app's own rules elsewhere rule out fake
+/// success states, and a wrong-email typo is exactly the kind of mistake a
+/// citizen under stress needs to actually see, not have silently swallowed.
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<ForgotPasswordScreen> createState() =>
+      _ForgotPasswordScreenState();
 }
 
-class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   bool _isSubmitting = false;
-  bool _obscurePassword = true;
   String? _errorMessage;
+  bool _sent = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
@@ -38,9 +37,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (Navigator.of(context).canPop()) {
       context.pop();
     } else {
-      // Reached directly (e.g. a bookmarked/typed URL on web) — nothing to
-      // pop back to, so fall back to a real navigation instead of a dead
-      // button.
       context.go('/login');
     }
   }
@@ -54,15 +50,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final result = await ref
         .read(authControllerProvider.notifier)
-        .register(
-          name: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
+        .sendPasswordResetEmail(email: _emailController.text.trim());
 
     if (!mounted) return;
     result.when(
-      success: (_) => TextInput.finishAutofillContext(),
+      success: (_) {
+        TextInput.finishAutofillContext();
+        setState(() => _sent = true);
+      },
       failure: (failure) => setState(() => _errorMessage = failure.message),
     );
     setState(() => _isSubmitting = false);
@@ -81,12 +76,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             SingleChildScrollView(
               child: Column(
                 children: [
-                  const AuthBrandHeader(tagline: 'Create a citizen account'),
+                  const AuthBrandHeader(tagline: 'Reset your password'),
                   Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 420),
                       child: AuthCard(
-                        child: _buildFormFields(scheme, textTheme),
+                        child: _sent
+                            ? _buildSentState(scheme, textTheme)
+                            : _buildFormFields(scheme, textTheme),
                       ),
                     ),
                   ),
@@ -108,6 +105,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  Widget _buildSentState(ColorScheme scheme, TextTheme textTheme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(Icons.mark_email_read_outlined, size: 40, color: scheme.primary),
+        const SizedBox(height: Spacing.sm),
+        Text('Check your email', style: textTheme.headlineSmall),
+        const SizedBox(height: Spacing.xs),
+        Text(
+          'If an account exists for ${_emailController.text.trim()}, a '
+          'password reset link is on its way.',
+          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: Spacing.lg),
+        FilledButton(
+          onPressed: () => _goBackToLogin(context),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+          child: const Text('Back to sign in'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFormFields(ColorScheme scheme, TextTheme textTheme) {
     return Form(
       key: _formKey,
@@ -116,67 +137,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Create account', style: textTheme.headlineSmall),
+            Text('Reset password', style: textTheme.headlineSmall),
             const SizedBox(height: Spacing.xs),
             Text(
-              'Report incidents, get alerts, mark yourself safe.',
+              'Enter the email on your account and we\'ll send a link to '
+              'reset your password.',
               style: textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: Spacing.lg),
             TextFormField(
-              controller: _nameController,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.name],
-              decoration: const InputDecoration(
-                labelText: 'Full name',
-                prefixIcon: Icon(Icons.badge_outlined),
-              ),
-              validator: (value) => (value == null || value.trim().isEmpty)
-                  ? 'Enter your name'
-                  : null,
-            ),
-            const SizedBox(height: Spacing.sm),
-            TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
+              textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.email],
+              onFieldSubmitted: (_) => _submit(),
               decoration: const InputDecoration(
                 labelText: 'Email',
                 prefixIcon: Icon(Icons.email_outlined),
               ),
               validator: (value) => (value == null || !value.contains('@'))
                   ? 'Enter a valid email'
-                  : null,
-            ),
-            const SizedBox(height: Spacing.sm),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              textInputAction: TextInputAction.done,
-              // newPassword, not password: this creates a credential rather
-              // than filling an existing one, so a password manager offers
-              // to generate/save a new strong password instead of
-              // autofilling whatever it has saved for this site already.
-              autofillHints: const [AutofillHints.newPassword],
-              onFieldSubmitted: (_) => _submit(),
-              decoration: InputDecoration(
-                labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                  ),
-                  onPressed: () =>
-                      setState(() => _obscurePassword = !_obscurePassword),
-                ),
-              ),
-              validator: (value) => (value == null || value.length < 6)
-                  ? 'At least 6 characters'
                   : null,
             ),
             if (_errorMessage != null) ...[
@@ -225,21 +207,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Create account'),
+                  : const Text('Send reset link'),
             ),
             const SizedBox(height: Spacing.xs),
             TextButton(
               onPressed: () => _goBackToLogin(context),
-              child: const Text('Already have an account? Sign in'),
-            ),
-            const SizedBox(height: Spacing.sm),
-            Text(
-              'Field responder, official and admin accounts are '
-              'provisioned by a system admin, not self-registered.',
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
+              child: const Text('Back to sign in'),
             ),
           ],
         ),

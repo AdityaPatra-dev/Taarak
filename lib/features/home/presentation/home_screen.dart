@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taarak/app/spacing.dart';
 import 'package:taarak/core/providers/core_providers.dart';
+import 'package:taarak/features/admin/application/admin_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
@@ -27,7 +28,16 @@ class HomeScreen extends ConsumerWidget {
     }
 
     final user = session.user;
-    final permissions = user.role.permissions.toList()
+    // Consults a System Admin's Manage Permissions edits (see
+    // rolePermissionOverridesProvider) so this screen — and the route
+    // guard reached by tapping any button below — always agree on what
+    // the role can actually do right now, not just its hardcoded default.
+    final effectivePermissions =
+        ref.watch(rolePermissionOverridesProvider).valueOrNull
+            ?.effectivePermissionsFor(user.role) ??
+        user.role.permissions;
+    bool can(Permission permission) => effectivePermissions.contains(permission);
+    final permissions = effectivePermissions.toList()
       ..sort((a, b) => a.label.compareTo(b.label));
     final syncSummary =
         ref.watch(syncQueueSummaryProvider).valueOrNull ??
@@ -35,130 +45,142 @@ class HomeScreen extends ConsumerWidget {
     final isDevMode = ref.watch(appConfigProvider).isDevMode;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final hasSos = user.role.can(Permission.sendSos);
+    final hasSos = can(Permission.sendSos);
 
     final actions = <_QuickAction>[
-      if (user.role.can(Permission.submitIncidentReport))
+      if (can(Permission.submitIncidentReport))
         _QuickAction(
           icon: Icons.report_outlined,
           label: 'Report Incident',
           onTap: () => context.push('/report'),
         ),
-      if (user.role.can(Permission.updateSafeStatus))
+      if (can(Permission.updateSafeStatus))
         _QuickAction(
           icon: Icons.health_and_safety_outlined,
           label: 'I Am Safe',
           onTap: () => context.push('/safe-status'),
         ),
-      if (user.role.can(Permission.verifyReports))
+      if (can(Permission.verifyReports))
         _QuickAction(
           icon: Icons.fact_check_outlined,
           label: 'Verify Reports',
           onTap: () => context.push('/verification'),
         ),
-      if (user.role.can(Permission.manageSheltersResources))
+      if (can(Permission.manageSheltersResources))
         _QuickAction(
           icon: Icons.home_work_outlined,
           label: 'Shelters & Resources',
           onTap: () => context.push('/shelters/manage'),
         ),
-      if (user.role.can(Permission.manageLocalIncidents))
+      if (can(Permission.manageLocalIncidents))
         _QuickAction(
           icon: Icons.warning_amber_outlined,
           label: 'Report Hazard Zone',
           onTap: () => context.push('/hazards/report'),
         ),
-      if (user.role.can(Permission.manageLocalIncidents))
+      if (can(Permission.manageLocalIncidents))
         _QuickAction(
           icon: Icons.campaign_outlined,
           label: 'Simulate Government Alert',
           onTap: () => context.push('/hazards/simulate-alert'),
         ),
-      if (user.role.can(Permission.viewAlerts))
+      if (can(Permission.viewAlerts))
         _QuickAction(
           icon: Icons.campaign_outlined,
           label: 'Alerts',
           onTap: () => context.push('/alerts'),
         ),
-      if (user.role.can(Permission.sendBroadcast))
+      if (can(Permission.sendBroadcast))
         _QuickAction(
           icon: Icons.campaign,
           label: 'Broadcast Alert',
           onTap: () => context.push('/alerts/broadcast'),
         ),
-      if (user.role.can(Permission.monitorZones))
+      if (can(Permission.monitorZones))
         _QuickAction(
           icon: Icons.dashboard_outlined,
           label: 'Command Dashboard',
           onTap: () => context.push('/dashboard'),
         ),
-      if (user.role.can(Permission.reviewAudit))
+      if (can(Permission.reviewAudit))
         _QuickAction(
           icon: Icons.history_outlined,
           label: 'Audit Log',
           onTap: () => context.push('/audit'),
         ),
-      if (user.role.can(Permission.manageAccounts))
+      if (can(Permission.manageAccounts))
         _QuickAction(
           icon: Icons.manage_accounts_outlined,
           label: 'Manage Accounts',
           onTap: () => context.push('/admin/users'),
         ),
-      if (user.role.can(Permission.moderateContent))
+      if (can(Permission.moderateContent))
         _QuickAction(
           icon: Icons.remove_moderator_outlined,
           label: 'Content Moderation',
           onTap: () => context.push('/admin/moderation'),
         ),
-      if (user.role.can(Permission.viewAssignedIncidents))
+      if (can(Permission.managePermissions))
+        _QuickAction(
+          icon: Icons.admin_panel_settings_outlined,
+          label: 'Manage Permissions',
+          onTap: () => context.push('/admin/permissions'),
+        ),
+      if (can(Permission.manageTechnicalConfiguration))
+        _QuickAction(
+          icon: Icons.settings_suggest_outlined,
+          label: 'Technical Configuration',
+          onTap: () => context.push('/admin/technical'),
+        ),
+      if (can(Permission.viewAssignedIncidents))
         _QuickAction(
           icon: Icons.assignment_turned_in_outlined,
           label: 'My Assigned Incidents',
           onTap: () => context.push('/field/incidents'),
         ),
-      if (user.role.can(Permission.manageResponders))
+      if (can(Permission.manageResponders))
         _QuickAction(
           icon: Icons.groups_outlined,
           label: 'Manage Responders',
           onTap: () => context.push('/command/responders'),
         ),
-      if (user.role.can(Permission.manageResources))
+      if (can(Permission.manageResources))
         _QuickAction(
           icon: Icons.inventory_2_outlined,
           label: 'Manage Resources',
           onTap: () => context.push('/command/resources'),
         ),
-      if (user.role.can(Permission.manageRelocation))
+      if (can(Permission.manageRelocation))
         _QuickAction(
           icon: Icons.moving_outlined,
           label: 'Manage Relocation',
           onTap: () => context.push('/command/relocation'),
         ),
-      if (user.role.can(Permission.manageRelocation))
+      if (can(Permission.manageRelocation))
         _QuickAction(
           icon: Icons.leaderboard_outlined,
           label: 'Relocation Priority',
           onTap: () => context.push('/relocation/priority'),
         ),
-      if (user.role.can(Permission.manageHabitations))
+      if (can(Permission.manageHabitations))
         _QuickAction(
           icon: Icons.holiday_village_outlined,
           label: 'Register Habitation',
           onTap: () => context.push('/habitations/register'),
         ),
-      if (user.role.can(Permission.crossDistrictOversight))
+      if (can(Permission.crossDistrictOversight))
         _QuickAction(
           icon: Icons.public_outlined,
           label: 'Cross-District Oversight',
           onTap: () => context.push('/state/oversight'),
         ),
-      if (user.role.can(Permission.viewReports))
+      if (can(Permission.viewReports))
         _QuickAction(
           icon: Icons.bar_chart_outlined,
           label: 'State Reports',
           onTap: () => context.push('/state/reports'),
         ),
-      if (user.role.can(Permission.managePolicyConfiguration))
+      if (can(Permission.managePolicyConfiguration))
         _QuickAction(
           icon: Icons.tune,
           label: 'Policy Configuration',
@@ -182,7 +204,7 @@ class HomeScreen extends ConsumerWidget {
       appBar: TaarakAppBar(
         title: 'TAARAK',
         actions: [
-          if (user.role.can(Permission.viewRiskMap))
+          if (can(Permission.viewRiskMap))
             IconButton(
               icon: const Icon(Icons.map_outlined),
               tooltip: 'Risk Map',

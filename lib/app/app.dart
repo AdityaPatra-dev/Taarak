@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:taarak/app/router.dart';
 import 'package:taarak/app/theme.dart';
+import 'package:taarak/features/admin/application/admin_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/notifications/application/notification_providers.dart';
 import 'package:taarak/features/sync/application/sync_providers.dart';
@@ -21,6 +22,11 @@ class TaarakApp extends ConsumerWidget {
     // notification (client-only: no server push, works while the app is
     // open/backgrounded).
     ref.watch(notificationWatcherProvider);
+    // Same lifetime — keeps the role→permission override map warm so
+    // computeRedirect's ref.read of it (inside the router's redirect
+    // closure, which can't ref.watch) always sees a resolved value rather
+    // than a perpetually-reloading autoDispose provider with no watcher.
+    ref.watch(rolePermissionOverridesProvider);
 
     // Router redirects assume the session restore is already resolved, so
     // hold on a splash screen until then rather than teaching the router

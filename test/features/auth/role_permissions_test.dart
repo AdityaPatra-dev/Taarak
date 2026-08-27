@@ -26,6 +26,15 @@ void main() {
       expect(role.can(Permission.manageAccounts), isFalse);
     });
 
+    test(
+      'a field responder can view the risk map — navigateToIncident\'s only '
+      'implementation pushes to /map to show the planned route, so without '
+      'this that push bounces to /unauthorized',
+      () {
+        expect(UserRole.fieldResponder.can(Permission.viewRiskMap), isTrue);
+      },
+    );
+
     test('a local official can verify reports but not manage accounts', () {
       const role = UserRole.localOfficial;
       expect(role.can(Permission.verifyReports), isTrue);

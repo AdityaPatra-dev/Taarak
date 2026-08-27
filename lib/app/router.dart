@@ -10,10 +10,14 @@ import 'package:taarak/features/dashboard/presentation/command_dashboard_screen.
 import 'package:taarak/features/dashboard/presentation/incident_detail_screen.dart';
 import 'package:taarak/features/device_relay/presentation/device_relay_screen.dart';
 import 'package:taarak/features/disaster_events/presentation/simulate_alert_screen.dart';
+import 'package:taarak/features/auth/presentation/forgot_password_screen.dart';
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
+import 'package:taarak/features/admin/application/admin_providers.dart';
 import 'package:taarak/features/admin/presentation/content_moderation_screen.dart';
+import 'package:taarak/features/admin/presentation/manage_permissions_screen.dart';
+import 'package:taarak/features/admin/presentation/manage_technical_configuration_screen.dart';
 import 'package:taarak/features/admin/presentation/user_admin_screen.dart';
 import 'package:taarak/features/command/presentation/manage_relocation_screen.dart';
 import 'package:taarak/features/command/presentation/manage_resources_screen.dart';
@@ -64,9 +68,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     // to home. computeRedirect below still gates it exactly the same way
     // regardless of how the location was reached.
     refreshListenable: refreshNotifier,
+    // ref.read, not ref.watch: this closure runs on every navigation
+    // attempt, not during appRouterProvider's own build — the same reason
+    // the session lookup just below it already uses read rather than
+    // watch. A permission-override edit takes effect on the affected
+    // user's next navigation (including the same quick-action tap that
+    // just got newly enabled for them), not via a live mid-page kick-out.
     redirect: (context, state) => computeRedirect(
       session: ref.read(authControllerProvider).valueOrNull,
       location: state.matchedLocation,
+      permissionOverrides: ref
+          .read(rolePermissionOverridesProvider)
+          .valueOrNull,
     ),
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomeScreen()),
@@ -74,10 +87,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
       ),
-      GoRoute(
-        path: '/map',
-        builder: (context, state) => const RiskMapScreen(),
-      ),
+      GoRoute(path: '/map', builder: (context, state) => const RiskMapScreen()),
       GoRoute(
         path: '/hazards/report',
         builder: (context, state) => const ReportHazardZoneScreen(),
@@ -103,7 +113,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/shelters/manage',
         builder: (context, state) => const ShelterManagementScreen(),
       ),
-      GoRoute(path: '/alerts', builder: (context, state) => const AlertsScreen()),
+      GoRoute(
+        path: '/alerts',
+        builder: (context, state) => const AlertsScreen(),
+      ),
       GoRoute(
         path: '/alerts/broadcast',
         builder: (context, state) => const BroadcastAlertScreen(),
@@ -118,7 +131,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           incidentId: state.pathParameters['incidentId']!,
         ),
       ),
-      GoRoute(path: '/audit', builder: (context, state) => const AuditLogScreen()),
+      GoRoute(
+        path: '/audit',
+        builder: (context, state) => const AuditLogScreen(),
+      ),
       GoRoute(
         path: '/admin/users',
         builder: (context, state) => const UserAdminScreen(),
@@ -126,6 +142,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/moderation',
         builder: (context, state) => const ContentModerationScreen(),
+      ),
+      GoRoute(
+        path: '/admin/permissions',
+        builder: (context, state) => const ManagePermissionsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/technical',
+        builder: (context, state) => const ManageTechnicalConfigurationScreen(),
       ),
       GoRoute(
         path: '/field/incidents',
@@ -178,13 +202,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/device-relay',
         builder: (context, state) => const DeviceRelayScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       GoRoute(
         path: '/unauthorized',

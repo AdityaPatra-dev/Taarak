@@ -38,6 +38,7 @@ class RelocationPriorityEngine {
     required CapacityGapResult capacity,
     required RelocationPlan relocationPlan,
     double maxRelevantDistanceMeters = defaultMaxRelevantDistanceMeters,
+    List<String> hazardZoneSources = const [],
     DateTime? now,
   }) {
     final bestCandidate = relocationPlan.rankedCandidates.isEmpty
@@ -94,6 +95,7 @@ class RelocationPriorityEngine {
         bestCandidate: bestCandidate,
         accessibilityDifficulty: accessibilityDifficulty,
         priorityTier: priorityTier,
+        hazardZoneSources: hazardZoneSources,
       ),
       modelVersion: relocationPriorityModelVersion,
       assessedAt: now ?? DateTime.now(),
@@ -106,6 +108,7 @@ class RelocationPriorityEngine {
     required RelocationCandidate? bestCandidate,
     required double accessibilityDifficulty,
     required RelocationPriorityTier priorityTier,
+    required List<String> hazardZoneSources,
   }) {
     final reasons = <String>[
       '${risk.riskClass.name[0].toUpperCase()}${risk.riskClass.name.substring(1)} '
@@ -141,6 +144,10 @@ class RelocationPriorityEngine {
 
     if (accessibilityDifficulty >= 0.7) {
       reasons.add('Site access is rated difficult, complicating evacuation.');
+    }
+
+    if (hazardZoneSources.isNotEmpty) {
+      reasons.add('Hazard data source(s): ${hazardZoneSources.join(', ')}.');
     }
 
     reasons.add('Recommended: ${priorityTier.recommendedAction}');

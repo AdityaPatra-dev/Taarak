@@ -1,8 +1,9 @@
+import 'package:taarak/features/admin/domain/role_permission_overrides.dart';
 import 'package:taarak/features/auth/domain/auth_session.dart';
 import 'package:taarak/features/auth/domain/permission.dart';
 import 'package:taarak/features/auth/domain/user_role.dart';
 
-const _authRoutes = {'/login', '/register'};
+const _authRoutes = {'/login', '/register', '/forgot-password'};
 
 /// Registered by each feature as its screens land. `/map` is the citizen
 /// Risk Map (blueprint section 4); the official Incident Map / Risk &
@@ -34,6 +35,8 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/state/policy': Permission.managePolicyConfiguration,
   '/sms-prototype': Permission.sendSos,
   '/device-relay': Permission.sendSos,
+  '/admin/permissions': Permission.managePermissions,
+  '/admin/technical': Permission.manageTechnicalConfiguration,
 };
 
 /// [defaultRoutePermissions] only matches exact locations; a route with a
@@ -51,6 +54,7 @@ String? computeRedirect({
   required AuthSession? session,
   required String location,
   Map<String, Permission> routePermissions = defaultRoutePermissions,
+  RolePermissionOverrides? permissionOverrides,
 }) {
   if (session == null) {
     return _authRoutes.contains(location) ? null : '/login';
@@ -65,8 +69,13 @@ String? computeRedirect({
       : location.startsWith(fieldIncidentDetailPrefix)
       ? Permission.viewAssignedIncidents
       : routePermissions[location];
-  if (required != null && !session.user.role.can(required)) {
-    return '/unauthorized';
+  if (required != null) {
+    final effectivePermissions =
+        permissionOverrides?.effectivePermissionsFor(session.user.role) ??
+        session.user.role.permissions;
+    if (!effectivePermissions.contains(required)) {
+      return '/unauthorized';
+    }
   }
 
   return null;

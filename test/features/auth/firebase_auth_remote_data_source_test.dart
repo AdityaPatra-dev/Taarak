@@ -141,4 +141,40 @@ void main() {
       },
     );
   });
+
+  group('sendPasswordResetEmail', () {
+    test('succeeds for a real account', () async {
+      final auth = MockFirebaseAuth();
+      final dataSource = FirebaseAuthRemoteDataSource(
+        auth: auth,
+        firestore: FakeFirebaseFirestore(),
+      );
+
+      final result = await dataSource.sendPasswordResetEmail(
+        email: 'citizen@taarak.dev',
+      );
+
+      expect(result.isSuccess, isTrue);
+    });
+
+    test('a Firebase error maps to the same failure login already uses', () async {
+      final auth = MockFirebaseAuth();
+      whenCalling(
+        Invocation.method(#sendPasswordResetEmail, null, {
+          #email: 'unknown@taarak.dev',
+        }),
+      ).on(auth).thenThrow(FirebaseAuthException(code: 'user-not-found'));
+      final dataSource = FirebaseAuthRemoteDataSource(
+        auth: auth,
+        firestore: FakeFirebaseFirestore(),
+      );
+
+      final result = await dataSource.sendPasswordResetEmail(
+        email: 'unknown@taarak.dev',
+      );
+
+      expect(result.isFailure, isTrue);
+      expect((result as Failed).failure, isA<UnauthorizedFailure>());
+    });
+  });
 }

@@ -1,4 +1,5 @@
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
+import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/features/capacity/application/capacity_assessment_service.dart';
 import 'package:taarak/features/capacity/domain/capacity_gap_result.dart';
 import 'package:taarak/features/relocation/application/relocation_planning_service.dart';
@@ -15,6 +16,7 @@ import 'package:taarak/features/risk/domain/risk_assessment_result.dart';
 /// through [RelocationPriorityEngine]. Ranked highest-priority first.
 class RelocationPriorityService {
   final LocalHabitationRepository _habitationRepository;
+  final LocalHazardZoneRepository _hazardZoneRepository;
   final RiskAssessmentService _riskAssessmentService;
   final CapacityAssessmentService _capacityAssessmentService;
   final RelocationPlanningService _relocationPlanningService;
@@ -22,11 +24,13 @@ class RelocationPriorityService {
 
   RelocationPriorityService({
     required LocalHabitationRepository habitationRepository,
+    required LocalHazardZoneRepository hazardZoneRepository,
     required RiskAssessmentService riskAssessmentService,
     required CapacityAssessmentService capacityAssessmentService,
     required RelocationPlanningService relocationPlanningService,
     RelocationPriorityEngine? engine,
   }) : _habitationRepository = habitationRepository,
+       _hazardZoneRepository = hazardZoneRepository,
        _riskAssessmentService = riskAssessmentService,
        _capacityAssessmentService = capacityAssessmentService,
        _relocationPlanningService = relocationPlanningService,
@@ -36,6 +40,16 @@ class RelocationPriorityService {
     final habitationsResult = await _habitationRepository.getAll();
     final habitations = habitationsResult.dataOrNull ?? const [];
     if (habitations.isEmpty) return const [];
+
+    // Resolved once per run (not per habitation) so answering "where did
+    // this come from" for every entry in the queue costs one extra query,
+    // not N — the same batch-then-map shape [buildQueue] already uses for
+    // risk/capacity/relocation below.
+    final hazardZonesResult = await _hazardZoneRepository.getAll();
+    final sourceByZoneId = <String, String>{
+      for (final zone in hazardZonesResult.dataOrNull ?? const [])
+        zone.id: zone.source,
+    };
 
     final riskResults = await _riskAssessmentService.assessAllHabitations(
       now: now,
@@ -67,12 +81,18 @@ class RelocationPriorityService {
       // doesn't actually have.
       if (risk == null || capacity == null || plan == null) continue;
 
+      final hazardZoneSources = {
+        for (final zoneId in risk.contributingHazardZoneIds)
+          if (sourceByZoneId[zoneId] != null) sourceByZoneId[zoneId]!,
+      }.toList();
+
       queue.add(
         _engine.assess(
           habitation: habitation,
           risk: risk,
           capacity: capacity,
           relocationPlan: plan,
+          hazardZoneSources: hazardZoneSources,
           now: now,
         ),
       );
