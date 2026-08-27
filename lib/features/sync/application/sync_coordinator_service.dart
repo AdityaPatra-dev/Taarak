@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/repositories/local_alert_repository.dart';
 import 'package:taarak/core/database/repositories/local_damage_report_repository.dart';
+import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
@@ -37,6 +38,7 @@ class SyncCoordinatorService {
   final LocalAlertRepository? _alertRepository;
   final LocalDamageReportRepository? _damageReportRepository;
   final LocalResourceRepository? _resourceRepository;
+  final LocalHabitationRepository? _habitationRepository;
 
   SyncCoordinatorService({
     required SyncQueueDao syncQueueDao,
@@ -50,6 +52,7 @@ class SyncCoordinatorService {
     LocalAlertRepository? alertRepository,
     LocalDamageReportRepository? damageReportRepository,
     LocalResourceRepository? resourceRepository,
+    LocalHabitationRepository? habitationRepository,
   }) : _syncQueueDao = syncQueueDao,
        _networkInfo = networkInfo,
        _transport = transport,
@@ -60,7 +63,8 @@ class SyncCoordinatorService {
        _shelterRepository = shelterRepository,
        _alertRepository = alertRepository,
        _damageReportRepository = damageReportRepository,
-       _resourceRepository = resourceRepository;
+       _resourceRepository = resourceRepository,
+       _habitationRepository = habitationRepository;
 
   Future<SyncRunSummary> syncPendingEntries({DateTime? now}) async {
     if (!await _networkInfo.isConnected) {
@@ -172,6 +176,7 @@ class SyncCoordinatorService {
     applied += await _pullAlerts(pendingIdsByTable['local_alerts'] ?? const {});
     applied += await _pullDamageReports();
     applied += await _pullResources();
+    applied += await _pullHabitations();
     return applied;
   }
 
@@ -506,6 +511,52 @@ class SyncCoordinatorService {
       applied++;
     }
     return applied;
+  }
+
+  /// Habitations don't support a moderation-style delete like incidents/
+  /// alerts/hazard zones do — nothing in the app removes one today — so
+  /// this pull skips the [_deleteLocallyMissing] diff those three use.
+  Future<int> _pullHabitations() async {
+    final repository = _habitationRepository;
+    if (repository == null) return 0;
+
+    final pullResult = await _transport.pullAll('local_habitations');
+    final remoteRecords = pullResult.dataOrNull ?? const <RemoteSyncRecord>[];
+
+    var applied = 0;
+    for (final record in remoteRecords) {
+      final localResult = await repository.getById(record.entityId);
+      final local = localResult.dataOrNull;
+      if (local != null && local.version >= record.version) continue;
+
+      final habitation = _habitationFromPayload(record);
+      if (habitation == null) continue;
+
+      await repository.save(habitation);
+      applied++;
+    }
+    return applied;
+  }
+
+  LocalHabitation? _habitationFromPayload(RemoteSyncRecord record) {
+    try {
+      final payload = jsonDecode(record.payloadJson) as Map<String, dynamic>;
+      return LocalHabitation(
+        id: record.entityId,
+        name: payload['name'] as String,
+        latitude: (payload['latitude'] as num).toDouble(),
+        longitude: (payload['longitude'] as num).toDouble(),
+        population: (payload['population'] as num?)?.toInt() ?? 0,
+        administrativeRegionName: payload['administrativeRegionName'] as String?,
+        infrastructureQuality: (payload['infrastructureQuality'] as num?)
+            ?.toDouble(),
+        accessQuality: (payload['accessQuality'] as num?)?.toDouble(),
+        updatedAt: DateTime.now(),
+        version: record.version,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   LocalResource? _resourceFromPayload(RemoteSyncRecord record) {

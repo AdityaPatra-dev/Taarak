@@ -23,6 +23,7 @@ enum Permission {
   manageLocalIncidents,
   manageSheltersResources,
   sendBroadcast,
+  manageHabitations,
 
   // District/Command
   monitorZones,
@@ -61,6 +62,7 @@ extension PermissionLabel on Permission {
     Permission.manageLocalIncidents => 'Manage local incidents',
     Permission.manageSheltersResources => 'Manage shelters & resources',
     Permission.sendBroadcast => 'Send emergency broadcasts',
+    Permission.manageHabitations => 'Register vulnerable habitations',
     Permission.monitorZones => 'Monitor zones',
     Permission.viewCapacityGaps => 'View capacity gaps',
     Permission.manageResources => 'Manage resources',

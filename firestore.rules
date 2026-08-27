@@ -115,6 +115,18 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Vulnerable habitations (M08/M09/M10's subject) — the same official
+    // roles that report hazard zones register these; read stays open since
+    // the risk map, command dashboard, and relocation priority queue all
+    // need them regardless of the viewer's own role.
+    match /local_habitations/{id} {
+      allow read: if isSignedIn();
+      allow create, update: if hasAnyRole(
+        ['localOfficial', 'districtCommand', 'stateAdmin']
+      );
+      allow delete: if false;
+    }
+
     // Permission.managePolicyConfiguration (State/Admin only, write) —
     // read stays open since broadcast_alert_screen.dart and
     // report_hazard_zone_screen.dart read this regardless of the

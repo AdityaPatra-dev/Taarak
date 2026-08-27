@@ -11,6 +11,7 @@ const _authRoutes = {'/login', '/register'};
 const Map<String, Permission> defaultRoutePermissions = {
   '/map': Permission.viewRiskMap,
   '/hazards/report': Permission.manageLocalIncidents,
+  '/hazards/simulate-alert': Permission.manageLocalIncidents,
   '/report': Permission.submitIncidentReport,
   '/sos': Permission.sendSos,
   '/safe-status': Permission.updateSafeStatus,
@@ -26,6 +27,8 @@ const Map<String, Permission> defaultRoutePermissions = {
   '/command/responders': Permission.manageResponders,
   '/command/resources': Permission.manageResources,
   '/command/relocation': Permission.manageRelocation,
+  '/relocation/priority': Permission.manageRelocation,
+  '/habitations/register': Permission.manageHabitations,
   '/state/oversight': Permission.crossDistrictOversight,
   '/state/reports': Permission.viewReports,
   '/state/policy': Permission.managePolicyConfiguration,

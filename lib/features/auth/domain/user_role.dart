@@ -36,6 +36,7 @@ const Map<UserRole, Set<Permission>> rolePermissions = {
     Permission.manageLocalIncidents,
     Permission.manageSheltersResources,
     Permission.sendBroadcast,
+    Permission.manageHabitations,
     // Without this, an official reporting hazard zones/broadcasting to
     // them, verifying reports, or managing shelters had no way to see the
     // very map those actions place things on.
@@ -47,11 +48,18 @@ const Map<UserRole, Set<Permission>> rolePermissions = {
     Permission.manageResources,
     Permission.manageResponders,
     Permission.manageRelocation,
+    Permission.manageHabitations,
   },
   UserRole.stateAdmin: {
     Permission.crossDistrictOversight,
     Permission.viewReports,
     Permission.managePolicyConfiguration,
+    Permission.manageHabitations,
+    // A state authority needs the same relocation-priority view a
+    // district does, scoped wider — the PS's own named audience
+    // ("provides actionable insights to State Disaster Management
+    // Authorities") is exactly this permission's reason to exist.
+    Permission.manageRelocation,
   },
   UserRole.systemAdmin: {
     Permission.manageAccounts,

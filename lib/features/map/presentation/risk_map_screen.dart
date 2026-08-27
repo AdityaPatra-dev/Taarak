@@ -138,7 +138,10 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
             initialCenter: userPoint ?? defaultMapCenter,
             initialZoom: userPoint != null ? 15 : defaultMapZoom,
             mapController: _mapController,
-            polygons: buildHazardZoneLayer(hazardZones),
+            polygons: buildHazardZoneLayer(
+              hazardZones,
+              onTap: _showHazardZoneProvenance,
+            ),
             markers: {
               ...buildShelterLayer(
                 shelters,
@@ -185,6 +188,30 @@ class _RiskMapScreenState extends ConsumerState<RiskMapScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showHazardZoneProvenance(LocalHazardZone zone) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${zone.hazardType} · ${zone.severity}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text('Source: ${zone.source}'),
+            Text('Observed: ${zone.observedAt.toLocal()}'),
+            Text('Confidence: ${(zone.confidence * 100).round()}%'),
+          ],
+        ),
       ),
     );
   }

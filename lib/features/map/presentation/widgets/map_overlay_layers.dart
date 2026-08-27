@@ -17,7 +17,16 @@ gmaps.LatLng _toG(double lat, double lng) => gmaps.LatLng(lat, lng);
 /// severity/status palette without shipping custom bitmap icons.
 double _markerHue(Color color) => HSVColor.fromColor(color).hue;
 
-Set<gmaps.Polygon> buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
+/// [onTap], when given, is a hazard zone's only way to show provenance —
+/// unlike [gmaps.Marker], [gmaps.Polygon] has no built-in InfoWindow, so a
+/// tap has to hand the zone off to the caller (a bottom sheet, typically)
+/// to actually display `source`/`observedAt`/`confidence` — the fields
+/// M06 already captures on every zone but nothing surfaced on the map
+/// itself until this existed.
+Set<gmaps.Polygon> buildHazardZoneLayer(
+  List<LocalHazardZone> hazardZones, {
+  void Function(LocalHazardZone zone)? onTap,
+}) {
   return {
     for (final zone in hazardZones)
       gmaps.Polygon(
@@ -29,6 +38,8 @@ Set<gmaps.Polygon> buildHazardZoneLayer(List<LocalHazardZone> hazardZones) {
         fillColor: severityColor(zone.severity).withValues(alpha: 0.35),
         strokeColor: severityColor(zone.severity),
         strokeWidth: 2,
+        consumeTapEvents: onTap != null,
+        onTap: onTap == null ? null : () => onTap(zone),
       ),
   };
 }

@@ -36,6 +36,7 @@ final syncCoordinatorServiceProvider = Provider<SyncCoordinatorService>(
     alertRepository: ref.watch(localAlertRepositoryProvider),
     damageReportRepository: ref.watch(localDamageReportRepositoryProvider),
     resourceRepository: ref.watch(localResourceRepositoryProvider),
+    habitationRepository: ref.watch(localHabitationRepositoryProvider),
   ),
 );
 

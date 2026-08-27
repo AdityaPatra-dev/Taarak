@@ -9,6 +9,7 @@ import 'package:taarak/features/auth/application/auth_controller.dart';
 import 'package:taarak/features/dashboard/presentation/command_dashboard_screen.dart';
 import 'package:taarak/features/dashboard/presentation/incident_detail_screen.dart';
 import 'package:taarak/features/device_relay/presentation/device_relay_screen.dart';
+import 'package:taarak/features/disaster_events/presentation/simulate_alert_screen.dart';
 import 'package:taarak/features/auth/presentation/login_screen.dart';
 import 'package:taarak/features/auth/presentation/register_screen.dart';
 import 'package:taarak/features/home/presentation/home_screen.dart';
@@ -19,9 +20,11 @@ import 'package:taarak/features/command/presentation/manage_resources_screen.dar
 import 'package:taarak/features/command/presentation/manage_responders_screen.dart';
 import 'package:taarak/features/field_response/presentation/assigned_incidents_screen.dart';
 import 'package:taarak/features/field_response/presentation/field_incident_detail_screen.dart';
+import 'package:taarak/features/habitations/presentation/register_habitation_screen.dart';
 import 'package:taarak/features/hazards/presentation/report_hazard_zone_screen.dart';
 import 'package:taarak/features/home/presentation/unauthorized_screen.dart';
 import 'package:taarak/features/map/presentation/risk_map_screen.dart';
+import 'package:taarak/features/relocation/presentation/relocation_priority_screen.dart';
 import 'package:taarak/features/state_admin/presentation/policy_configuration_screen.dart';
 import 'package:taarak/features/state_admin/presentation/state_reports_screen.dart';
 import 'package:taarak/features/profile/presentation/profile_screen.dart';
@@ -78,6 +81,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/hazards/report',
         builder: (context, state) => const ReportHazardZoneScreen(),
+      ),
+      GoRoute(
+        path: '/hazards/simulate-alert',
+        builder: (context, state) => const SimulateAlertScreen(),
       ),
       GoRoute(
         path: '/report',
@@ -141,6 +148,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/command/relocation',
         builder: (context, state) => const ManageRelocationScreen(),
+      ),
+      GoRoute(
+        path: '/relocation/priority',
+        builder: (context, state) => const RelocationPriorityScreen(),
+      ),
+      GoRoute(
+        path: '/habitations/register',
+        builder: (context, state) => const RegisterHabitationScreen(),
       ),
       GoRoute(
         path: '/state/oversight',

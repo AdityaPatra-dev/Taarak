@@ -68,6 +68,12 @@ class HomeScreen extends ConsumerWidget {
           label: 'Report Hazard Zone',
           onTap: () => context.push('/hazards/report'),
         ),
+      if (user.role.can(Permission.manageLocalIncidents))
+        _QuickAction(
+          icon: Icons.campaign_outlined,
+          label: 'Simulate Government Alert',
+          onTap: () => context.push('/hazards/simulate-alert'),
+        ),
       if (user.role.can(Permission.viewAlerts))
         _QuickAction(
           icon: Icons.campaign_outlined,
@@ -127,6 +133,18 @@ class HomeScreen extends ConsumerWidget {
           icon: Icons.moving_outlined,
           label: 'Manage Relocation',
           onTap: () => context.push('/command/relocation'),
+        ),
+      if (user.role.can(Permission.manageRelocation))
+        _QuickAction(
+          icon: Icons.leaderboard_outlined,
+          label: 'Relocation Priority',
+          onTap: () => context.push('/relocation/priority'),
+        ),
+      if (user.role.can(Permission.manageHabitations))
+        _QuickAction(
+          icon: Icons.holiday_village_outlined,
+          label: 'Register Habitation',
+          onTap: () => context.push('/habitations/register'),
         ),
       if (user.role.can(Permission.crossDistrictOversight))
         _QuickAction(
