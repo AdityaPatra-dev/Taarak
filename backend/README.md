@@ -1,5 +1,7 @@
 # TAARAK backend stub
 
+**Not required to build or run the app.** The Flutter app now talks to a real, hosted Firebase project unconditionally (see the root README's "Firebase" section) — nothing in `lib/` points at this stub anymore. It's kept here for historical reference only; skip this whole directory unless you're specifically curious about the client/server contract `SyncCoordinatorService` was originally built against.
+
 This is **not a production backend**. It exists to answer one question honestly: does the Flutter app's auth + sync client contract actually work against a real server, or only against mocks?
 
 Until now, nothing on the other end of `ApiClient`/`ApiSyncTransport` had ever run. This stub implements just enough of that contract — login/register, and the generic `/sync/<table>` push endpoint `SyncCoordinatorService` already speaks — to validate it for real.

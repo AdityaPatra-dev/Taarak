@@ -33,9 +33,12 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- M05: Google Maps JS SDK, required by google_maps_flutter on web.
-       Replace REPLACE_WITH_YOUR_MAPS_API_KEY with a real key that has
-       "Maps JavaScript API" enabled and its HTTP referrer restriction set
-       to this site's domain (taakrak-d9ed0.web.app). -->
+       Already a real, working key with "Maps JavaScript API" enabled —
+       no setup needed for a fresh clone. It's the same key used in
+       android/app/src/main/AndroidManifest.xml, which is why it has no
+       HTTP-referrer restriction either (a key can only have one
+       application-identity restriction type, and the Android SDK doesn't
+       send a referrer) — see that file's comment and the README. -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_fq9kiPi7gKZ3X9DEg4dLzcTwsPPIAsM"></script>
 </head>
 <body>

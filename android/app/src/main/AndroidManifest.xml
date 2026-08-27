@@ -12,10 +12,14 @@
         android:label="taarak"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
-        <!-- M05: Google Maps API key. Replace REPLACE_WITH_YOUR_MAPS_API_KEY
-             with a real key that has "Maps SDK for Android" enabled — see
-             console.cloud.google.com/google/maps-apis/credentials on the
-             same project as the Firebase project (taakrak-d9ed0). -->
+        <!-- M05: Google Maps API key. Already a real, working key with
+             "Maps SDK for Android" enabled — no setup needed for a fresh
+             clone. It has no Android-app (package + SHA-1) restriction on
+             purpose: the debug keystore that signs local/CI builds is
+             generated per machine, so restricting to one machine's SHA-1
+             would break Maps for everyone else who clones this repo. Add
+             that restriction (and switch to a dedicated non-debug key)
+             once real release signing is set up — see the README. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyB_fq9kiPi7gKZ3X9DEg4dLzcTwsPPIAsM" />
