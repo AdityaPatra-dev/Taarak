@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taarak/core/database/app_database.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
+import 'package:taarak/core/database/repositories/local_shelter_repository.dart';
 import 'package:taarak/core/database/sync_queue_dao.dart';
 import 'package:taarak/core/error/failure.dart';
 import 'package:taarak/core/network/network_info.dart';
@@ -475,6 +476,76 @@ void main() {
           final summary = await service.syncPendingEntries(now: now);
 
           expect(summary.pulledCount, 0);
+        },
+      );
+    },
+  );
+
+  group(
+    'A SHELTER REMOVED ON ONE DEVICE IS REMOVED ON ANOTHER — shelter delete propagation',
+    () {
+      late LocalShelterRepository shelterRepository;
+
+      setUp(() => shelterRepository = LocalShelterRepository(db));
+
+      LocalShelter localShelter(String id, {int version = 1}) => LocalShelter(
+        id: id,
+        name: 'Community Hall',
+        latitude: 10,
+        longitude: 20,
+        capacityTotal: 100,
+        occupancy: 0,
+        facilitiesJson: '[]',
+        accessQuality: null,
+        updatedAt: now,
+        version: version,
+      );
+
+      test(
+        'a shelter cached locally but absent from the remote set is deleted',
+        () async {
+          await shelterRepository.save(localShelter('shelter-1'));
+          final transport = _ScriptedTransport(const {})
+            ..remoteRecords = const [];
+          final service = SyncCoordinatorService(
+            syncQueueDao: syncQueueDao,
+            networkInfo: _FakeNetworkInfo(),
+            transport: transport,
+            shelterRepository: shelterRepository,
+          );
+
+          final summary = await service.syncPendingEntries(now: now);
+
+          expect(summary.pulledCount, 1);
+          final saved = await shelterRepository.getById('shelter-1');
+          expect(saved.isFailure, isTrue);
+        },
+      );
+
+      test(
+        'a shelter whose creation push just failed is kept, not deleted as missing',
+        () async {
+          await shelterRepository.save(localShelter('shelter-pending'));
+          await syncQueueDao.enqueue(
+            entityTable: 'local_shelters',
+            entityId: 'shelter-pending',
+            operation: 'create',
+            payloadJson: jsonEncode({'name': 'Community Hall'}),
+          );
+          final transport = _ScriptedTransport({
+            'shelter-pending': () => const Result.failure(NetworkFailure()),
+          })..remoteRecords = const [];
+          final service = SyncCoordinatorService(
+            syncQueueDao: syncQueueDao,
+            networkInfo: _FakeNetworkInfo(),
+            transport: transport,
+            shelterRepository: shelterRepository,
+          );
+
+          await service.syncPendingEntries(now: now);
+
+          final saved = await shelterRepository.getById('shelter-pending');
+          expect(saved.isSuccess, isTrue);
         },
       );
     },

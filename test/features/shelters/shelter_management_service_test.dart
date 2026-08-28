@@ -140,4 +140,41 @@ void main() {
       expect(result.isFailure, isTrue);
     });
   });
+
+  group('removeShelter', () {
+    test('deletes the shelter and writes an audit entry', () async {
+      final created = await service.upsertShelter(
+        name: 'Community Hall',
+        latitude: 10,
+        longitude: 20,
+        capacityTotal: 200,
+        officialId: 'official-1',
+        now: now,
+      );
+      final shelterId = created.dataOrNull!.id;
+
+      final result = await service.removeShelter(
+        shelterId: shelterId,
+        officialId: 'official-2',
+        now: now,
+      );
+
+      expect(result.isSuccess, isTrue);
+      final afterDelete = await repository.getById(shelterId);
+      expect(afterDelete.isFailure, isTrue);
+
+      final auditDao = AuditLogDao(db);
+      final trail = await auditDao.listForObject('shelter', shelterId);
+      expect(trail.dataOrNull!.first.action, 'shelter.removed');
+    });
+
+    test('fails cleanly for an unknown shelter', () async {
+      final result = await service.removeShelter(
+        shelterId: 'missing',
+        officialId: 'official-1',
+        now: now,
+      );
+      expect(result.isFailure, isTrue);
+    });
+  });
 }

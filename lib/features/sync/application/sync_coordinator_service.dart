@@ -172,7 +172,7 @@ class SyncCoordinatorService {
     applied += await _pullHazardZones(
       pendingIdsByTable['local_hazard_zones'] ?? const {},
     );
-    applied += await _pullShelters();
+    applied += await _pullShelters(pendingIdsByTable['local_shelters'] ?? const {});
     applied += await _pullAlerts(pendingIdsByTable['local_alerts'] ?? const {});
     applied += await _pullDamageReports();
     applied += await _pullResources();
@@ -357,7 +357,7 @@ class SyncCoordinatorService {
     }
   }
 
-  Future<int> _pullShelters() async {
+  Future<int> _pullShelters(Set<String> pendingIds) async {
     final repository = _shelterRepository;
     if (repository == null) return 0;
 
@@ -376,6 +376,13 @@ class SyncCoordinatorService {
       await repository.save(shelter);
       applied++;
     }
+    applied += await _deleteLocallyMissing<LocalShelter>(
+      getAllLocal: repository.getAll,
+      deleteLocal: repository.delete,
+      idOf: (shelter) => shelter.id,
+      remoteIds: remoteRecords.map((r) => r.entityId).toSet(),
+      pendingIds: pendingIds,
+    );
     return applied;
   }
 
