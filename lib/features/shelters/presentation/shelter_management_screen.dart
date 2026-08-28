@@ -170,6 +170,15 @@ class _ShelterCard extends ConsumerWidget {
                   icon: const Icon(Icons.tune, size: 16),
                   label: const Text('Edit'),
                 ),
+                OutlinedButton.icon(
+                  onPressed: () => _confirmRemove(context, ref),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: scheme.error,
+                    side: BorderSide(color: scheme.error),
+                  ),
+                  icon: const Icon(Icons.delete_outline, size: 16),
+                  label: const Text('Remove'),
+                ),
               ],
             ),
           ],
@@ -227,6 +236,52 @@ class _ShelterCard extends ConsumerWidget {
       success: (_) => ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Occupancy updated'))),
+      failure: (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+    );
+  }
+
+  Future<void> _confirmRemove(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Remove shelter?'),
+        content: Text(
+          'This removes "${shelter.name}" from the shelter list. This can\'t be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final officialId = ref.read(currentUserProvider)?.id;
+    if (officialId == null) return;
+
+    final result = await ref
+        .read(shelterManagementServiceProvider)
+        .removeShelter(shelterId: shelter.id, officialId: officialId);
+
+    ref.invalidate(sheltersProvider);
+
+    if (!context.mounted) return;
+    result.when(
+      success: (_) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Shelter removed'))),
       failure: (failure) => ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(failure.message))),

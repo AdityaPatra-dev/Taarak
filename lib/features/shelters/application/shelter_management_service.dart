@@ -159,6 +159,49 @@ class ShelterManagementService {
     return Result.success(updated);
   }
 
+  /// An actual delete, both locally and (once synced) in Firestore — a
+  /// shelter that's closed or was entered in error shouldn't keep showing
+  /// up as a relocation candidate. Matches [HazardIngestionService.remove]'s
+  /// pattern: confirm it exists, delete, enqueue the sync, then audit it.
+  Future<Result<void>> removeShelter({
+    required String shelterId,
+    required String officialId,
+    String? reason,
+    DateTime? now,
+  }) async {
+    final existingResult = await _shelterRepository.getById(shelterId);
+    if (existingResult case Failed<LocalShelter>(:final failure)) {
+      return Result.failure(failure);
+    }
+    final occurredAt = now ?? DateTime.now();
+
+    final deleteResult = await _shelterRepository.delete(shelterId);
+    if (deleteResult case Failed<void>(:final failure)) {
+      return Result.failure(failure);
+    }
+
+    final syncQueueDao = _syncQueueDao;
+    if (syncQueueDao != null) {
+      await syncQueueDao.enqueue(
+        entityTable: 'local_shelters',
+        entityId: shelterId,
+        operation: 'delete',
+        payloadJson: '{}',
+      );
+    }
+
+    await _auditLogDao.record(
+      actorId: officialId,
+      action: 'shelter.removed',
+      objectType: 'shelter',
+      objectId: shelterId,
+      reason: reason,
+      now: occurredAt,
+    );
+
+    return const Result.success(null);
+  }
+
   Set<ShelterFacilityType> facilitiesOf(LocalShelter shelter) {
     try {
       final decoded = jsonDecode(shelter.facilitiesJson);
