@@ -24,7 +24,7 @@ Lightweight, code-level documentation pass — findings only, nothing exploited,
 | `local_incident_reports/{id}` | Any signed-in user | Create: any signed-in user. Update: `localOfficial`/`districtCommand`. Delete: never. | |
 | `local_incidents/{id}` | Any signed-in user | Create/update: `localOfficial`/`districtCommand`. Delete: `systemAdmin` only (moderation). | |
 | `local_hazard_zones/{id}` | Any signed-in user | Create/update: `localOfficial`/`districtCommand`/`stateAdmin`. Delete: `systemAdmin` only. | |
-| `local_shelters/{id}` | Any signed-in user | Create/update: `localOfficial` only. Delete: never (not even by admin). | |
+| `local_shelters/{id}` | Any signed-in user | Create/update/delete: `localOfficial` only. | Delete added alongside `ShelterManagementService.removeShelter` — a Local Official's own manage capability, not `systemAdmin` moderation like incidents/hazard_zones/alerts. |
 | `local_alerts/{id}` | Any signed-in user | Create/update: `localOfficial` only. Delete: `systemAdmin` only. | |
 | `local_damage_reports/{id}` | Any signed-in user | Create: `fieldResponder` only. Update/delete: never. | Field reports are treated as immutable once filed. |
 | `local_resources/{id}` | Any signed-in user | Create/update: `districtCommand` only. Delete: never. | |
@@ -33,7 +33,7 @@ Lightweight, code-level documentation pass — findings only, nothing exploited,
 | `config/role_permissions` | Any signed-in user | `systemAdmin` only. | Runtime RBAC-override document — see `docs/modules/admin.md`. |
 | `config/technical` | Any signed-in user | `systemAdmin` only. | |
 
-**No collection allows unrestricted delete except by `systemAdmin`**, and several collections (`local_shelters`, `local_habitations`, `local_damage_reports`, `local_resources`) don't allow *any* role to delete — a deliberate immutability choice for those record types, worth knowing before assuming a "remove" feature exists anywhere in the app for them.
+**No collection allows unrestricted delete except by `systemAdmin`**, and several collections (`local_habitations`, `local_damage_reports`, `local_resources`) don't allow *any* role to delete — a deliberate immutability choice for those record types, worth knowing before assuming a "remove" feature exists anywhere in the app for them. `local_shelters` used to be in this list too, but now allows `localOfficial` delete (see its row above).
 
 **Missing authorization observed**: none found in the 11 rule blocks — every collection has an explicit, role-scoped write rule. The rules file's own header comment states it's meant to mirror `lib/app/route_guard.dart`'s permission table exactly, and spot-checking several entries against `06_ROUTING.md`'s route table confirms they do.
 

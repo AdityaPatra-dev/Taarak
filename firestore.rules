@@ -80,10 +80,12 @@ service cloud.firestore {
 
     // Permission.viewSheltersRoutes (citizen, read) vs.
     // Permission.manageSheltersResources (Local Official only, write).
+    // Unlike incidents/hazard_zones/alerts, a shelter's delete is the same
+    // Local Official manage capability as its create/update, not a
+    // systemAdmin-only moderation action — so it shares their allowlist.
     match /local_shelters/{id} {
       allow read: if isSignedIn();
-      allow create, update: if hasAnyRole(['localOfficial']);
-      allow delete: if false;
+      allow create, update, delete: if hasAnyRole(['localOfficial']);
     }
 
     // Permission.viewAlerts (citizen, read) vs. Permission.sendBroadcast

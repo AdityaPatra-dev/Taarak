@@ -115,7 +115,7 @@ shelter_capacity_feeds_relocation_test.dart):
 - `upsertShelter` treats "creates new" vs. "updates existing" purely by whether an `id` is passed in — there is no separate confirmation step or duplicate-name detection; two shelters with the same name and different ids are allowed.
 - `updateOccupancy` accepts any non-negative integer with no validation that it doesn't exceed `capacityTotal` — the UI's progress bar clamps its *display* fraction to `[0.0, 1.0]` (`shelter_management_screen.dart`'s `occupancyFraction`), but the underlying stored `occupancy` value itself is not clamped or validated against `capacityTotal` at the service layer.
 - `facilitiesOf` silently returns an empty set on malformed JSON rather than surfacing an error — a corrupted `facilitiesJson` value would make a shelter appear to have no facilities rather than flagging data corruption.
-- No delete/deactivate path exists in this module — a shelter can be edited but not removed (removal, if needed, would be an admin content-moderation action outside this module's scope, mirroring how `hazards`/`verification` model their own delete paths).
+- `removeShelter` deletes a shelter (screen → service → repository → audit log → sync queue, same shape as the write path), gated by the same `manageSheltersResources` permission as create/update — a Local Official's own manage action, not a `systemAdmin` moderation action like `hazards`'/`verification`'s delete paths.
 - `_ShelterFormScreenState` does not validate that `capacityTotal` is non-negative — `int.tryParse` accepts a negative number as long as it parses.
 
 ## Test Coverage
