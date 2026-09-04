@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local secrets passed via --dart-define-from-file=env.json (Gemini API
+# key). Never commit a real key — see env.json.example for the template.
+env.json

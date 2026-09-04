@@ -8,6 +8,7 @@ import 'package:taarak/core/database/repositories/local_capacity_assessment_repo
 import 'package:taarak/core/database/repositories/local_damage_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_environmental_observation_repository.dart';
 import 'package:taarak/core/database/repositories/local_habitation_repository.dart';
+import 'package:taarak/core/database/repositories/local_hazard_automation_state_repository.dart';
 import 'package:taarak/core/database/repositories/local_hazard_zone_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_report_repository.dart';
 import 'package:taarak/core/database/repositories/local_incident_repository.dart';
@@ -57,6 +58,11 @@ final localUserRepositoryProvider = Provider<LocalUserRepository>(
 final localHazardZoneRepositoryProvider = Provider<LocalHazardZoneRepository>(
   (ref) => LocalHazardZoneRepository(ref.watch(appDatabaseProvider)),
 );
+
+final localHazardAutomationStateRepositoryProvider =
+    Provider<LocalHazardAutomationStateRepository>(
+      (ref) => LocalHazardAutomationStateRepository(ref.watch(appDatabaseProvider)),
+    );
 
 final localIncidentRepositoryProvider = Provider<LocalIncidentRepository>(
   (ref) => LocalIncidentRepository(ref.watch(appDatabaseProvider)),

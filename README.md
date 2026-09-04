@@ -35,7 +35,7 @@ git clone <this-repo>
 cd Taarak
 flutter pub get
 flutter analyze   # should report 0 errors (a handful of pre-existing lint infos is normal)
-flutter test      # 440 tests, all should pass
+flutter test      # 473 tests, all should pass
 flutter run       # pick a device when prompted (emulator, physical Android device, or Chrome)
 ```
 
@@ -118,6 +118,35 @@ in both places). Nothing to configure for local development or building.
 - The key belongs to a Google Cloud "Maps Platform" trial project with no
   billing account attached. It's realistically fine for demo/development
   traffic, but is not something to depend on for real production load.
+
+## Gemini API key — optional, unlike Maps/Firebase above
+
+The automatic hazard-zone engine (`lib/features/hazard_automation/`)
+works fully without this: live weather data from Open-Meteo alone
+decides whether a zone is created or removed. A Gemini key only adds a
+short plain-English rationale to zones the weather data already flagged
+— it's an enrichment, not a requirement, and it never influences the
+create/delete decision itself.
+
+If you have a key and want that enrichment:
+
+1. Copy `env.json.example` to `env.json` at the repo root and fill in
+   `GEMINI_API_KEY`. `env.json` is gitignored — never commit a real key
+   here, the same lesson as the Maps key above.
+2. Run with `flutter run --dart-define-from-file=env.json` (or add the
+   same flag to `flutter build ...`) instead of the plain `flutter run`
+   shown above.
+3. A System Admin still has to flip `geminiEnabled` on under Manage
+   Technical Configuration — a compiled-in key alone doesn't turn this
+   on, so it can be disabled at runtime (no rebuild) if the key is ever
+   compromised.
+
+Note this key still ends up embedded in the compiled binary, extractable
+by decompiling it — the same class of exposure as the Maps key above,
+just not visible in `git log`. A backend proxy holding the key
+server-side would close that gap properly; this app has no backend of
+its own to host one (see the Firebase section above), so this is a
+deliberate, documented tradeoff for now, not an oversight.
 
 ## Android release signing — currently uses the debug key
 
