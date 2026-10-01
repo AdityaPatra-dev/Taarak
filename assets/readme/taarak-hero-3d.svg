@@ -1,0 +1,323 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#141E33" />
+      <stop offset="60%" stop-color="#0A0E17" />
+      <stop offset="100%" stop-color="#05070B" />
+    </radialGradient>
+    <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF3366" stop-opacity="0.3" />
+      <stop offset="70%" stop-color="#FF3366" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#FF3366" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#4FACFE" />
+    </linearGradient>
+    <linearGradient id="neonCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF0844" />
+      <stop offset="100%" stop-color="#FFB199" />
+    </linearGradient>
+    <linearGradient id="neonAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F6D365" />
+      <stop offset="100%" stop-color="#FDA085" />
+    </linearGradient>
+    <linearGradient id="neonEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5A0" />
+      <stop offset="100%" stop-color="#00D9F5" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#0F172A" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Filters for 3D Glow -->
+    <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="intenseGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      @keyframes radarSweep {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes radarSweepRev {
+        0% { transform: rotate(360deg); }
+        100% { transform: rotate(0deg); }
+      }
+      @keyframes pulseRing {
+        0% { r: 10px; opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { r: 120px; opacity: 0; }
+      }
+      @keyframes floatCard1 {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      @keyframes floatCard2 {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(8px); }
+      }
+      @keyframes dashAnim {
+        to { stroke-dashoffset: -100; }
+      }
+      @keyframes blinker {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+      .sweep-beam {
+        transform-origin: 600px 240px;
+        animation: radarSweep 8s linear infinite;
+      }
+      .sweep-rev {
+        transform-origin: 600px 240px;
+        animation: radarSweepRev 16s linear infinite;
+      }
+      .pulse-beacon {
+        animation: pulseRing 3.5s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+      }
+      .pulse-beacon-delay {
+        animation: pulseRing 3.5s cubic-bezier(0.2, 0.8, 0.4, 1) 1.75s infinite;
+      }
+      .card-1 {
+        animation: floatCard1 6s ease-in-out infinite;
+      }
+      .card-2 {
+        animation: floatCard2 7s ease-in-out infinite;
+      }
+      .dash-line {
+        stroke-dasharray: 6 6;
+        animation: dashAnim 5s linear infinite;
+      }
+      .live-blink {
+        animation: blinker 2s ease-in-out infinite;
+      }
+      text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+    </style>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1200" height="480" fill="url(#bgGlow)" rx="16" />
+  
+  <!-- Outer subtle tech border -->
+  <rect x="2" y="2" width="1196" height="476" rx="15" fill="none" stroke="#1E293B" stroke-width="1.5" />
+  <rect x="8" y="8" width="1184" height="464" rx="12" fill="none" stroke="#00F2FE" stroke-opacity="0.15" stroke-width="1" />
+
+  <!-- 3D Perspective Grid Background (Terrain / Mesh lines) -->
+  <g opacity="0.18">
+    <!-- Horizontal Perspective Lines -->
+    <line x1="100" y1="460" x2="1100" y2="460" stroke="#00F2FE" stroke-width="1.5" />
+    <line x1="180" y1="410" x2="1020" y2="410" stroke="#00F2FE" stroke-width="1.2" />
+    <line x1="260" y1="365" x2="940" y2="365" stroke="#00F2FE" stroke-width="1.0" />
+    <line x1="330" y1="325" x2="870" y2="325" stroke="#00F2FE" stroke-width="0.8" />
+    <line x1="390" y1="290" x2="810" y2="290" stroke="#00F2FE" stroke-width="0.6" />
+    <line x1="440" y1="260" x2="760" y2="260" stroke="#00F2FE" stroke-width="0.5" />
+    
+    <!-- Vanishing Lines to Horizon Point (600, 220) -->
+    <line x1="100" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="250" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="400" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="550" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="650" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="800" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="950" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+    <line x1="1100" y1="460" x2="600" y2="240" stroke="#00F2FE" stroke-width="1" />
+  </g>
+
+  <!-- Central 3D Radar System -->
+  <g>
+    <!-- Ambient Radar Field -->
+    <circle cx="600" cy="240" r="190" fill="url(#radarGlow)" />
+
+    <!-- Concentric Technical Rings -->
+    <circle cx="600" cy="240" r="190" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="8 6" />
+    <circle cx="600" cy="240" r="145" fill="none" stroke="#475569" stroke-width="1.2" />
+    <circle cx="600" cy="240" r="100" fill="none" stroke="#00F2FE" stroke-opacity="0.4" stroke-width="1.5" stroke-dasharray="12 4" />
+    <circle cx="600" cy="240" r="50" fill="none" stroke="#FF3366" stroke-opacity="0.5" stroke-width="1.5" />
+    <circle cx="600" cy="240" r="4" fill="#00F2FE" />
+
+    <!-- Degree Marks -->
+    <g font-size="9" fill="#64748B" font-weight="600">
+      <text x="600" y="40" text-anchor="middle">000° N</text>
+      <text x="805" y="243" text-anchor="start">090° E</text>
+      <text x="600" y="445" text-anchor="middle">180° S</text>
+      <text x="395" y="243" text-anchor="end">270° W</text>
+    </g>
+
+    <!-- Radar Crosshairs -->
+    <line x1="400" y1="240" x2="800" y2="240" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" />
+    <line x1="600" y1="40" x2="600" y2="440" stroke="#334155" stroke-width="1" stroke-dasharray="4 4" />
+
+    <!-- Rotating Tech Outer Ring -->
+    <g class="sweep-rev">
+      <circle cx="600" cy="240" r="170" fill="none" stroke="#00F2FE" stroke-opacity="0.25" stroke-width="2" stroke-dasharray="30 80 15 40 50 100" />
+      <polygon points="600,68 604,75 596,75" fill="#00F2FE" opacity="0.6" />
+      <polygon points="772,240 765,244 765,236" fill="#00F2FE" opacity="0.6" />
+    </g>
+
+    <!-- 3D Rotating Radar Sweep Cone -->
+    <g class="sweep-beam">
+      <path d="M600,240 L734,106 A190,190 0 0,1 790,240 Z" fill="url(#neonCrimson)" opacity="0.18" />
+      <line x1="600" y1="240" x2="790" y2="240" stroke="#FF0844" stroke-width="2" filter="url(#glowFilter)" />
+    </g>
+
+    <!-- Dynamic Red Zone Danger Polygon (Multi-Hazard Inundation Area) -->
+    <polygon points="540,190 640,170 680,225 610,285 520,250" fill="#FF0844" fill-opacity="0.18" stroke="#FF0844" stroke-width="2" stroke-dasharray="6 3" filter="url(#glowFilter)" />
+    <text x="610" y="228" fill="#FFA3B5" font-size="10" font-weight="700" letter-spacing="1">RED ZONE #A12</text>
+    <text x="610" y="240" fill="#FF4477" font-size="8" font-weight="500">RISK: 89.4 / CRITICAL</text>
+
+    <!-- Pulsing Epicenter Beacon (Active Landslide / Disaster Hazard) -->
+    <circle cx="560" cy="210" class="pulse-beacon" fill="none" stroke="#FF0844" stroke-width="2.5" />
+    <circle cx="560" cy="210" class="pulse-beacon-delay" fill="none" stroke="#FF3366" stroke-width="1.8" />
+    <circle cx="560" cy="210" r="6" fill="#FF0844" filter="url(#intenseGlow)" />
+
+    <!-- Safe Shelter Node with Connected Route Line -->
+    <path d="M560,210 Q650,290 710,320" fill="none" stroke="#00F5A0" stroke-width="2.5" class="dash-line" filter="url(#glowFilter)" />
+    <circle cx="710" cy="320" r="7" fill="#00F5A0" filter="url(#glowFilter)" />
+    <text x="725" y="324" fill="#00F5A0" font-size="10" font-weight="700">SHELTER HUB 04 [CAP: 85%]</text>
+  </g>
+
+  <!-- Left Side: Title & Project Identity -->
+  <g transform="translate(60, 60)">
+    <!-- SIH 2026 Problem Statement Pill -->
+    <rect x="0" y="0" width="310" height="28" rx="14" fill="#1E293B" stroke="#00F2FE" stroke-opacity="0.4" stroke-width="1" />
+    <circle cx="14" cy="14" r="5" fill="#00F2FE" class="live-blink" />
+    <text x="28" y="18" fill="#38BDF8" font-size="11" font-weight="700" letter-spacing="1">SIH 2026 • PS 26191 • NDRF / MHA</text>
+
+    <!-- Main Project Name -->
+    <text x="0" y="85" fill="#FFFFFF" font-size="52" font-weight="900" letter-spacing="3" filter="url(#glowFilter)">TAARAK</text>
+    
+    <!-- Subtitle -->
+    <text x="2" y="115" fill="url(#neonCyan)" font-size="15" font-weight="700" letter-spacing="1.5">
+      DYNAMIC MULTI-HAZARD RED-ZONE IDENTIFICATION
+    </text>
+    <text x="2" y="135" fill="#94A3B8" font-size="13" font-weight="400">
+      &amp; Actionable Relocation Guidance for Disaster Management Authorities
+    </text>
+
+    <!-- Core Badges / Architecture Highlights -->
+    <g transform="translate(0, 165)">
+      <!-- Badge 1: Flutter & Dart -->
+      <g>
+        <rect width="130" height="34" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="0" y="0" width="4" height="34" rx="2" fill="#00F2FE" />
+        <text x="14" y="15" fill="#64748B" font-size="9" font-weight="600">CROSS-PLATFORM</text>
+        <text x="14" y="28" fill="#F8FAFC" font-size="11" font-weight="700">Flutter 3.44.8</text>
+      </g>
+
+      <!-- Badge 2: Offline First -->
+      <g transform="translate(140, 0)">
+        <rect width="140" height="34" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="0" y="0" width="4" height="34" rx="2" fill="#00F5A0" />
+        <text x="14" y="15" fill="#64748B" font-size="9" font-weight="600">LOCAL DRIFT SQLITE</text>
+        <text x="14" y="28" fill="#F8FAFC" font-size="11" font-weight="700">Offline-First Sync</text>
+      </g>
+
+      <!-- Badge 3: Pure Math Engine -->
+      <g transform="translate(0, 44)">
+        <rect width="130" height="34" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="0" y="0" width="4" height="34" rx="2" fill="#F6D365" />
+        <text x="14" y="15" fill="#64748B" font-size="9" font-weight="600">DETERMINISTIC</text>
+        <text x="14" y="28" fill="#F8FAFC" font-size="11" font-weight="700">Risk Math Engine</text>
+      </g>
+
+      <!-- Badge 4: Live Firebase & Google Maps -->
+      <g transform="translate(140, 44)">
+        <rect width="140" height="34" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="1" />
+        <rect x="0" y="0" width="4" height="34" rx="2" fill="#FF0844" />
+        <text x="14" y="15" fill="#64748B" font-size="9" font-weight="600">LIVE CLOUD</text>
+        <text x="14" y="28" fill="#F8FAFC" font-size="11" font-weight="700">Firestore &amp; Maps</text>
+      </g>
+    </g>
+
+    <!-- Status Strip -->
+    <g transform="translate(0, 265)">
+      <circle cx="6" cy="6" r="4" fill="#00F5A0" class="live-blink" />
+      <text x="18" y="9" fill="#A7F3D0" font-size="11" font-weight="600">Production Ready: 440/440 Tests Passing • 18 Drift Tables • 6 RBAC Roles</text>
+    </g>
+  </g>
+
+  <!-- Right Floating 3D HUD Cards -->
+  <!-- Card 1: Live Relocation Queue Telemetry (Top Right) -->
+  <g class="card-1" transform="translate(890, 45)">
+    <rect width="260" height="150" rx="14" fill="url(#cardGrad)" stroke="#38BDF8" stroke-opacity="0.3" stroke-width="1.5" filter="url(#glowFilter)" />
+    <path d="M0,14 Q0,0 14,0 L246,0 Q260,0 260,14 L260,34 L0,34 Z" fill="#1E293B" />
+    <circle cx="16" cy="17" r="4" fill="#00F2FE" />
+    <text x="28" y="21" fill="#E2E8F0" font-size="11" font-weight="700" letter-spacing="0.5">RELOCATION PRIORITY QUEUE</text>
+    
+    <!-- Item 1 -->
+    <g transform="translate(16, 48)">
+      <rect width="228" height="26" rx="6" fill="#0F172A" />
+      <text x="8" y="17" fill="#F8FAFC" font-size="10" font-weight="600">#1 Rampur Settlement</text>
+      <text x="170" y="17" fill="#FF4477" font-size="10" font-weight="800">URGENCY: 9.8</text>
+    </g>
+
+    <!-- Item 2 -->
+    <g transform="translate(16, 80)">
+      <rect width="228" height="26" rx="6" fill="#0F172A" />
+      <text x="8" y="17" fill="#F8FAFC" font-size="10" font-weight="600">#2 Kosi Valley Sector 4</text>
+      <text x="170" y="17" fill="#FDA085" font-size="10" font-weight="800">URGENCY: 8.4</text>
+    </g>
+
+    <!-- Item 3 -->
+    <g transform="translate(16, 112)">
+      <rect width="228" height="26" rx="6" fill="#0F172A" />
+      <text x="8" y="17" fill="#F8FAFC" font-size="10" font-weight="600">#3 Bhimtal South Outpost</text>
+      <text x="170" y="17" fill="#FBBF24" font-size="10" font-weight="800">URGENCY: 7.1</text>
+    </g>
+  </g>
+
+  <!-- Card 2: Offline-First Sync Engine Gauge (Bottom Right) -->
+  <g class="card-2" transform="translate(890, 220)">
+    <rect width="260" height="210" rx="14" fill="url(#cardGrad)" stroke="#00F5A0" stroke-opacity="0.3" stroke-width="1.5" filter="url(#glowFilter)" />
+    <path d="M0,14 Q0,0 14,0 L246,0 Q260,0 260,14 L260,34 L0,34 Z" fill="#1E293B" />
+    <circle cx="16" cy="17" r="4" fill="#00F5A0" class="live-blink" />
+    <text x="28" y="21" fill="#E2E8F0" font-size="11" font-weight="700" letter-spacing="0.5">OFFLINE-FIRST SYNC ENGINE</text>
+
+    <!-- Sync Stat 1 -->
+    <g transform="translate(16, 48)">
+      <text x="0" y="12" fill="#94A3B8" font-size="10" font-weight="500">Local Drift SQLite Cache</text>
+      <text x="228" y="12" fill="#38BDF8" font-size="11" font-weight="700" text-anchor="end">18 Tables Active</text>
+      <rect x="0" y="18" width="228" height="4" rx="2" fill="#1E293B" />
+      <rect x="0" y="18" width="228" height="4" rx="2" fill="#00F2FE" />
+    </g>
+
+    <!-- Sync Stat 2 -->
+    <g transform="translate(16, 85)">
+      <text x="0" y="12" fill="#94A3B8" font-size="10" font-weight="500">Conflict-Free Mutation Queue</text>
+      <text x="228" y="12" fill="#00F5A0" font-size="11" font-weight="700" text-anchor="end">0 Pending (Synced)</text>
+      <rect x="0" y="18" width="228" height="4" rx="2" fill="#1E293B" />
+      <rect x="0" y="18" width="228" height="4" rx="2" fill="#00F5A0" />
+    </g>
+
+    <!-- Sync Stat 3 -->
+    <g transform="translate(16, 122)">
+      <text x="0" y="12" fill="#94A3B8" font-size="10" font-weight="500">Cloud Firestore Transport</text>
+      <text x="228" y="12" fill="#A855F7" font-size="11" font-weight="700" text-anchor="end">Auto-Reconnect (45s)</text>
+      <rect x="0" y="18" width="228" height="4" rx="2" fill="#1E293B" />
+      <rect x="0" y="18" width="185" height="4" rx="2" fill="#A855F7" />
+    </g>
+
+    <!-- Role Indicator Strip -->
+    <g transform="translate(16, 164)">
+      <rect width="228" height="30" rx="6" fill="#0F172A" stroke="#334155" stroke-width="0.8" />
+      <text x="12" y="19" fill="#E2E8F0" font-size="10" font-weight="600">RBAC Security Boundary</text>
+      <rect x="145" y="7" width="75" height="16" rx="4" fill="#047857" />
+      <text x="182" y="19" fill="#ECFDF5" font-size="9" font-weight="800" text-anchor="middle">6 ROLES OK</text>
+    </g>
+  </g>
+</svg>
