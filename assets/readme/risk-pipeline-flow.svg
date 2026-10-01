@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 380" width="100%" height="100%">
+  <defs>
+    <radialGradient id="pipeBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+    
+    <linearGradient id="glowRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" />
+      <stop offset="100%" stop-color="#991B1B" />
+    </linearGradient>
+    <linearGradient id="glowOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316" />
+      <stop offset="100%" stop-color="#C2410C" />
+    </linearGradient>
+    <linearGradient id="glowCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#0E7490" />
+    </linearGradient>
+    <linearGradient id="glowGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    
+    <filter id="glowF2" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      @keyframes flowDash {
+        to { stroke-dashoffset: -40; }
+      }
+      @keyframes pulseBadge {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.05); opacity: 1; }
+      }
+      .flow-stream {
+        stroke-dasharray: 6 6;
+        animation: flowDash 1.5s linear infinite;
+      }
+      .math-box {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+    </style>
+  </defs>
+
+  <rect width="1000" height="380" fill="url(#pipeBg)" rx="16" />
+  <rect x="2" y="2" width="996" height="376" rx="15" fill="none" stroke="#1E293B" stroke-width="1.5" />
+
+  <!-- Title & Subtitle -->
+  <g transform="translate(50, 40)">
+    <text x="0" y="0" fill="#F43F5E" font-size="11" font-weight="700" letter-spacing="1.5">DETERMINISTIC MULTI-HAZARD DISASTER PIPELINE</text>
+    <text x="0" y="24" fill="#FFFFFF" font-size="20" font-weight="800">Dynamic Red-Zone to Relocation Decision Loop</text>
+    <text x="0" y="42" fill="#94A3B8" font-size="11.5">Pure Dart calculation: zero black-box AI hallucinations, 100% explainable unit-tested arithmetic</text>
+  </g>
+
+  <!-- Connecting Flow Pipe Lines -->
+  <g stroke-width="2.5" fill="none">
+    <path d="M 230, 200 L 290, 200" stroke="#EF4444" class="flow-stream" filter="url(#glowF2)" />
+    <path d="M 490, 200 L 550, 200" stroke="#F97316" class="flow-stream" filter="url(#glowF2)" />
+    <path d="M 750, 200 L 810, 200" stroke="#10B981" class="flow-stream" filter="url(#glowF2)" />
+  </g>
+
+  <!-- ============================================== -->
+  <!-- STEP 1: HAZARD & HABITATION INGESTION          -->
+  <!-- ============================================== -->
+  <g transform="translate(50, 115)">
+    <rect width="180" height="170" rx="12" fill="#1E293B" stroke="#EF4444" stroke-width="1.5" stroke-opacity="0.8" />
+    <rect x="0" y="0" width="180" height="30" rx="12" fill="#7F1D1D" fill-opacity="0.4" />
+    <circle cx="16" cy="15" r="4" fill="#EF4444" />
+    <text x="28" y="19" fill="#FCA5A5" font-size="10" font-weight="800" letter-spacing="0.5">01 • HAZARD &amp; CENSUS</text>
+    
+    <text x="14" y="52" fill="#F1F5F9" font-size="11" font-weight="700">Inputs &amp; Telemetry</text>
+    <text x="14" y="70" fill="#94A3B8" font-size="9.5">• Landslide / Flood Red-Zone</text>
+    <text x="14" y="86" fill="#94A3B8" font-size="9.5">• Open-Meteo Weather Data</text>
+    <text x="14" y="102" fill="#94A3B8" font-size="9.5">• Habitation Demographics</text>
+    <text x="14" y="118" fill="#94A3B8" font-size="9.5">• Access &amp; Infra Factors</text>
+
+    <!-- Formula snippet -->
+    <rect x="10" y="132" width="160" height="26" rx="6" fill="#0F172A" />
+    <text x="16" y="149" fill="#EF4444" font-size="9" class="math-box">Intensity: I ∈ [0.0, 1.0]</text>
+  </g>
+
+  <!-- ============================================== -->
+  <!-- STEP 2: DETERMINISTIC RISK SCORING ENGINE      -->
+  <!-- ============================================== -->
+  <g transform="translate(290, 115)">
+    <rect width="200" height="170" rx="12" fill="#1E293B" stroke="#F97316" stroke-width="1.5" stroke-opacity="0.8" />
+    <rect x="0" y="0" width="200" height="30" rx="12" fill="#7C2D12" fill-opacity="0.4" />
+    <circle cx="16" cy="15" r="4" fill="#F97316" />
+    <text x="28" y="19" fill="#FDBA74" font-size="10" font-weight="800" letter-spacing="0.5">02 • RISK SCORING</text>
+
+    <text x="14" y="52" fill="#F1F5F9" font-size="11" font-weight="700">Multi-Factor Formulation</text>
+    <text x="14" y="70" fill="#94A3B8" font-size="9.5">• 45% Population Exposure</text>
+    <text x="14" y="86" fill="#94A3B8" font-size="9.5">• 35% Infrastructure Deficit</text>
+    <text x="14" y="102" fill="#94A3B8" font-size="9.5">• 20% Terrain/Road Isolation</text>
+    <text x="14" y="118" fill="#FDBA74" font-size="9.5">Score Range: [0 to 100]</text>
+
+    <!-- Formula snippet -->
+    <rect x="10" y="132" width="180" height="26" rx="6" fill="#0F172A" />
+    <text x="16" y="149" fill="#FB923C" font-size="8.5" class="math-box">Risk = H_int × V_index</text>
+  </g>
+
+  <!-- ============================================== -->
+  <!-- STEP 3: SHELTER CAPACITY GAP ANALYSIS         -->
+  <!-- ============================================== -->
+  <g transform="translate(550, 115)">
+    <rect width="200" height="170" rx="12" fill="#1E293B" stroke="#06B6D4" stroke-width="1.5" stroke-opacity="0.8" />
+    <rect x="0" y="0" width="200" height="30" rx="12" fill="#164E63" fill-opacity="0.4" />
+    <circle cx="16" cy="15" r="4" fill="#06B6D4" />
+    <text x="28" y="19" fill="#67E8F9" font-size="10" font-weight="800" letter-spacing="0.5">03 • CAPACITY GAP</text>
+
+    <text x="14" y="52" fill="#F1F5F9" font-size="11" font-weight="700">Relief Hub Optimization</text>
+    <text x="14" y="70" fill="#94A3B8" font-size="9.5">• Total At-Risk Population</text>
+    <text x="14" y="86" fill="#94A3B8" font-size="9.5">• Usable Shelter Bed Capacity</text>
+    <text x="14" y="102" fill="#94A3B8" font-size="9.5">• Vulnerable Group Reservation</text>
+    <text x="14" y="118" fill="#67E8F9" font-size="9.5">Real-time Deficit Counter</text>
+
+    <!-- Formula snippet -->
+    <rect x="10" y="132" width="180" height="26" rx="6" fill="#0F172A" />
+    <text x="16" y="149" fill="#22D3EE" font-size="8.5" class="math-box">Gap = Pop_req - Cap_free</text>
+  </g>
+
+  <!-- ============================================== -->
+  <!-- STEP 4: RELOCATION QUEUE & OSRM EVACUATION     -->
+  <!-- ============================================== -->
+  <g transform="translate(810, 115)">
+    <rect width="140" height="170" rx="12" fill="#1E293B" stroke="#10B981" stroke-width="1.5" stroke-opacity="0.8" />
+    <rect x="0" y="0" width="140" height="30" rx="12" fill="#064E3B" fill-opacity="0.4" />
+    <circle cx="16" cy="15" r="4" fill="#10B981" />
+    <text x="28" y="19" fill="#6EE7B7" font-size="10" font-weight="800" letter-spacing="0.5">04 • ACTION</text>
+
+    <text x="14" y="52" fill="#F1F5F9" font-size="11" font-weight="700">Dispatch Order</text>
+    <text x="14" y="70" fill="#94A3B8" font-size="9.5">• Ranked Queue</text>
+    <text x="14" y="86" fill="#94A3B8" font-size="9.5">• OSRM Route</text>
+    <text x="14" y="102" fill="#94A3B8" font-size="9.5">• Evacuation Order</text>
+    <text x="14" y="118" fill="#10B981" font-size="9.5">• Offline SMS Mesh</text>
+
+    <!-- Formula snippet -->
+    <rect x="10" y="132" width="120" height="26" rx="6" fill="#0F172A" />
+    <text x="16" y="149" fill="#34D399" font-size="8.5" class="math-box">Priority Queue</text>
+  </g>
+
+  <!-- Footer Banner -->
+  <g transform="translate(50, 310)">
+    <rect width="900" height="42" rx="8" fill="#0B132B" stroke="#334155" stroke-width="1" />
+    <circle cx="20" cy="21" r="5" fill="#10B981" />
+    <text x="36" y="25" fill="#E2E8F0" font-size="11.5" font-weight="600">Model Version: <tspan fill="#38BDF8">v1.0.0-deterministic</tspan> • Automated Weather Ingestion • Zero Hallucinations • Tested with 440 Unit/Widget Tests</text>
+  </g>
+</svg>

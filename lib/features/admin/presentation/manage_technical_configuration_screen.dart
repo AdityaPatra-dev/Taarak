@@ -25,12 +25,15 @@ class ManageTechnicalConfigurationScreen extends ConsumerStatefulWidget {
 class _ManageTechnicalConfigurationScreenState
     extends ConsumerState<ManageTechnicalConfigurationScreen> {
   final _syncIntervalController = TextEditingController();
+  final _hazardPollIntervalController = TextEditingController();
   bool _isSaving = false;
   String? _error;
+  String? _hazardPollError;
 
   @override
   void dispose() {
     _syncIntervalController.dispose();
+    _hazardPollIntervalController.dispose();
     super.dispose();
   }
 
@@ -49,6 +52,10 @@ class _ManageTechnicalConfigurationScreenState
         data: (config) {
           if (_syncIntervalController.text.isEmpty) {
             _syncIntervalController.text = '${config.syncIntervalSeconds}';
+          }
+          if (_hazardPollIntervalController.text.isEmpty) {
+            _hazardPollIntervalController.text =
+                '${config.hazardAutomationPollIntervalSeconds}';
           }
           return ListView(
             padding: const EdgeInsets.all(Spacing.md),
@@ -93,19 +100,74 @@ class _ManageTechnicalConfigurationScreenState
                             ),
                           ),
                           const SizedBox(width: Spacing.sm),
-                          FilledButton(
-                            onPressed: _isSaving ? null : _save,
-                            child: _isSaving
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Save'),
-                          ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.lg),
+                    const SectionHeader(
+                      title: 'Automatic hazard zone engine',
+                      icon: Icons.auto_awesome_outlined,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
+                      ),
+                      child: Text(
+                        'How often every Local Official/Admin session '
+                        're-checks live weather data at each habitation '
+                        'and auto-creates or removes a hazard zone. '
+                        '(${TechnicalConfig.minHazardAutomationPollIntervalSeconds}–'
+                        '${TechnicalConfig.maxHazardAutomationPollIntervalSeconds} seconds.)',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
+                      ),
+                      child: TextField(
+                        controller: _hazardPollIntervalController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Seconds',
+                          errorText: _hazardPollError,
+                        ),
+                      ),
+                    ),
+                    SwitchListTile(
+                      title: const Text('Enrich with Gemini rationale'),
+                      subtitle: const Text(
+                        'When a compiled-in Gemini key is available, adds a '
+                        'short explanation to auto-created zones. Never '
+                        'changes a zone’s severity or the create/delete '
+                        'decision itself — disabling this only removes '
+                        'the explanation text.',
+                      ),
+                      value: config.geminiEnabled,
+                      onChanged: _isSaving
+                          ? null
+                          : (value) => _saveAll(config.copyWith(geminiEnabled: value)),
+                    ),
+                    const SizedBox(height: Spacing.sm),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: Spacing.md,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: FilledButton(
+                          onPressed: _isSaving ? null : () => _save(config),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text('Save'),
+                        ),
                       ),
                     ),
                   ],
@@ -118,27 +180,55 @@ class _ManageTechnicalConfigurationScreenState
     );
   }
 
-  Future<void> _save() async {
+  Future<void> _save(TechnicalConfig current) async {
     final seconds = int.tryParse(_syncIntervalController.text.trim());
+    final hazardPollSeconds = int.tryParse(_hazardPollIntervalController.text.trim());
+    var hasError = false;
+
     if (seconds == null ||
         seconds < TechnicalConfig.minSyncIntervalSeconds ||
         seconds > TechnicalConfig.maxSyncIntervalSeconds) {
-      setState(
-        () => _error =
-            'Enter a value between ${TechnicalConfig.minSyncIntervalSeconds} '
-            'and ${TechnicalConfig.maxSyncIntervalSeconds}',
-      );
+      _error =
+          'Enter a value between ${TechnicalConfig.minSyncIntervalSeconds} '
+          'and ${TechnicalConfig.maxSyncIntervalSeconds}';
+      hasError = true;
+    } else {
+      _error = null;
+    }
+
+    if (hazardPollSeconds == null ||
+        hazardPollSeconds < TechnicalConfig.minHazardAutomationPollIntervalSeconds ||
+        hazardPollSeconds > TechnicalConfig.maxHazardAutomationPollIntervalSeconds) {
+      _hazardPollError =
+          'Enter a value between '
+          '${TechnicalConfig.minHazardAutomationPollIntervalSeconds} and '
+          '${TechnicalConfig.maxHazardAutomationPollIntervalSeconds}';
+      hasError = true;
+    } else {
+      _hazardPollError = null;
+    }
+
+    if (hasError) {
+      setState(() {});
       return;
     }
 
+    await _saveAll(
+      current.copyWith(
+        syncIntervalSeconds: seconds,
+        hazardAutomationPollIntervalSeconds: hazardPollSeconds,
+      ),
+    );
+  }
+
+  Future<void> _saveAll(TechnicalConfig config) async {
     setState(() {
       _isSaving = true;
       _error = null;
+      _hazardPollError = null;
     });
 
-    await ref
-        .read(technicalConfigDataSourceProvider)
-        .write(TechnicalConfig(syncIntervalSeconds: seconds));
+    await ref.read(technicalConfigDataSourceProvider).write(config);
     ref.invalidate(technicalConfigProvider);
 
     if (!mounted) return;

@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="archBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#030712" />
+    </radialGradient>
+
+    <!-- Layer Gradients -->
+    <linearGradient id="layerTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#0284C7" stop-opacity="0.15" />
+    </linearGradient>
+    <linearGradient id="layerApp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#4F46E5" stop-opacity="0.15" />
+    </linearGradient>
+    <linearGradient id="layerData" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.15" />
+    </linearGradient>
+    <linearGradient id="layerCloud" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F472B6" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#DB2777" stop-opacity="0.15" />
+    </linearGradient>
+
+    <!-- Side Wall Gradients for 3D Slab Thickness -->
+    <linearGradient id="slabLeftTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#0369A1" stop-opacity="0.3" />
+    </linearGradient>
+    <linearGradient id="slabRightTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0369A1" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#075985" stop-opacity="0.4" />
+    </linearGradient>
+
+    <!-- Glowing Filters -->
+    <filter id="glowF" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <style>
+      @keyframes busFlowUp {
+        0% { stroke-dashoffset: 80; }
+        100% { stroke-dashoffset: 0; }
+      }
+      @keyframes busFlowDown {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 80; }
+      }
+      @keyframes floatLayer {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      @keyframes pulseNode {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+      }
+      .bus-stream-up {
+        stroke-dasharray: 8 12;
+        animation: busFlowUp 2s linear infinite;
+      }
+      .bus-stream-down {
+        stroke-dasharray: 8 12;
+        animation: busFlowDown 2.4s linear infinite;
+      }
+      .node-pulse {
+        animation: pulseNode 2.5s ease-in-out infinite;
+      }
+      text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+    </style>
+  </defs>
+
+  <rect width="1000" height="620" fill="url(#archBg)" rx="16" />
+  <rect x="2" y="2" width="996" height="616" rx="15" fill="none" stroke="#1F2937" stroke-width="1.5" />
+
+  <!-- Section Title & Tagline -->
+  <g transform="translate(60, 45)">
+    <text x="0" y="0" fill="#38BDF8" font-size="11" font-weight="700" letter-spacing="1.5">TAARAK ARCHITECTURAL BLUEPRINT</text>
+    <text x="0" y="24" fill="#FFFFFF" font-size="22" font-weight="800">5-Tier Layered Offline-First System</text>
+    <text x="0" y="44" fill="#9CA3AF" font-size="12">Strict separation of pure deterministic mathematics from Drift local persistence and Cloud Firestore sync</text>
+  </g>
+
+  <!-- Vertical 3D Fiber-Optic Bus Connectors (Left & Right Spines) -->
+  <g stroke-width="2" opacity="0.8">
+    <!-- Left Data Spine (Local to Cloud) -->
+    <line x1="280" y1="180" x2="280" y2="520" stroke="#38BDF8" class="bus-stream-up" filter="url(#glowF)" />
+    <!-- Center Spine (Scoring Engine Loop) -->
+    <line x1="500" y1="150" x2="500" y2="480" stroke="#34D399" class="bus-stream-down" filter="url(#glowF)" />
+    <!-- Right Data Spine (Auth & Remote Transport) -->
+    <line x1="720" y1="180" x2="720" y2="520" stroke="#F472B6" class="bus-stream-up" filter="url(#glowF)" />
+  </g>
+
+  <!-- ========================================== -->
+  <!-- TIER 4: CLOUD BACKEND & REMOTES (Bottom)   -->
+  <!-- ========================================== -->
+  <g transform="translate(0, 360)">
+    <!-- 3D Slab Thickness -->
+    <!-- Front Left Edge -->
+    <polygon points="200,120 500,190 500,205 200,135" fill="#9D174D" opacity="0.6" />
+    <!-- Front Right Edge -->
+    <polygon points="500,190 800,120 800,135 500,205" fill="#831843" opacity="0.7" />
+    <!-- Top Face -->
+    <polygon points="500,50 800,120 500,190 200,120" fill="url(#layerCloud)" stroke="#F472B6" stroke-width="1.5" filter="url(#glowF)" />
+
+    <!-- Isometric Tier Content -->
+    <g transform="translate(500, 110)">
+      <text x="0" y="-20" fill="#FBCFE8" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="1">TIER 4: CLOUD BACKEND &amp; EXTERNAL APIS</text>
+      
+      <!-- Component 1: Cloud Firestore -->
+      <g transform="translate(-160, 0)">
+        <polygon points="0,-15 70,0 0,15 -70,0" fill="#1E293B" stroke="#F472B6" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Cloud Firestore</text>
+        <text x="0" y="14" fill="#F472B6" font-size="7.5" text-anchor="middle">11 Role Rules</text>
+      </g>
+
+      <!-- Component 2: Firebase Auth -->
+      <g transform="translate(0, 20)">
+        <polygon points="0,-15 70,0 0,15 -70,0" fill="#1E293B" stroke="#F472B6" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Firebase Auth</text>
+        <text x="0" y="14" fill="#F472B6" font-size="7.5" text-anchor="middle">taakrak-d9ed0</text>
+      </g>
+
+      <!-- Component 3: Google Maps & Open-Meteo -->
+      <g transform="translate(160, 0)">
+        <polygon points="0,-15 75,0 0,15 -75,0" fill="#1E293B" stroke="#F472B6" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Google Maps / OSRM</text>
+        <text x="0" y="14" fill="#F472B6" font-size="7.5" text-anchor="middle">Open-Meteo API</text>
+      </g>
+    </g>
+
+    <text x="825" y="145" fill="#F472B6" font-size="11" font-weight="700">Remote Cloud Layer</text>
+    <text x="825" y="160" fill="#9CA3AF" font-size="9.5">State Synchronization Boundary</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- TIER 3: LOCAL STORAGE & SYNC ENGINE        -->
+  <!-- ========================================== -->
+  <g transform="translate(0, 260)">
+    <!-- 3D Slab Thickness -->
+    <polygon points="200,120 500,190 500,205 200,135" fill="#047857" opacity="0.6" />
+    <polygon points="500,190 800,120 800,135 500,205" fill="#065F46" opacity="0.7" />
+    <!-- Top Face -->
+    <polygon points="500,50 800,120 500,190 200,120" fill="url(#layerData)" stroke="#34D399" stroke-width="1.5" filter="url(#glowF)" />
+
+    <!-- Isometric Tier Content -->
+    <g transform="translate(500, 110)">
+      <text x="0" y="-20" fill="#A7F3D0" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="1">TIER 3: OFFLINE-FIRST DRIFT SQLITE (SCHEMA v11)</text>
+
+      <!-- Component 1: Drift 18 Tables -->
+      <g transform="translate(-160, 0)">
+        <polygon points="0,-15 75,0 0,15 -75,0" fill="#064E3B" stroke="#34D399" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Drift Typed SQLite</text>
+        <text x="0" y="14" fill="#6EE7B7" font-size="7.5" text-anchor="middle">18 Tables / Web WASM</text>
+      </g>
+
+      <!-- Component 2: Conflict-Free Sync Engine -->
+      <g transform="translate(0, 20)">
+        <polygon points="0,-15 80,0 0,15 -80,0" fill="#064E3B" stroke="#34D399" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Versioned Sync Queue</text>
+        <text x="0" y="14" fill="#6EE7B7" font-size="7.5" text-anchor="middle">Reconnect + 45s Poll</text>
+      </g>
+
+      <!-- Component 3: Local Repositories -->
+      <g transform="translate(160, 0)">
+        <polygon points="0,-15 75,0 0,15 -75,0" fill="#064E3B" stroke="#34D399" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Local Repositories</text>
+        <text x="0" y="14" fill="#6EE7B7" font-size="7.5" text-anchor="middle">Result&lt;T&gt; Abstraction</text>
+      </g>
+    </g>
+
+    <text x="825" y="145" fill="#34D399" font-size="11" font-weight="700">Offline Single Source of Truth</text>
+    <text x="825" y="160" fill="#9CA3AF" font-size="9.5">Local-first writes, optimistic UI</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- TIER 2: DETERMINISTIC LOGIC & RIVERPOD     -->
+  <!-- ========================================== -->
+  <g transform="translate(0, 160)">
+    <!-- 3D Slab Thickness -->
+    <polygon points="200,120 500,190 500,205 200,135" fill="#4338CA" opacity="0.6" />
+    <polygon points="500,190 800,120 800,135 500,205" fill="#3730A3" opacity="0.7" />
+    <!-- Top Face -->
+    <polygon points="500,50 800,120 500,190 200,120" fill="url(#layerApp)" stroke="#818CF8" stroke-width="1.5" filter="url(#glowF)" />
+
+    <!-- Isometric Tier Content -->
+    <g transform="translate(500, 110)">
+      <text x="0" y="-20" fill="#C7D2FE" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="1">TIER 2: DETERMINISTIC DISASTER ENGINES &amp; STATE</text>
+
+      <!-- Component 1: Multi-Hazard Risk Engine -->
+      <g transform="translate(-160, 0)">
+        <polygon points="0,-15 78,0 0,15 -78,0" fill="#312E81" stroke="#818CF8" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Risk Scoring Engine</text>
+        <text x="0" y="14" fill="#A5B4FC" font-size="7.5" text-anchor="middle">Pure Dart • Deterministic</text>
+      </g>
+
+      <!-- Component 2: Riverpod Container -->
+      <g transform="translate(0, 20)">
+        <polygon points="0,-15 80,0 0,15 -80,0" fill="#312E81" stroke="#818CF8" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Riverpod DI &amp; State</text>
+        <text x="0" y="14" fill="#A5B4FC" font-size="7.5" text-anchor="middle">Root Lifetime Watchers</text>
+      </g>
+
+      <!-- Component 3: Relocation Priority Engine -->
+      <g transform="translate(160, 0)">
+        <polygon points="0,-15 78,0 0,15 -78,0" fill="#312E81" stroke="#818CF8" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Relocation &amp; Shelter</text>
+        <text x="0" y="14" fill="#A5B4FC" font-size="7.5" text-anchor="middle">Capacity Gap Allocation</text>
+      </g>
+    </g>
+
+    <text x="825" y="145" fill="#818CF8" font-size="11" font-weight="700">Pure Mathematical Pipeline</text>
+    <text x="825" y="160" fill="#9CA3AF" font-size="9.5">Unit-tested with no I/O dependencies</text>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- TIER 1: PRESENTATION & 6-ROLE RBAC (Top)   -->
+  <!-- ========================================== -->
+  <g transform="translate(0, 60)">
+    <!-- 3D Slab Thickness -->
+    <polygon points="200,120 500,190 500,205 200,135" fill="url(#slabLeftTop)" />
+    <polygon points="500,190 800,120 800,135 500,205" fill="url(#slabRightTop)" />
+    <!-- Top Face -->
+    <polygon points="500,50 800,120 500,190 200,120" fill="url(#layerTop)" stroke="#38BDF8" stroke-width="2" filter="url(#glowF)" />
+
+    <!-- Isometric Tier Content -->
+    <g transform="translate(500, 110)">
+      <text x="0" y="-20" fill="#BAE6FD" font-size="13" font-weight="800" text-anchor="middle" letter-spacing="1">TIER 1: PRESENTATION &amp; 6-ROLE SHELL</text>
+
+      <!-- Component 1: Multi-Platform Flutter -->
+      <g transform="translate(-160, 0)">
+        <polygon points="0,-15 78,0 0,15 -78,0" fill="#0C4A6E" stroke="#38BDF8" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Android &amp; Web</text>
+        <text x="0" y="14" fill="#7DD3FC" font-size="7.5" text-anchor="middle">Flutter 3.44.8 Stable</text>
+      </g>
+
+      <!-- Component 2: 6 Specialized Role UIs -->
+      <g transform="translate(0, 20)">
+        <polygon points="0,-15 84,0 0,15 -84,0" fill="#0C4A6E" stroke="#38BDF8" stroke-width="1.2" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">6-Role Dashboard</text>
+        <text x="0" y="14" fill="#7DD3FC" font-size="7.5" text-anchor="middle">Citizen • Responder • Command</text>
+      </g>
+
+      <!-- Component 3: go_router RBAC Route Guard -->
+      <g transform="translate(160, 0)">
+        <polygon points="0,-15 78,0 0,15 -78,0" fill="#0C4A6E" stroke="#38BDF8" stroke-width="1" />
+        <text x="0" y="3" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">go_router Guard</text>
+        <text x="0" y="14" fill="#7DD3FC" font-size="7.5" text-anchor="middle">33 Centrally Gated Routes</text>
+      </g>
+    </g>
+
+    <text x="825" y="145" fill="#38BDF8" font-size="11" font-weight="700">User Interface &amp; RBAC</text>
+    <text x="825" y="160" fill="#9CA3AF" font-size="9.5">Direct map interaction &amp; alerts</text>
+  </g>
+</svg>

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 340" width="100%" height="100%">
+  <defs>
+    <radialGradient id="syncBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#091428" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+    <filter id="glowF3" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes syncRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes dashSync {
+        to { stroke-dashoffset: -30; }
+      }
+      @keyframes pulseOnline {
+        0%, 100% { fill: #10B981; }
+        50% { fill: #34D399; }
+      }
+      .sync-spin {
+        transform-origin: 460px 175px;
+        animation: syncRotate 8s linear infinite;
+      }
+      .sync-track {
+        stroke-dasharray: 6 6;
+        animation: dashSync 1.2s linear infinite;
+      }
+      .online-beacon {
+        animation: pulseOnline 2s infinite;
+      }
+      text {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+    </style>
+  </defs>
+
+  <rect width="920" height="340" fill="url(#syncBg)" rx="16" />
+  <rect x="2" y="2" width="916" height="336" rx="15" fill="none" stroke="#1E293B" stroke-width="1.5" />
+
+  <!-- Title -->
+  <g transform="translate(45, 35)">
+    <text x="0" y="0" fill="#10B981" font-size="11" font-weight="700" letter-spacing="1.5">OFFLINE-FIRST ENGINE STATE MACHINE</text>
+    <text x="0" y="24" fill="#FFFFFF" font-size="20" font-weight="800">Bi-Directional Drift SQLite &amp; Cloud Firestore Sync</text>
+  </g>
+
+  <!-- Left: Local Device Bubble -->
+  <g transform="translate(45, 85)">
+    <rect width="250" height="210" rx="14" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5" />
+    <path d="M0,14 Q0,0 14,0 L236,0 Q250,0 250,14 L250,34 L0,34 Z" fill="#0369A1" fill-opacity="0.3" />
+    <circle cx="16" cy="17" r="4" fill="#38BDF8" />
+    <text x="28" y="21" fill="#BAE6FD" font-size="11" font-weight="700">LOCAL DEVICE (CLIENT)</text>
+
+    <!-- Step 1 -->
+    <g transform="translate(14, 46)">
+      <circle cx="10" cy="12" r="9" fill="#0284C7" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">1</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Immediate Local Mutation</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">UI responds with 0 latency (Optimistic)</text>
+    </g>
+
+    <!-- Step 2 -->
+    <g transform="translate(14, 88)">
+      <circle cx="10" cy="12" r="9" fill="#0284C7" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">2</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Drift SQLite Commit</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">Written to schema v11 (18 typed tables)</text>
+    </g>
+
+    <!-- Step 3 -->
+    <g transform="translate(14, 130)">
+      <circle cx="10" cy="12" r="9" fill="#0284C7" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">3</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Local Mutation Queue</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">Pending action logged with local version</text>
+    </g>
+
+    <rect x="14" y="172" width="222" height="24" rx="6" fill="#1E293B" />
+    <circle cx="26" cy="184" r="4" fill="#10B981" />
+    <text x="36" y="187" fill="#6EE7B7" font-size="9.5" font-weight="600">Works 100% Without Internet</text>
+  </g>
+
+  <!-- Center: Sync Transition Gateway -->
+  <g transform="translate(345, 110)">
+    <!-- Rotating Ring -->
+    <g class="sync-spin">
+      <circle cx="115" cy="65" r="50" fill="none" stroke="#10B981" stroke-width="1.5" stroke-dasharray="16 8" />
+    </g>
+    <!-- Center Orb -->
+    <circle cx="115" cy="65" r="32" fill="#064E3B" stroke="#34D399" stroke-width="1.5" filter="url(#glowF3)" />
+    <text x="115" y="61" fill="#ECFDF5" font-size="10" font-weight="800" text-anchor="middle">SYNC</text>
+    <text x="115" y="73" fill="#A7F3D0" font-size="8" font-weight="700" text-anchor="middle">ENGINE</text>
+
+    <!-- Triggers -->
+    <g transform="translate(0, 125)">
+      <rect width="230" height="48" rx="8" fill="#0B132B" stroke="#334155" stroke-width="1" />
+      <text x="115" y="18" fill="#38BDF8" font-size="9.5" font-weight="700" text-anchor="middle">DUAL AUTOMATIC TRIGGERS</text>
+      <text x="115" y="34" fill="#94A3B8" font-size="8.5" text-anchor="middle">Offline→Online Reconnect &amp; 45s Background Poll</text>
+    </g>
+  </g>
+
+  <!-- Animated Tracks Between Client, Gateway and Cloud -->
+  <path d="M 295, 175 L 428, 175" stroke="#38BDF8" stroke-width="2.5" fill="none" class="sync-track" filter="url(#glowF3)" />
+  <path d="M 492, 175 L 625, 175" stroke="#10B981" stroke-width="2.5" fill="none" class="sync-track" filter="url(#glowF3)" />
+
+  <!-- Right: Cloud Firestore Bubble -->
+  <g transform="translate(625, 85)">
+    <rect width="250" height="210" rx="14" fill="#0F172A" stroke="#F43F5E" stroke-width="1.5" />
+    <path d="M0,14 Q0,0 14,0 L236,0 Q250,0 250,14 L250,34 L0,34 Z" fill="#881337" fill-opacity="0.3" />
+    <circle cx="16" cy="17" r="4" fill="#F43F5E" />
+    <text x="28" y="21" fill="#FECDD3" font-size="11" font-weight="700">CLOUD FIRESTORE (SERVER)</text>
+
+    <!-- Step 4 -->
+    <g transform="translate(14, 46)">
+      <circle cx="10" cy="12" r="9" fill="#BE123C" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">4</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Batch Transport Ingestion</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">FirestoreSyncTransport runs batch push</text>
+    </g>
+
+    <!-- Step 5 -->
+    <g transform="translate(14, 88)">
+      <circle cx="10" cy="12" r="9" fill="#BE123C" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">5</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Security Rules Validation</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">RBAC checked by firestore.rules</text>
+    </g>
+
+    <!-- Step 6 -->
+    <g transform="translate(14, 130)">
+      <circle cx="10" cy="12" r="9" fill="#BE123C" />
+      <text x="10" y="15" fill="#FFFFFF" font-size="9" font-weight="800" text-anchor="middle">6</text>
+      <text x="28" y="11" fill="#F8FAFC" font-size="10.5" font-weight="600">Version Reconciliation</text>
+      <text x="28" y="24" fill="#94A3B8" font-size="9">Server version updated, queue pruned</text>
+    </g>
+
+    <rect x="14" y="172" width="222" height="24" rx="6" fill="#1E293B" />
+    <circle cx="26" cy="184" r="4" fill="#F43F5E" />
+    <text x="36" y="187" fill="#FDA4AF" font-size="9.5" font-weight="600">Shared Backend Across 6 Roles</text>
+  </g>
+</svg>

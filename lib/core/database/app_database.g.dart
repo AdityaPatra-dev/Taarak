@@ -969,6 +969,518 @@ class LocalHazardZonesCompanion extends UpdateCompanion<LocalHazardZone> {
   }
 }
 
+class $LocalHazardAutomationStatesTable extends LocalHazardAutomationStates
+    with
+        TableInfo<
+          $LocalHazardAutomationStatesTable,
+          LocalHazardAutomationState
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalHazardAutomationStatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _habitationIdMeta = const VerificationMeta(
+    'habitationId',
+  );
+  @override
+  late final GeneratedColumn<String> habitationId = GeneratedColumn<String>(
+    'habitation_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hazardTypeMeta = const VerificationMeta(
+    'hazardType',
+  );
+  @override
+  late final GeneratedColumn<String> hazardType = GeneratedColumn<String>(
+    'hazard_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastScoreMeta = const VerificationMeta(
+    'lastScore',
+  );
+  @override
+  late final GeneratedColumn<double> lastScore = GeneratedColumn<double>(
+    'last_score',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _consecutiveBelowDeleteThresholdMeta =
+      const VerificationMeta('consecutiveBelowDeleteThreshold');
+  @override
+  late final GeneratedColumn<int> consecutiveBelowDeleteThreshold =
+      GeneratedColumn<int>(
+        'consecutive_below_delete_threshold',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _zoneActiveMeta = const VerificationMeta(
+    'zoneActive',
+  );
+  @override
+  late final GeneratedColumn<bool> zoneActive = GeneratedColumn<bool>(
+    'zone_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("zone_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastEvaluatedAtMeta = const VerificationMeta(
+    'lastEvaluatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastEvaluatedAt =
+      GeneratedColumn<DateTime>(
+        'last_evaluated_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    habitationId,
+    hazardType,
+    lastScore,
+    consecutiveBelowDeleteThreshold,
+    zoneActive,
+    lastEvaluatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_hazard_automation_states';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalHazardAutomationState> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('habitation_id')) {
+      context.handle(
+        _habitationIdMeta,
+        habitationId.isAcceptableOrUnknown(
+          data['habitation_id']!,
+          _habitationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_habitationIdMeta);
+    }
+    if (data.containsKey('hazard_type')) {
+      context.handle(
+        _hazardTypeMeta,
+        hazardType.isAcceptableOrUnknown(data['hazard_type']!, _hazardTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hazardTypeMeta);
+    }
+    if (data.containsKey('last_score')) {
+      context.handle(
+        _lastScoreMeta,
+        lastScore.isAcceptableOrUnknown(data['last_score']!, _lastScoreMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastScoreMeta);
+    }
+    if (data.containsKey('consecutive_below_delete_threshold')) {
+      context.handle(
+        _consecutiveBelowDeleteThresholdMeta,
+        consecutiveBelowDeleteThreshold.isAcceptableOrUnknown(
+          data['consecutive_below_delete_threshold']!,
+          _consecutiveBelowDeleteThresholdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('zone_active')) {
+      context.handle(
+        _zoneActiveMeta,
+        zoneActive.isAcceptableOrUnknown(data['zone_active']!, _zoneActiveMeta),
+      );
+    }
+    if (data.containsKey('last_evaluated_at')) {
+      context.handle(
+        _lastEvaluatedAtMeta,
+        lastEvaluatedAt.isAcceptableOrUnknown(
+          data['last_evaluated_at']!,
+          _lastEvaluatedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastEvaluatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalHazardAutomationState map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalHazardAutomationState(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      habitationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}habitation_id'],
+      )!,
+      hazardType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hazard_type'],
+      )!,
+      lastScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}last_score'],
+      )!,
+      consecutiveBelowDeleteThreshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}consecutive_below_delete_threshold'],
+      )!,
+      zoneActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}zone_active'],
+      )!,
+      lastEvaluatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_evaluated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalHazardAutomationStatesTable createAlias(String alias) {
+    return $LocalHazardAutomationStatesTable(attachedDatabase, alias);
+  }
+}
+
+class LocalHazardAutomationState extends DataClass
+    implements Insertable<LocalHazardAutomationState> {
+  final String id;
+  final String habitationId;
+  final String hazardType;
+  final double lastScore;
+  final int consecutiveBelowDeleteThreshold;
+  final bool zoneActive;
+  final DateTime lastEvaluatedAt;
+  const LocalHazardAutomationState({
+    required this.id,
+    required this.habitationId,
+    required this.hazardType,
+    required this.lastScore,
+    required this.consecutiveBelowDeleteThreshold,
+    required this.zoneActive,
+    required this.lastEvaluatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['habitation_id'] = Variable<String>(habitationId);
+    map['hazard_type'] = Variable<String>(hazardType);
+    map['last_score'] = Variable<double>(lastScore);
+    map['consecutive_below_delete_threshold'] = Variable<int>(
+      consecutiveBelowDeleteThreshold,
+    );
+    map['zone_active'] = Variable<bool>(zoneActive);
+    map['last_evaluated_at'] = Variable<DateTime>(lastEvaluatedAt);
+    return map;
+  }
+
+  LocalHazardAutomationStatesCompanion toCompanion(bool nullToAbsent) {
+    return LocalHazardAutomationStatesCompanion(
+      id: Value(id),
+      habitationId: Value(habitationId),
+      hazardType: Value(hazardType),
+      lastScore: Value(lastScore),
+      consecutiveBelowDeleteThreshold: Value(consecutiveBelowDeleteThreshold),
+      zoneActive: Value(zoneActive),
+      lastEvaluatedAt: Value(lastEvaluatedAt),
+    );
+  }
+
+  factory LocalHazardAutomationState.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalHazardAutomationState(
+      id: serializer.fromJson<String>(json['id']),
+      habitationId: serializer.fromJson<String>(json['habitationId']),
+      hazardType: serializer.fromJson<String>(json['hazardType']),
+      lastScore: serializer.fromJson<double>(json['lastScore']),
+      consecutiveBelowDeleteThreshold: serializer.fromJson<int>(
+        json['consecutiveBelowDeleteThreshold'],
+      ),
+      zoneActive: serializer.fromJson<bool>(json['zoneActive']),
+      lastEvaluatedAt: serializer.fromJson<DateTime>(json['lastEvaluatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'habitationId': serializer.toJson<String>(habitationId),
+      'hazardType': serializer.toJson<String>(hazardType),
+      'lastScore': serializer.toJson<double>(lastScore),
+      'consecutiveBelowDeleteThreshold': serializer.toJson<int>(
+        consecutiveBelowDeleteThreshold,
+      ),
+      'zoneActive': serializer.toJson<bool>(zoneActive),
+      'lastEvaluatedAt': serializer.toJson<DateTime>(lastEvaluatedAt),
+    };
+  }
+
+  LocalHazardAutomationState copyWith({
+    String? id,
+    String? habitationId,
+    String? hazardType,
+    double? lastScore,
+    int? consecutiveBelowDeleteThreshold,
+    bool? zoneActive,
+    DateTime? lastEvaluatedAt,
+  }) => LocalHazardAutomationState(
+    id: id ?? this.id,
+    habitationId: habitationId ?? this.habitationId,
+    hazardType: hazardType ?? this.hazardType,
+    lastScore: lastScore ?? this.lastScore,
+    consecutiveBelowDeleteThreshold:
+        consecutiveBelowDeleteThreshold ?? this.consecutiveBelowDeleteThreshold,
+    zoneActive: zoneActive ?? this.zoneActive,
+    lastEvaluatedAt: lastEvaluatedAt ?? this.lastEvaluatedAt,
+  );
+  LocalHazardAutomationState copyWithCompanion(
+    LocalHazardAutomationStatesCompanion data,
+  ) {
+    return LocalHazardAutomationState(
+      id: data.id.present ? data.id.value : this.id,
+      habitationId: data.habitationId.present
+          ? data.habitationId.value
+          : this.habitationId,
+      hazardType: data.hazardType.present
+          ? data.hazardType.value
+          : this.hazardType,
+      lastScore: data.lastScore.present ? data.lastScore.value : this.lastScore,
+      consecutiveBelowDeleteThreshold:
+          data.consecutiveBelowDeleteThreshold.present
+          ? data.consecutiveBelowDeleteThreshold.value
+          : this.consecutiveBelowDeleteThreshold,
+      zoneActive: data.zoneActive.present
+          ? data.zoneActive.value
+          : this.zoneActive,
+      lastEvaluatedAt: data.lastEvaluatedAt.present
+          ? data.lastEvaluatedAt.value
+          : this.lastEvaluatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalHazardAutomationState(')
+          ..write('id: $id, ')
+          ..write('habitationId: $habitationId, ')
+          ..write('hazardType: $hazardType, ')
+          ..write('lastScore: $lastScore, ')
+          ..write(
+            'consecutiveBelowDeleteThreshold: $consecutiveBelowDeleteThreshold, ',
+          )
+          ..write('zoneActive: $zoneActive, ')
+          ..write('lastEvaluatedAt: $lastEvaluatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    habitationId,
+    hazardType,
+    lastScore,
+    consecutiveBelowDeleteThreshold,
+    zoneActive,
+    lastEvaluatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalHazardAutomationState &&
+          other.id == this.id &&
+          other.habitationId == this.habitationId &&
+          other.hazardType == this.hazardType &&
+          other.lastScore == this.lastScore &&
+          other.consecutiveBelowDeleteThreshold ==
+              this.consecutiveBelowDeleteThreshold &&
+          other.zoneActive == this.zoneActive &&
+          other.lastEvaluatedAt == this.lastEvaluatedAt);
+}
+
+class LocalHazardAutomationStatesCompanion
+    extends UpdateCompanion<LocalHazardAutomationState> {
+  final Value<String> id;
+  final Value<String> habitationId;
+  final Value<String> hazardType;
+  final Value<double> lastScore;
+  final Value<int> consecutiveBelowDeleteThreshold;
+  final Value<bool> zoneActive;
+  final Value<DateTime> lastEvaluatedAt;
+  final Value<int> rowid;
+  const LocalHazardAutomationStatesCompanion({
+    this.id = const Value.absent(),
+    this.habitationId = const Value.absent(),
+    this.hazardType = const Value.absent(),
+    this.lastScore = const Value.absent(),
+    this.consecutiveBelowDeleteThreshold = const Value.absent(),
+    this.zoneActive = const Value.absent(),
+    this.lastEvaluatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalHazardAutomationStatesCompanion.insert({
+    required String id,
+    required String habitationId,
+    required String hazardType,
+    required double lastScore,
+    this.consecutiveBelowDeleteThreshold = const Value.absent(),
+    this.zoneActive = const Value.absent(),
+    required DateTime lastEvaluatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       habitationId = Value(habitationId),
+       hazardType = Value(hazardType),
+       lastScore = Value(lastScore),
+       lastEvaluatedAt = Value(lastEvaluatedAt);
+  static Insertable<LocalHazardAutomationState> custom({
+    Expression<String>? id,
+    Expression<String>? habitationId,
+    Expression<String>? hazardType,
+    Expression<double>? lastScore,
+    Expression<int>? consecutiveBelowDeleteThreshold,
+    Expression<bool>? zoneActive,
+    Expression<DateTime>? lastEvaluatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (habitationId != null) 'habitation_id': habitationId,
+      if (hazardType != null) 'hazard_type': hazardType,
+      if (lastScore != null) 'last_score': lastScore,
+      if (consecutiveBelowDeleteThreshold != null)
+        'consecutive_below_delete_threshold': consecutiveBelowDeleteThreshold,
+      if (zoneActive != null) 'zone_active': zoneActive,
+      if (lastEvaluatedAt != null) 'last_evaluated_at': lastEvaluatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalHazardAutomationStatesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? habitationId,
+    Value<String>? hazardType,
+    Value<double>? lastScore,
+    Value<int>? consecutiveBelowDeleteThreshold,
+    Value<bool>? zoneActive,
+    Value<DateTime>? lastEvaluatedAt,
+    Value<int>? rowid,
+  }) {
+    return LocalHazardAutomationStatesCompanion(
+      id: id ?? this.id,
+      habitationId: habitationId ?? this.habitationId,
+      hazardType: hazardType ?? this.hazardType,
+      lastScore: lastScore ?? this.lastScore,
+      consecutiveBelowDeleteThreshold:
+          consecutiveBelowDeleteThreshold ??
+          this.consecutiveBelowDeleteThreshold,
+      zoneActive: zoneActive ?? this.zoneActive,
+      lastEvaluatedAt: lastEvaluatedAt ?? this.lastEvaluatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (habitationId.present) {
+      map['habitation_id'] = Variable<String>(habitationId.value);
+    }
+    if (hazardType.present) {
+      map['hazard_type'] = Variable<String>(hazardType.value);
+    }
+    if (lastScore.present) {
+      map['last_score'] = Variable<double>(lastScore.value);
+    }
+    if (consecutiveBelowDeleteThreshold.present) {
+      map['consecutive_below_delete_threshold'] = Variable<int>(
+        consecutiveBelowDeleteThreshold.value,
+      );
+    }
+    if (zoneActive.present) {
+      map['zone_active'] = Variable<bool>(zoneActive.value);
+    }
+    if (lastEvaluatedAt.present) {
+      map['last_evaluated_at'] = Variable<DateTime>(lastEvaluatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalHazardAutomationStatesCompanion(')
+          ..write('id: $id, ')
+          ..write('habitationId: $habitationId, ')
+          ..write('hazardType: $hazardType, ')
+          ..write('lastScore: $lastScore, ')
+          ..write(
+            'consecutiveBelowDeleteThreshold: $consecutiveBelowDeleteThreshold, ',
+          )
+          ..write('zoneActive: $zoneActive, ')
+          ..write('lastEvaluatedAt: $lastEvaluatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $LocalIncidentsTable extends LocalIncidents
     with TableInfo<$LocalIncidentsTable, LocalIncident> {
   @override
@@ -10715,6 +11227,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocalHazardZonesTable localHazardZones = $LocalHazardZonesTable(
     this,
   );
+  late final $LocalHazardAutomationStatesTable localHazardAutomationStates =
+      $LocalHazardAutomationStatesTable(this);
   late final $LocalIncidentsTable localIncidents = $LocalIncidentsTable(this);
   late final $LocalIncidentReportsTable localIncidentReports =
       $LocalIncidentReportsTable(this);
@@ -10752,6 +11266,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     localUsers,
     localHazardZones,
+    localHazardAutomationStates,
     localIncidents,
     localIncidentReports,
     localShelters,
@@ -11275,6 +11790,279 @@ typedef $$LocalHazardZonesTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $LocalHazardZonesTable, LocalHazardZone>,
       ),
       LocalHazardZone,
+      PrefetchHooks Function()
+    >;
+typedef $$LocalHazardAutomationStatesTableCreateCompanionBuilder =
+    LocalHazardAutomationStatesCompanion Function({
+      required String id,
+      required String habitationId,
+      required String hazardType,
+      required double lastScore,
+      Value<int> consecutiveBelowDeleteThreshold,
+      Value<bool> zoneActive,
+      required DateTime lastEvaluatedAt,
+      Value<int> rowid,
+    });
+typedef $$LocalHazardAutomationStatesTableUpdateCompanionBuilder =
+    LocalHazardAutomationStatesCompanion Function({
+      Value<String> id,
+      Value<String> habitationId,
+      Value<String> hazardType,
+      Value<double> lastScore,
+      Value<int> consecutiveBelowDeleteThreshold,
+      Value<bool> zoneActive,
+      Value<DateTime> lastEvaluatedAt,
+      Value<int> rowid,
+    });
+
+class $$LocalHazardAutomationStatesTableFilterComposer
+    extends Composer<_$AppDatabase, $LocalHazardAutomationStatesTable> {
+  $$LocalHazardAutomationStatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hazardType => $composableBuilder(
+    column: $table.hazardType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get lastScore => $composableBuilder(
+    column: $table.lastScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get consecutiveBelowDeleteThreshold => $composableBuilder(
+    column: $table.consecutiveBelowDeleteThreshold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get zoneActive => $composableBuilder(
+    column: $table.zoneActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastEvaluatedAt => $composableBuilder(
+    column: $table.lastEvaluatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalHazardAutomationStatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LocalHazardAutomationStatesTable> {
+  $$LocalHazardAutomationStatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hazardType => $composableBuilder(
+    column: $table.hazardType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get lastScore => $composableBuilder(
+    column: $table.lastScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get consecutiveBelowDeleteThreshold =>
+      $composableBuilder(
+        column: $table.consecutiveBelowDeleteThreshold,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<bool> get zoneActive => $composableBuilder(
+    column: $table.zoneActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastEvaluatedAt => $composableBuilder(
+    column: $table.lastEvaluatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalHazardAutomationStatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LocalHazardAutomationStatesTable> {
+  $$LocalHazardAutomationStatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get habitationId => $composableBuilder(
+    column: $table.habitationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get hazardType => $composableBuilder(
+    column: $table.hazardType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get lastScore =>
+      $composableBuilder(column: $table.lastScore, builder: (column) => column);
+
+  GeneratedColumn<int> get consecutiveBelowDeleteThreshold =>
+      $composableBuilder(
+        column: $table.consecutiveBelowDeleteThreshold,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<bool> get zoneActive => $composableBuilder(
+    column: $table.zoneActive,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastEvaluatedAt => $composableBuilder(
+    column: $table.lastEvaluatedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$LocalHazardAutomationStatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LocalHazardAutomationStatesTable,
+          LocalHazardAutomationState,
+          $$LocalHazardAutomationStatesTableFilterComposer,
+          $$LocalHazardAutomationStatesTableOrderingComposer,
+          $$LocalHazardAutomationStatesTableAnnotationComposer,
+          $$LocalHazardAutomationStatesTableCreateCompanionBuilder,
+          $$LocalHazardAutomationStatesTableUpdateCompanionBuilder,
+          (
+            LocalHazardAutomationState,
+            BaseReferences<
+              _$AppDatabase,
+              $LocalHazardAutomationStatesTable,
+              LocalHazardAutomationState
+            >,
+          ),
+          LocalHazardAutomationState,
+          PrefetchHooks Function()
+        > {
+  $$LocalHazardAutomationStatesTableTableManager(
+    _$AppDatabase db,
+    $LocalHazardAutomationStatesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LocalHazardAutomationStatesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$LocalHazardAutomationStatesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$LocalHazardAutomationStatesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> habitationId = const Value.absent(),
+                Value<String> hazardType = const Value.absent(),
+                Value<double> lastScore = const Value.absent(),
+                Value<int> consecutiveBelowDeleteThreshold =
+                    const Value.absent(),
+                Value<bool> zoneActive = const Value.absent(),
+                Value<DateTime> lastEvaluatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalHazardAutomationStatesCompanion(
+                id: id,
+                habitationId: habitationId,
+                hazardType: hazardType,
+                lastScore: lastScore,
+                consecutiveBelowDeleteThreshold:
+                    consecutiveBelowDeleteThreshold,
+                zoneActive: zoneActive,
+                lastEvaluatedAt: lastEvaluatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String habitationId,
+                required String hazardType,
+                required double lastScore,
+                Value<int> consecutiveBelowDeleteThreshold =
+                    const Value.absent(),
+                Value<bool> zoneActive = const Value.absent(),
+                required DateTime lastEvaluatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalHazardAutomationStatesCompanion.insert(
+                id: id,
+                habitationId: habitationId,
+                hazardType: hazardType,
+                lastScore: lastScore,
+                consecutiveBelowDeleteThreshold:
+                    consecutiveBelowDeleteThreshold,
+                zoneActive: zoneActive,
+                lastEvaluatedAt: lastEvaluatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalHazardAutomationStatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LocalHazardAutomationStatesTable,
+      LocalHazardAutomationState,
+      $$LocalHazardAutomationStatesTableFilterComposer,
+      $$LocalHazardAutomationStatesTableOrderingComposer,
+      $$LocalHazardAutomationStatesTableAnnotationComposer,
+      $$LocalHazardAutomationStatesTableCreateCompanionBuilder,
+      $$LocalHazardAutomationStatesTableUpdateCompanionBuilder,
+      (
+        LocalHazardAutomationState,
+        BaseReferences<
+          _$AppDatabase,
+          $LocalHazardAutomationStatesTable,
+          LocalHazardAutomationState
+        >,
+      ),
+      LocalHazardAutomationState,
       PrefetchHooks Function()
     >;
 typedef $$LocalIncidentsTableCreateCompanionBuilder =
@@ -16113,6 +16901,12 @@ class $AppDatabaseManager {
       $$LocalUsersTableTableManager(_db, _db.localUsers);
   $$LocalHazardZonesTableTableManager get localHazardZones =>
       $$LocalHazardZonesTableTableManager(_db, _db.localHazardZones);
+  $$LocalHazardAutomationStatesTableTableManager
+  get localHazardAutomationStates =>
+      $$LocalHazardAutomationStatesTableTableManager(
+        _db,
+        _db.localHazardAutomationStates,
+      );
   $$LocalIncidentsTableTableManager get localIncidents =>
       $$LocalIncidentsTableTableManager(_db, _db.localIncidents);
   $$LocalIncidentReportsTableTableManager get localIncidentReports =>

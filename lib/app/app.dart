@@ -4,6 +4,7 @@ import 'package:taarak/app/router.dart';
 import 'package:taarak/app/theme.dart';
 import 'package:taarak/features/admin/application/admin_providers.dart';
 import 'package:taarak/features/auth/application/auth_controller.dart';
+import 'package:taarak/features/hazard_automation/application/hazard_automation_providers.dart';
 import 'package:taarak/features/notifications/application/notification_providers.dart';
 import 'package:taarak/features/sync/application/sync_providers.dart';
 
@@ -22,6 +23,10 @@ class TaarakApp extends ConsumerWidget {
     // notification (client-only: no server push, works while the app is
     // open/backgrounded).
     ref.watch(notificationWatcherProvider);
+    // Same lifetime — periodically re-checks live weather data at every
+    // habitation and auto-creates/removes hazard zones with no human
+    // involved (gated internally to Local Official/Admin sessions only).
+    ref.watch(hazardAutomationTriggerProvider);
     // Same lifetime — keeps the role→permission override map warm so
     // computeRedirect's ref.read of it (inside the router's redirect
     // closure, which can't ref.watch) always sees a resolved value rather

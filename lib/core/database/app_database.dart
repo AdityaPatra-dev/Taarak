@@ -7,6 +7,7 @@ import 'package:taarak/core/database/tables/local_damage_reports_table.dart';
 import 'package:taarak/core/database/tables/local_environmental_observations_table.dart';
 import 'package:taarak/core/database/tables/local_capacity_assessments_table.dart';
 import 'package:taarak/core/database/tables/local_habitations_table.dart';
+import 'package:taarak/core/database/tables/local_hazard_automation_states_table.dart';
 import 'package:taarak/core/database/tables/local_hazard_zones_table.dart';
 import 'package:taarak/core/database/tables/local_incident_reports_table.dart';
 import 'package:taarak/core/database/tables/local_incidents_table.dart';
@@ -28,6 +29,7 @@ part 'app_database.g.dart';
   tables: [
     LocalUsers,
     LocalHazardZones,
+    LocalHazardAutomationStates,
     LocalIncidents,
     LocalIncidentReports,
     LocalShelters,
@@ -63,7 +65,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

@@ -1,43 +1,52 @@
+import 'package:taarak/features/hazards/domain/hazard_type.dart';
 import 'package:taarak/features/susceptibility/domain/hazard_susceptibility_prediction.dart';
 
-/// The extension point this app doesn't use yet, on purpose — see
-/// [UnavailableHazardSusceptibilityModel]. A real implementation is meant
-/// to be a **trained** model (logistic regression or a shallow gradient-
-/// boosted tree, per the project's own architecture notes — not a deep
-/// net, since a linear model's feature weights are directly presentable:
-/// "slope contributed 40% to this prediction"), trained offline against
-/// GSI's public landslide inventory plus terrain (SRTM slope/elevation)
-/// and rainfall (already available via [EnvironmentalDataSource])
-/// features, then ported into pure Dart the same way a hand-written
-/// engine is — no on-device model runtime, no new dependency, fully
-/// offline-capable like everything else in this app.
+/// "How likely is a hazard here in the first place" — independent of
+/// whether an official has already mapped a [LocalHazardZone] there. A
+/// trained model (GSI landslide inventory + SRTM terrain, per this
+/// module's original design notes) is still future work; the default
+/// implementation now wired in ([DeterministicHazardSusceptibilityModel],
+/// in this same directory) answers a narrower version of the same
+/// question from live weather signals alone (rainfall/soil moisture via
+/// [EnvironmentalDataService]) — real, but honestly limited, never dressed
+/// up as more than it is. [UnavailableHazardSusceptibilityModel] stays in
+/// the codebase as a fallback/test double, the same way
+/// `DemoEnvironmentalDataSource` was kept after being superseded.
 ///
-/// Until that training happens, [predict] returning `null` is not a
-/// placeholder bug — it's the honest answer: no trained model exists yet,
-/// and nothing in this app should imply otherwise (see
-/// [UnavailableHazardSusceptibilityModel]'s own doc comment).
+/// [habitationId]/[hazardType] were added when this stopped being a pure
+/// extension point: a real prediction needs to read the cached
+/// observations for *this* habitation and apply hazard-type-specific
+/// thresholds, not just a bare lat/lng.
 abstract class HazardSusceptibilityModel {
+  /// [habitationName]/[populationExposed] are display context only —
+  /// used solely by an enrichment layer (e.g. a Gemini-backed decorator)
+  /// to write a readable rationale; the deterministic tier ignores them.
   Future<HazardSusceptibilityPrediction?> predict({
+    required String habitationId,
     required double latitude,
     required double longitude,
+    required HazardType hazardType,
     DateTime? now,
+    String habitationName = '',
+    int populationExposed = 0,
   });
 }
 
-/// The only implementation currently wired into this app. Always returns
-/// `null` — deliberately, not as an oversight. A model that fabricated a
-/// number here (even a "reasonable-looking" deterministic one) would be
-/// exactly the kind of fake AI claim this project's own engineering rules
-/// rule out: nothing has been trained on real hazard data yet, so nothing
-/// should present as if it had been. Swap this provider for a real
-/// implementation only once one actually exists.
+/// Kept as an explicit "no answer" implementation for tests/fallback use
+/// — not the default anymore (see [HazardSusceptibilityModel]'s doc
+/// comment), but still the honest choice for a caller that wants no
+/// prediction rather than a fabricated one. Always returns `null`.
 class UnavailableHazardSusceptibilityModel implements HazardSusceptibilityModel {
   const UnavailableHazardSusceptibilityModel();
 
   @override
   Future<HazardSusceptibilityPrediction?> predict({
+    required String habitationId,
     required double latitude,
     required double longitude,
+    required HazardType hazardType,
     DateTime? now,
+    String habitationName = '',
+    int populationExposed = 0,
   }) async => null;
 }
